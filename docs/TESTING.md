@@ -22,13 +22,13 @@ Use a sandbox project. Always run with `--dry-run` first. Record date, OpenProje
 |---|---|---|---|---|
 | S1 | 3 phases / 10 tasks, no existing WPs | 1 feature WP, 3 phase WPs, 10 task WPs with parents, mapping has 14 entries | 2026-10-05 | pass (manual walkthrough, see run log) |
 | S2 | Re-run S1 | 0 created, 14 skipped, 0 relations created | 2026-10-05 | pass (manual walkthrough, see run log) |
-| S3 | Interrupt after 5 creations (answer "stop" at the second phase confirmation), re-run | remaining items created, existing ones skipped, 0 duplicates | – | – |
-| S4 | `tests/fixtures/tasks/s4-tasks.md` (dependencies, `[P]` tasks) | exactly 3 `follows` relations: T004→T002, T005→T004, T006→T001; none between `[P]` tasks | – | – |
-| S5 | Type from config does not exist | stops, lists available types | – | – |
-| S6 | Mandatory custom field in project | stops for that item, reports field | – | – |
-| S7 | Project not in write allowlist | clear error, nothing written | – | – |
+| S3 | Interrupt after 5 creations (answer "stop" at the second phase confirmation), re-run | remaining items created, existing ones skipped, 0 duplicates | 2026-10-05 | pass (manual walkthrough; interruption simulated by answering "stop" after phase 1) |
+| S4 | `tests/fixtures/tasks/s4-tasks.md` (dependencies, `[P]` tasks) | exactly 3 `follows` relations: T004→T002, T005→T004, T006→T001; none between `[P]` tasks | 2026-10-05 | pass (manual walkthrough) |
+| S5 | Type from config does not exist | stops, lists available types | 2026-10-05 | logic only: stop condition derived from the real `list-types` output, no end-to-end run |
+| S6 | Mandatory custom field in project | stops for that item, reports field | 2026-10-05 | pass (manual walkthrough) |
+| S7 | Project not in write allowlist | clear error, nothing written | 2026-10-05 | partial: project outside the server allowlist only; OpenProject-side reader role not tested |
 | S8 | `--dry-run` on the S1 input | plan with 14 entries; 0 work packages created; `.specify/openproject/mapping.json` absent or byte-identical | 2026-10-05 | partial: plan logic checked by hand (see run log); not run via the installed skill |
-| S9 | Change one task title, run without then with `--update`; add a ledger entry pointing to a non-existent work package | without `--update`: "differs, not updated"; with `--update`: that work package updated; the bogus entry is reported as stale, not recreated | – | – |
+| S9 | Change one task title, run without then with `--update`; add a ledger entry pointing to a non-existent work package | without `--update`: "differs, not updated"; with `--update`: that work package updated; the bogus entry is reported as stale, not recreated | 2026-10-05 | pass (manual walkthrough) |
 
 ## Notes for the scenarios
 - Before S1: delete leftover `VERIFY-*` work packages from earlier checks, otherwise search hits and counts differ.
@@ -53,3 +53,17 @@ Use a sandbox project. Always run with `--dry-run` first. Record date, OpenProje
 - Open: a `[P]`-only task gets the first line `Story: parallel`, which reads oddly; consider the label `Labels:`.
 - Not covered: the installed skill was not invoked (frontmatter `tools:` matching, argument parsing untested); command mode not run; the S1 duration (SC-004) was not measured; OpenProject version not recorded; S3–S7 and S9 not run; search-and-adopt, relations, `--update` and the mandatory-field block were not exercised live in this run.
 - Leftover state: the 14 work packages remain in `speckit-sandbox` (this project never deletes). Remove them before repeating S1.
+
+### 2026-10-05 – S3, S4, S5, S6, S7, S9 and adopt, manual walkthrough
+All steps were followed by hand against `speckit-sandbox` with the MCP tools (not the installed skill); the mandatory custom field `S6 Test Field` (assigned to type Task) was active. Feature `003-s4-demo` from `tests/fixtures/tasks/s4-tasks.md`; the earlier ledger of the S1 feature was moved aside in the scratch project.
+- **S6**: preview of a Task without the field value: `state: rejected`, `ready: false`, `validation_errors: {"customField1": "S6 Test Field can't be blank."}` (readable, not a tool error). Run A created the Feature and both phases (ids 55–57) and left all 6 Tasks blocked (`mandatory field customField1`). With `required_custom_fields: {customField1: "n/a"}` in the config, the tasks were created with `custom_fields={"customField1": "n/a"}`.
+- **S3**: phase 1 tasks T001–T003 created, then stop (ledger: 6 items). Resume created T004–T006 in phase 2 without touching existing items; 0 duplicates.
+- **S4**: 3 relations created (preview, then confirm): T004 follows T002, T005 follows T004, T006 follows T001 (relation ids 10–12). Read-back shows no relation involving T003 and none between T001 and T002; `queried_perspective` of T005 reports predecessor T004. Ledger has 9 items and 3 relations, schema-valid.
+- **Adopt (FR-007, ledger moved aside)**: the search found each of the 9 items exactly once, subjects start with the key; the parent chain of T004 contains the feature work package; the relation of T005 was recognised via `get-relations` (predecessor id). No duplicates would be created. The ledger was then restored from the moved-aside copy instead of being rebuilt by a run.
+- **S9**: after changing the title of T004 in `tasks.md`: without `--update` the stored hash differs from the current one, so "differs, not updated" and no update call. With `--update`: `update-work-package` preview (only subject/description) and confirm; `lock_version` 2. A ledger entry pointing to id 99999 was classified `stale` by the existence check (the search returns `total: 0`), not recreated, ledger untouched (the entry was restored by hand afterwards).
+- **S5** (logic only): the real type list is Task, Milestone, Summary task, Feature, Epic, User story, Bug; a configured type "Phase" is not in it, so the prompt would stop in step 5.2 before any write and list these types. Not run end to end.
+- **S7** (partial): a preview for a project outside the server's allowlist (`test`, not visible to the server) fails with the generic `Error executing tool create_work_package`; nothing was written. The case "project allowed by the server but read-only in OpenProject" was not tested; it needs the project in `OPENPROJECT_READ_PROJECTS`/`OPENPROJECT_WRITE_PROJECTS` and a restart of the MCP server.
+- **Defects found and fixed during this run**: (1) a missing id makes `get_work_package` fail with a generic error that cannot be told apart from a connection error; the existence check now uses `search_work_packages` by id. (Earlier: file hints in backticks.)
+- **Open findings**: (1) the ledger is one file per project but is tied to one `feature`; a second feature in the same repo stops at step 8 (design question, see research R16). (2) `Story: parallel` reads oddly for `[P]`-only tasks.
+- **Not covered**: installed skill, command mode, `--update` via arguments, dry-run output of this feature, S1 timing, 100+ tasks live.
+- **Leftover state**: feature `003-s4-demo` (ids 55–63, 3 relations) remains in `speckit-sandbox`; delete before repeating.
