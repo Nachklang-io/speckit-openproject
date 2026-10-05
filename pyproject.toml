@@ -1,0 +1,19 @@
+[project]
+name = "speckit-openproject-dev"
+version = "0.0.0"
+description = "Dev tooling for the spec-kit OpenProject preset and extension (not published)"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8", "pyyaml>=6", "jsonschema>=4", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = [".specify", ".claude/skills", ".scratch"]
+
+[tool.ruff.lint]
+ignore = ["BLE001", "SIM115"]

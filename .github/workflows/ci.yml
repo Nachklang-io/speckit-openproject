@@ -1,0 +1,18 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -v
+      - name: No secrets committed
+        run: "! git grep -nE 'OPENPROJECT_API_TOKEN=[A-Za-z0-9_-]{16,}'"

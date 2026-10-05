@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/speckit-openproject/mapping.schema.json",
+  "title": "spec-kit OpenProject mapping ledger",
+  "type": "object",
+  "required": ["project", "feature", "items"],
+  "properties": {
+    "project": {"type": "string"},
+    "feature": {"type": "string"},
+    "items": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "integer", "minimum": 1},
+          "url": {"type": "string"},
+          "hash": {"type": "string", "description": "content hash of the source item at last sync"},
+          "status": {"type": "string", "description": "last synced status"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

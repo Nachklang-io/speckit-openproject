@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+.scratch/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+.DS_Store
+.claude/settings.local.json
+.claude/worktrees/

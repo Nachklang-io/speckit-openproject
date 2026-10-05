@@ -1,0 +1,28 @@
+schema_version: "1.0"
+
+preset:
+  id: "openproject"
+  name: "OpenProject Work Packages"
+  version: "0.1.0"
+  description: "Overrides speckit.taskstoissues to create OpenProject work packages (phases, tasks, sub-tasks, relations) via an OpenProject MCP server instead of GitHub Issues"
+  author: "Daniel Ring"
+  repository: "https://github.com/<owner>/spec-kit-preset-openproject"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.1.0"
+
+provides:
+  templates:
+    - type: "command"
+      name: "speckit.taskstoissues"
+      file: "commands/speckit.taskstoissues.md"
+      description: "Convert tasks.md into OpenProject work packages with parent/child hierarchy and dependency relations"
+      replaces: "speckit.taskstoissues"
+
+tags:
+  - "openproject"
+  - "issue-tracking"
+  - "project-management"
+  - "mcp"
+  - "preset"

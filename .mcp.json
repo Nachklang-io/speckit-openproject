@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "openproject": {
+      "command": "uvx",
+      "args": ["openproject-ce-mcp"],
+      "env": {
+        "OPENPROJECT_BASE_URL": "${OPENPROJECT_BASE_URL}",
+        "OPENPROJECT_API_TOKEN": "${OPENPROJECT_API_TOKEN}",
+        "OPENPROJECT_READ_PROJECTS": "${OPENPROJECT_READ_PROJECTS}",
+        "OPENPROJECT_WRITE_PROJECTS": "${OPENPROJECT_WRITE_PROJECTS}",
+        "OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE": "true",
+        "OPENPROJECT_ENABLE_VERSION_WRITE": "true"
+      }
+    }
+  }
+}
