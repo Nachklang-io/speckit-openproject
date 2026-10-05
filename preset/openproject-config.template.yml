@@ -1,6 +1,6 @@
-# Copy to: .specify/presets/openproject/openproject-config.yml
+# Copy to: .specify/openproject/config.yml
 # Resolution order for every value: command argument -> this file -> environment variable -> ask the user.
-# Never put the API token here. It belongs in the MCP server configuration (.mcp.json etc.).
+# Never put the API token or the URL of your instance here. They belong in the MCP server configuration.
 
 # Target project (identifier or numeric id). Env: SPECKIT_OPENPROJECT_PROJECT
 project: ""
@@ -9,31 +9,26 @@ project: ""
 # Tested target: jtauschl/openproject-ce-mcp (MIT). Other servers have different tool names.
 mcp_server: "openproject-ce-mcp"
 
-# Work package types (must exist in the project). Env: SPECKIT_OPENPROJECT_TYPE_*
+# Work package types (must be enabled in the project). Env: SPECKIT_OPENPROJECT_TYPE_*
+# A default OpenProject instance has no type "Phase"; "Summary task" is the closest built-in type.
 types:
-  phase: "Phase"        # one per "## Phase N" heading in tasks.md
-  task: "Task"          # one per task line (T001, T002, ...)
-  subtask: "Task"       # optional finer granularity; same type is fine
+  feature: "Feature"        # one per feature, parent of all phases
+  phase: "Summary task"     # one per "## Phase N" heading in tasks.md
+  task: "Task"              # one per task line (T001, T002, ...)
+  subtask: "Task"           # optional finer granularity; same type is fine
 
-# Optional defaults
+# Optional defaults applied when work packages are created
 defaults:
-  status: ""            # empty = OpenProject default status of the type
+  status: ""            # not applied: the server cannot set a status on create (OpenProject default of the type applies)
   priority: ""          # empty = OpenProject default priority
   assignee: ""          # empty = unassigned
-  version: ""           # optional version/milestone name
+  version: ""           # ignored by speckit.taskstoissues
 
-# Labels cannot be set natively on work packages; the command appends this tag line to the description
-# and (if a matching custom field exists) fills it.
-feature_tag_prefix: "speckit:"
-
-# Create "follows"/"blocks" relations from dependency info in tasks.md
+# Create "follows" relations from dependency info in tasks.md
 create_relations: true
 
 # Mark [P] (parallel) tasks in the description instead of creating relations between them
 mark_parallel: true
-
-# Mapping file for idempotency (task id -> work package id). Commit it or not, your call.
-mapping_file: ".specify/presets/openproject/openproject-mapping.json"
 
 # Custom fields that are mandatory in the target project: { "customField12": "value" }
 required_custom_fields: {}

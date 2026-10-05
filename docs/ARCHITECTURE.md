@@ -9,7 +9,7 @@ spec-kit project                         OpenProject (CE)
   specs/NNN/{spec,plan,tasks}.md   ──►    work packages, relations, versions, attachments
   .specify/openproject/                      ▲
     config.yml (user)                        │ MCP (preview → confirm)
-    mapping.json (ledger)  ◄─────────  openproject-ce-mcp (stdio)
+    mapping-<feature>.json (ledger)◄──  openproject-ce-mcp (stdio)
         ▲
         │ commands (Markdown prompts)
   preset/     speckit.taskstoissues  (override)
@@ -23,8 +23,9 @@ spec-kit project                         OpenProject (CE)
 
 ## Config and state
 - `.specify/openproject/config.yml` – user config (project, type/status mapping, defaults). Resolution order: argument → file → `SPECKIT_OPENPROJECT_*` env → ask.
-- `.specify/openproject/mapping.json` – ledger: task/phase/feature ID → work package ID, URL, content hash, last synced status. Written after every successful write.
-- Note: the current preset README references `.specify/presets/openproject/…` paths; unify on `.specify/openproject/` in feature 001 (shared by preset and extension).
+- `.specify/openproject/mapping-<feature>.json` – ledger (one file per feature): task/phase/feature ID → work package ID, URL, content hash, last synced status. Written after every successful write.
+- Hierarchy created by the preset: Feature work package → Phase work packages → Task work packages (subjects start with the feature directory name, `Phase N:` and the task id). The ledger also records `follows` relations (`relations` list).
+- The installed command is self-contained: only the command text reaches a user's project, so the capability map and the config/ledger rules are embedded in it between marker comments and kept identical to `docs/mcp-tool-map.md` and `schemas/*.json` by `tests/test_prompt_sync.py`.
 
 ## Data flow principles
 1. Discover before write (types, statuses, custom fields).

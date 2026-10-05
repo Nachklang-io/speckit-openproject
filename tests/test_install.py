@@ -9,12 +9,33 @@ pytestmark = pytest.mark.skipif(shutil.which("specify") is None, reason="specify
 
 
 def run(cmd, cwd):
-    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=True)
+    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        version = subprocess.run(
+            ["specify", "--version"], capture_output=True, text=True, check=False
+        )
+        pytest.fail(
+            f"{' '.join(cmd)} exited with {result.returncode} "
+            f"(specify: {version.stdout.strip() or version.stderr.strip()})\n"
+            f"--- stdout ---\n{result.stdout}\n--- stderr ---\n{result.stderr}"
+        )
+    return result
 
 
 @pytest.fixture()
 def project(tmp_path):
-    run(["specify", "init", "proj", "--non-interactive", "--integration", "claude"], tmp_path)
+    run(
+        [
+            "specify",
+            "init",
+            "proj",
+            "--non-interactive",
+            "--integration",
+            "claude",
+            "--ignore-agent-tools",
+        ],
+        tmp_path,
+    )
     return tmp_path / "proj"
 
 

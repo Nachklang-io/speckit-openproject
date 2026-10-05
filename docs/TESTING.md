@@ -8,22 +8,96 @@
 ## Test instance setup (OpenProject in a Proxmox LXC, latest release)
 1. Log in as admin, create project with identifier `speckit-sandbox` (name e.g. "spec-kit Sandbox").
 2. Project settings -> Modules: enable Work packages, Versions (Roadmap), Time and costs, Wiki.
-3. Administration -> Types: ensure types "Phase" (or use "Milestone"), "Task", "Feature"/"Epic" exist and are enabled in the sandbox project. Note the names for `config.yml`.
+3. Administration -> Types: a default instance has no type "Phase". Enable the types "Feature", "Summary task" (used for phases) and "Task" in the sandbox project (Project settings -> Work packages) and use these names in `config.yml`.
 4. Create a dedicated user `speckit-bot` with a role that may add/edit work packages, manage versions and log time in the sandbox project only.
 5. As that user: My account -> Access tokens -> create an API token. Keep it in your shell environment only.
 6. Export `OPENPROJECT_BASE_URL`, `OPENPROJECT_API_TOKEN`, `OPENPROJECT_READ_PROJECTS=speckit-sandbox`, `OPENPROJECT_WRITE_PROJECTS=speckit-sandbox` before starting Claude Code.
 7. The LXC must be reachable from the machine running Claude Code (HTTPS recommended; if self-signed, set `OPENPROJECT_VERIFY_SSL` as documented by the MCP server).
-Record the OpenProject version in the results table below on every run.
+Optional, for scenario S6: create a mandatory text custom field in Administration -> Custom fields, assign it to type Task (type form configuration) and remove or deactivate it afterwards. The OpenProject version of the sandbox is 17.9.1 (2026-10-05); record it on every future run.
 
 ## Scenario checklist (manual, against the maintainer's test instance)
+Status of the results below: S1, S2, S3, S4, S6, S8 and S9 were run through the **installed skill** (skills mode) on the prompt revisions named in the table (the maintainer ran the command and pasted the output; the main session checked OpenProject and the ledger file afterwards). S5 (logic only) and S7 (partial) are still **manual walkthroughs** on an earlier revision. Command mode has not been run. OpenProject version of the sandbox: 17.9.1. SC-001 is therefore demonstrated for S1–S4, S6, S8 and S9 in skills mode only.
+
 Use a sandbox project. Always run with `--dry-run` first. Record date, OpenProject version, MCP server version, spec-kit version and result.
 
 | ID | Scenario | Expected | Last run | Result |
 |---|---|---|---|---|
-| S1 | 3 phases / 10 tasks, no existing WPs | 3 phase WPs, 10 task WPs with parents, mapping has 13 entries | – | – |
-| S2 | Re-run S1 | 0 creations, report says all skipped | – | – |
-| S3 | Interrupt after 5 creations, re-run | resumes, no duplicates | – | – |
-| S4 | Dependencies between tasks, `[P]` tasks | `follows` relations only for real dependencies | – | – |
-| S5 | Type from config does not exist | stops, lists available types | – | – |
-| S6 | Mandatory custom field in project | stops for that item, reports field | – | – |
-| S7 | Project not in write allowlist | clear error, nothing written | – | – |
+| S1 | 3 phases / 10 tasks, no existing WPs | 1 feature WP, 3 phase WPs, 10 task WPs with parents, mapping has 14 entries | 2026-10-05 | pass via the installed skill (skills mode, `--dry-run` first, three phase confirmations, 3 min), prompt revision 0808402; see run log |
+| S2 | Re-run S1 | 0 created, 14 skipped, 0 relations created | 2026-10-05 | pass via the installed skill (skills mode, 14 × skip, nothing written), prompt revision 0808402; see run log |
+| S3 | Interrupt after 5 creations (answer "stop" at the second phase confirmation), re-run | remaining items created, existing ones skipped, 0 duplicates | 2026-10-05 | pass via the installed skill (skills mode), revision 1ca734c; see run log |
+| S4 | `tests/fixtures/tasks/s4-tasks.md` (dependencies, `[P]` tasks) | exactly 3 `follows` relations: T004→T002, T005→T004, T006→T001; none between `[P]` tasks | 2026-10-05 | pass via the installed skill (skills mode), revision 1ca734c; see run log |
+| S5 | Type from config does not exist | stops, lists available types | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; logic only: stop condition derived from the real `list-types` output, no end-to-end run |
+| S6 | Mandatory custom field in project | stops for that item, reports field | 2026-10-05 | pass via the installed skill (skills mode), prompt revision d7e7216; see run log |
+| S7 | Project not in write allowlist | clear error, nothing written | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; partial: project outside the server allowlist only; OpenProject-side reader role not tested |
+| S8 | `--dry-run` on the S1 input | plan with 14 entries; 0 work packages created; `.specify/openproject/mapping-<feature>.json` absent or byte-identical | 2026-10-05 | pass via the installed skill (skills mode), prompt revision 0808402; see run log |
+| S9 | Change one task title, run without then with `--update`; add a ledger entry pointing to a non-existent work package | without `--update`: "differs, not updated"; with `--update`: that work package updated; the bogus entry is reported as stale, not recreated | 2026-10-05 | pass via the installed skill (skills mode), revision d7e7216 (first attempt on 1ca734c missed the changed title; fixed); see run log |
+
+## Notes for the scenarios
+- Before S1: delete leftover `VERIFY-*` work packages from earlier checks, otherwise search hits and counts differ.
+- S1 and S2 run in both modes: skills mode (`/speckit-taskstoissues`) and command mode (`/speckit.taskstoissues`). Note which one was not run.
+- S6 needs a mandatory custom field on the sandbox project (create it in the admin UI, remove it afterwards).
+- Large list (`tests/fixtures/tasks/s-large-tasks.md`, 120 tasks): `--dry-run` only; not run live.
+- Record the S1 duration (SC-004: under 5 minutes including the dry-run review).
+- Claude Code must be started with the MCP server variables exported (`set -a; source .env; set +a; claude`).
+
+## Run log
+### 2026-10-05 – S8 (dry-run), manual walkthrough, partial
+- What was executed: steps 1–10 of `preset/commands/speckit.taskstoissues.md` were followed by hand in a Claude Code session against `speckit-sandbox`, using only read capabilities (`list-projects`, `list-types`, `get-write-context` for Feature/Summary task/Task, `search-work-packages` for the feature, `Phase 1:` and `T001`, `list_work_packages`). Input: `tests/fixtures/tasks/s1-tasks.md`.
+- Result: sandbox empty before; no matches; plan = 4 create (feature + 3 phases), 10 blocked (type Task requires `customField1`, S6 setup), 0 relations. No write call was made and no ledger file was created.
+- Not covered: the installed skill was not invoked, so frontmatter `tools:` matching, argument parsing and the confirmation dialogue are untested. S1–S7 and S9 not run.
+- Environment: OpenProject version not recorded, MCP server `openproject-ce-mcp` 0.4.1 as pinned in the repo docs (not re-read at runtime), spec-kit 1.1.1.dev0.
+
+### 2026-10-05 – S1 and S2, manual walkthrough
+- What was executed: the steps of `preset/commands/speckit.taskstoissues.md` were followed by hand in a Claude Code session against `speckit-sandbox`, using the MCP tools directly (not the installed skill). Input: `tests/fixtures/tasks/s1-tasks.md` as feature `001-sandbox-demo` in the scratch project, config from the template defaults (types Feature / Summary task / Task). The mandatory test custom field had been deactivated by the maintainer. The maintainer confirmed each of the three phases, as the prompt requires.
+- S1 result: 14 work packages created (ids 41–54): 1 Feature, 3 Summary tasks (children of the Feature), 10 Tasks (children of their phase). Each write was previewed (`state: preview`, `ready: true`, no validation errors) and then confirmed. The ledger `.specify/openproject/mapping.json` has 14 entries, validates against `schemas/mapping.schema.json`, ids unique, no host or URL stored. The list of work packages in the project matched the ledger (total 14, parents as expected).
+- S2 result: re-planning with the ledger: each of the 14 ledger ids was found with `get-work-package`; plan = 14 skip, 0 create, 0 relations; no write call was made.
+- Defects found and fixed during the run: file hints like `src/app/__init__.py` rendered as bold text in Markdown, so the prompt now writes the path in backticks (the first preview of T001 showed it before anything was written).
+- Open: a `[P]`-only task gets the first line `Story: parallel`, which reads oddly; consider the label `Labels:`.
+- Not covered: the installed skill was not invoked (frontmatter `tools:` matching, argument parsing untested); command mode not run; the S1 duration (SC-004) was not measured; OpenProject version not recorded; S3–S7 and S9 not run; search-and-adopt, relations, `--update` and the mandatory-field block were not exercised live in this run.
+- Leftover state: the 14 work packages remain in `speckit-sandbox` (this project never deletes). Remove them before repeating S1.
+
+### 2026-10-05 – S3, S4, S5, S6, S7, S9 and adopt, manual walkthrough
+All steps were followed by hand against `speckit-sandbox` with the MCP tools (not the installed skill); the mandatory custom field `S6 Test Field` (assigned to type Task) was active. Feature `003-s4-demo` from `tests/fixtures/tasks/s4-tasks.md`; the earlier ledger of the S1 feature was moved aside in the scratch project.
+- **S6**: preview of a Task without the field value: `state: rejected`, `ready: false`, `validation_errors: {"customField1": "S6 Test Field can't be blank."}` (readable, not a tool error). Run A created the Feature and both phases (ids 55–57) and left all 6 Tasks blocked (`mandatory field customField1`). With `required_custom_fields: {customField1: "n/a"}` in the config, the tasks were created with `custom_fields={"customField1": "n/a"}`.
+- **S3**: phase 1 tasks T001–T003 created, then stop (ledger: 6 items). Resume created T004–T006 in phase 2 without touching existing items; 0 duplicates.
+- **S4**: 3 relations created (preview, then confirm): T004 follows T002, T005 follows T004, T006 follows T001 (relation ids 10–12). Read-back shows no relation involving T003 and none between T001 and T002; `queried_perspective` of T005 reports predecessor T004. Ledger has 9 items and 3 relations, schema-valid.
+- **Adopt (FR-007, ledger moved aside)**: the search found each of the 9 items exactly once, subjects start with the key; the parent chain of T004 contains the feature work package; the relation of T005 was recognised via `get-relations` (predecessor id). No duplicates would be created. The ledger was then restored from the moved-aside copy instead of being rebuilt by a run.
+- **S9**: after changing the title of T004 in `tasks.md`: without `--update` the stored hash differs from the current one, so "differs, not updated" and no update call. With `--update`: `update-work-package` preview (only subject/description) and confirm; `lock_version` 2. A ledger entry pointing to id 99999 was classified `stale` by the existence check (the search returns `total: 0`), not recreated, ledger untouched (the entry was restored by hand afterwards).
+- **S5** (logic only): the real type list is Task, Milestone, Summary task, Feature, Epic, User story, Bug; a configured type "Phase" is not in it, so the prompt would stop in step 5.2 before any write and list these types. Not run end to end.
+- **S7** (partial): a preview for a project outside the server's allowlist (`test`, not visible to the server) fails with the generic `Error executing tool create_work_package`; nothing was written. The case "project allowed by the server but read-only in OpenProject" was not tested; it needs the project in `OPENPROJECT_READ_PROJECTS`/`OPENPROJECT_WRITE_PROJECTS` and a restart of the MCP server.
+- **Defects found and fixed during this run**: (1) a missing id makes `get_work_package` fail with a generic error that cannot be told apart from a connection error; the existence check now uses `search_work_packages` by id. (Earlier: file hints in backticks.)
+- **Open findings**: (1) the ledger is one file per project but is tied to one `feature`; a second feature in the same repo stops at step 8 (design question, see research R16). (2) `Story: parallel` reads oddly for `[P]`-only tasks.
+- **Not covered**: installed skill, command mode, `--update` via arguments, dry-run output of this feature, S1 timing, 100+ tasks live.
+- **Leftover state**: feature `003-s4-demo` (ids 55–63, 3 relations) remains in `speckit-sandbox`; delete before repeating.
+
+### 2026-10-05 – follow-up decisions (no new run)
+- The ledger is now kept per feature (`mapping-<feature>.json`) and the first description line is `Labels: …`. The walkthroughs above were executed before this change with `mapping.json` and the line `Story: …`; they were not repeated.
+
+### 2026-10-05 – S8, S1, S2 through the installed skill (skills mode), prompt revision 0808402
+- Setup: scratch spec-kit project `.scratch/proj` created by `scripts/dev-install.sh`, config from the template (types Feature / Summary task / Task), feature `001-sandbox-demo` from `tests/fixtures/tasks/s1-tasks.md`, sandbox empty, the test custom field not mandatory. Claude Code was started in the scratch project with the MCP server variables exported. The maintainer ran `/speckit-taskstoissues` and pasted the output; the results below were checked afterwards against OpenProject and the ledger file from the main session.
+- **S8 (dry run)**: plan with 14 entries (all create, no relations, no blockers), last line "Dry run: nothing was written."; afterwards the sandbox still had 0 work packages and no ledger file existed.
+- **S1**: after the dry run, a real run with one confirmation per phase (feature together with phase 1): 14 work packages created (ids 64–77), parents correct, subjects without labels, first description line `Labels: parallel` where applicable, file paths in backticks. Ledger `mapping-001-sandbox-demo.json` schema-valid, header (`schema_version`, `project`, `feature`) written, 14 unique ids, only `/work_packages/<id>` paths. Duration measured by the maintainer: 3 minutes (SC-004: under 5 minutes, including the dry-run review).
+- **S2**: re-run without `--dry-run`: plan 14 × skip (existence checked by search per ledger id), no confirmation asked, nothing written; work package count stayed at 14 and the ledger file was unchanged (same modification time as at the end of S1).
+- Finding fixed afterwards: the skill separated the description parts by single line breaks (OpenProject renders them as one line); the prompt now requires a blank line between the parts and states that the plan table shows exactly the written subject. This changes the content hash, so the walkthrough results were not repeated for it.
+- Not covered by this run: command mode, S3–S7 and S9 through the skill, the hash comparison for "differs, not updated" in the skill (reported by the skill as not verified separately), `--update` via the skill.
+- Leftover state: feature `001-sandbox-demo` (ids 64–77) remains in `speckit-sandbox`.
+
+### 2026-10-05 – S3, S4, S2 (re-run) and S9 through the installed skill (skills mode)
+Feature `003-s4-demo` from `tests/fixtures/tasks/s4-tasks.md`, sandbox empty at the start, test custom field not mandatory, OpenProject 17.9.1. Each run was executed by the maintainer in a Claude Code session started inside the scratch project and checked afterwards from the main session against OpenProject and the ledger.
+- **Dry run** (revision 1ca734c): plan of 9 creates and the 3 relations T004→T002, T005→T004, T006→T001; nothing written. An earlier dry run (before 1ca734c) showed subjects ending in "in" (see findings).
+- **S3 (interrupt)**: confirmed phase 1, answered "no" for phase 2: 5 work packages (ids 78–82) created, ledger with 5 items, report names the open items.
+- **S3 resume and S4**: second run skipped the 5 existing items, asked for phase 2 (4 work packages, ids 83–86) and then separately for the 3 relations (with the note about automatic scheduling). Result in OpenProject: 9 work packages, 3 `follows` relations (ids 13–15) with the successor on the `from` side; no relation involving T003 or between T001 and T002. Ledger: 9 items, 3 relations, schema-valid, no host.
+- **S2 re-run** (feature 003): 9 skip, 3 relation skips, nothing written, no confirmation asked.
+- **S9, first attempt** (revision 1ca734c): the title of T004 had been changed in `tasks.md` and the ledger id of T005 pointed to a missing work package. The skill reported T005 as stale (not recreated, ledger untouched) but missed the changed title of T004 ("8 skipped, hashes match"); the stored hash matched the old content and the new content hashes differently. Cause: it reused `tasks.md` from earlier in the same conversation and skipped read steps.
+- **S9, second attempt** (revision d7e7216, new session): T004 `skip, differs, not updated`, T005 stale, no write. With `--update`: update table, one confirmation, preview and confirm; work package 84 got the new subject and description (`lock_version` 2, status, parent and the other 8 work packages unchanged); ledger hash of T004 updated and verified by recomputation; T005 stayed stale and untouched.
+- **Findings fixed during these runs**: (1) the task title kept a dangling preposition before the file hint ("Create database schema in") — the rule now drops it (1ca734c); (2) description parts were separated by single line breaks (47ceac4); (3) the skill skipped read steps and reused earlier results, so a changed title went unnoticed — every run now starts from scratch and recomputes hashes with the shell (d7e7216).
+- **Still not covered**: command mode, S5 end to end, S6 and S7 through the skill, S7 with the OpenProject-side read-only role, the `tools:` front matter for other server names.
+- **Leftover state**: feature `003-s4-demo` (ids 78–86, relations 13–15) remains in `speckit-sandbox`.
+
+### 2026-10-05 – S6 through the installed skill (skills mode), prompt revision d7e7216
+Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks), with the mandatory custom field `S6 Test Field` (`customField1`) assigned to type Task only; the feature `003-s4-demo` from the earlier runs was still in the project. Each run was done by the maintainer in a new session.
+- **Run A** (no value in `required_custom_fields`): plan = feature and phase `create`, T001–T003 `blocked` ("mandatory field S6 Test Field (customField1)"); one confirmation for the feature and phase; created 2 (ids 87, 88), blocked 3; ledger with 2 items. In OpenProject only those 2 work packages were added.
+- **Run B** (`required_custom_fields: {customField1: "n/a"}`): feature and phase `skip`, T001–T003 `create` (the search for `T001` also hits the tasks of feature 003; they were not adopted because their parent chain does not lead to the feature work package). One confirmation, 3 work packages (ids 89–91) created with `customField1 = "n/a"` and parent 88; feature and phase carry no field value. Total in the project 14 (9 of feature 003 unchanged + 5). Ledger: 5 items, schema-valid, no host. Report: created 3, skipped 2, blocked 0.
+- Side note: in run A the skill passed an unsupported `select` argument to the create tool; the tool rejected the call before running and the skill repeated it without the argument. Nothing was written twice.
+- **Result**: the blocking of only the affected type, the continuation for the other items, the resume after setting the value, the per-type `custom_fields` and the separation between two features in one project all behaved as specified.
+- Leftover state: feature `004-s6-demo` (ids 87–91) and feature `003-s4-demo` (ids 78–86) remain in `speckit-sandbox`; the mandatory field is still active.

@@ -1,0 +1,6 @@
+project: "speckit-sandbox"
+types:
+  feature: "Feature"
+  phase: "Summary task"
+  task: "Task"
+feature_tag_prefix: "speckit:"

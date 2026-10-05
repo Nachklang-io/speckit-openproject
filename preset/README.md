@@ -24,32 +24,46 @@ specify preset add --dev ./spec-kit-preset-openproject
 specify preset add openproject
 ```
 
-Then copy `openproject-config.template.yml` to `.specify/presets/openproject/openproject-config.yml` and set at least `project`.
+Then copy `openproject-config.template.yml` to `.specify/openproject/config.yml` and set at least `project`. The three work package types (`feature`, `phase`, `task`) must be enabled in the target project; a default OpenProject instance has no type "Phase", so the template uses "Summary task".
 
 ## Usage
 
 ```
-/speckit.taskstoissues                 # uses the config file
-/speckit.taskstoissues my-project      # project identifier as argument
-/speckit.taskstoissues --dry-run       # show plan only
-/speckit.taskstoissues --update        # update already mapped work packages
+/speckit-taskstoissues                 # skills mode; uses the config file
+/speckit-taskstoissues my-project      # project identifier as argument
+/speckit-taskstoissues --dry-run       # show plan only, write nothing
+/speckit-taskstoissues --update        # also update linked work packages whose title/description changed
 ```
 
-Configuration order per value: argument → config file → `SPECKIT_OPENPROJECT_*` environment → question.
+In command mode use `/speckit.taskstoissues`. Configuration order per value: argument → config file → `SPECKIT_OPENPROJECT_*` environment → question.
 
 ## Behavior
 
-1. Verifies the MCP tools, the project, and that the configured types exist.
-2. Parses phases, tasks, `[P]` markers and dependencies from `tasks.md`.
-3. Skips tasks that already exist (mapping file `.specify/presets/openproject/openproject-mapping.json` + search by task ID / `speckit:<feature>` tag).
-4. Creates phase work packages, task work packages (parent = phase), then `follows` relations.
-5. Prints a summary table with links.
+1. Validates the config, verifies the MCP capabilities, the project and the three types.
+2. Parses phases, tasks, `[P]` markers, `[US#]` labels and dependencies from `tasks.md`.
+3. Plans every item: skip (already in the ledger), adopt (found in OpenProject by its subject prefix), create, stale (ledger entry whose work package is gone, reported only), blocked.
+4. Asks for confirmation once per phase, then creates the hierarchy Feature → Phase → Task, one work package at a time (preview, then confirm), and writes the ledger `.specify/openproject/mapping-<feature>.json` after every write. Subjects start with the task id (`T012 …`); the feature subject starts with the feature directory name.
+5. Creates `follows` relations for real dependencies only (not for `[P]` tasks).
+6. Prints a report with counts, work package ids and reasons for blocked, stale and failed items.
 
-Writes follow the MCP server's preview-then-confirm flow; the command does not bypass it.
+Labels (`[US#]`, `[P]`) are written as plain text in the first line of the description. Nothing is ever deleted. The command works through the capability table embedded in the command; the tested server is `jtauschl/openproject-ce-mcp`.
+
+## Untested paths
+
+Labelled honestly until a scenario in `docs/TESTING.md` has been run:
+- Lists of 100+ tasks beyond a dry run.
+- Command mode (`/speckit.taskstoissues`) and other MCP servers.
+- Other MCP servers and other server names: the front matter filter `tools: ['openproject-ce-mcp/*']` worked in the runs with the server configured as `openproject`; behaviour with other servers is untested.
+- The installed skill was run in skills mode only (S1–S4, S6, S8, S9, see `docs/TESTING.md`); S5 (logic only) and S7 (project outside the server allowlist only, not the OpenProject read-only role) were manual walkthroughs.
+- spec-kit 1.0.x: not tested, so `requires.speckit_version` is `>=1.1.0`.
 
 ## Limitations
 
-- Work packages have no native labels; the feature tag is written into the description.
+- Work packages have no native labels; markers are written into the description.
+- The server cannot set a status when creating; the default status of the type applies (`defaults.status` is not applied).
+- Searching for existing work packages is a substring search on the subject; the command filters the hits itself. Re-runs search once per ledger item to detect stale entries, so large lists need many tool calls.
+- The ledger is kept per feature (`.specify/openproject/mapping-<feature>.json`), so several features in one repository do not collide. The configuration is shared per project.
+- Each write is a separate preview and confirm call; bulk creation is not used.
 - Types, statuses, workflows and mandatory custom fields differ per project. The command reports problems instead of guessing.
 - LLM execution is not fully deterministic; the mapping file is what guarantees idempotency.
 - Installs and overrides the command with spec-kit 1.1.1 (skills mode); re-verify on each spec-kit upgrade.

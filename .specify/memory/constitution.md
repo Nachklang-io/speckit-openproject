@@ -33,6 +33,17 @@ Prefer plain Markdown, YAML and small scripts over frameworks. Anything the LLM 
 - Breaking changes need an ADR, a major version bump and migration notes.
 
 ## Governance
-This constitution supersedes other practices. Amendments need an ADR in `docs/adr/` and a version bump below.
+This constitution supersedes other practices. Where a spec, plan, task list or prompt conflicts
+with it, the constitution wins and the conflicting artifact MUST be fixed.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-05 | **Last Amended**: 2026-10-05
+- **Amendments**: Proposed in a PR that changes this file and adds an ADR in `docs/adr/`. The
+  maintainer approves. Principle removals or redefinitions MUST include a migration note.
+- **Versioning** (semantic): MAJOR for backward-incompatible removal or redefinition of a
+  principle; MINOR for a new principle or section, or materially expanded guidance; PATCH for
+  clarifications and wording.
+- **Compliance review**: `/speckit-analyze` treats constitution violations as CRITICAL. The
+  `spec-conformance-reviewer` and `openproject-api-reviewer` subagents check every diff, and
+  reviewers MUST reject PRs that violate a principle without a justified, documented exception.
+- **Runtime guidance**: `CLAUDE.md` holds day-to-day instructions and MUST NOT contradict this file.
+
+**Version**: 1.1.0 | **Ratified**: 2026-10-05 | **Last Amended**: 2026-10-05

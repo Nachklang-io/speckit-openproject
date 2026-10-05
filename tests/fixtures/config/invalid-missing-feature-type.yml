@@ -1,0 +1,4 @@
+project: "speckit-sandbox"
+types:
+  phase: "Summary task"
+  task: "Task"

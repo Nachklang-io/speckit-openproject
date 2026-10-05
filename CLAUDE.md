@@ -30,7 +30,7 @@ This repo is itself a spec-kit project (Claude integration, skills mode). Non-tr
 ## Hard rules
 - OpenProject is accessed **only through an MCP server** (default `jtauschl/openproject-ce-mcp`, verified v0.4.1). Never call the REST API from prompts or scripts in this repo (ADR-0002).
 - Never write API tokens, URLs of private instances or `.env` content into any file, commit, work package or log. Tokens live in the MCP client config only. A hook blocks edits to secret files.
-- Every write path is idempotent: re-running a command must not create duplicates. Mapping file `.specify/openproject/mapping.json` is the ledger (`schemas/mapping.schema.json`).
+- Every write path is idempotent: re-running a command must not create duplicates. Mapping file `.specify/openproject/mapping-<feature>.json` (one per feature) is the ledger (`schemas/mapping.schema.json`).
 - Prompts (command markdown) are code: keep them deterministic, numbered, with explicit stop conditions and no hidden assumptions about tool names; map capabilities → tool names in one place.
 - Commands must work in skills mode (`/speckit-<name>`) and command mode (`/speckit.<name>`).
 - Never rename or delete shipped config keys without a major version bump and a migration note.
