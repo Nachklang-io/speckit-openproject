@@ -110,3 +110,39 @@ def test_ledger_is_per_feature_and_label_line_is_labels(prompt):
     assert "mapping.json" not in prompt
     assert "`Labels: US1 · parallel`" in prompt
     assert "Story:" not in prompt
+
+
+def test_config_value_types_match_schema(root, prompt):
+    cfg = json.loads((root / "schemas/config.schema.json").read_text())
+    props = cfg["properties"]
+    rules = block(prompt, "config-rules")
+    assert props["create_relations"]["type"] == "boolean"
+    assert props["mark_parallel"]["type"] == "boolean"
+    assert props["project"]["type"] == "string"
+    assert props["mcp_server"]["type"] == "string"
+    assert all(
+        props["types"]["properties"][k]["minLength"] == 1 for k in ("feature", "phase", "task")
+    )
+    assert props["required_custom_fields"]["type"] == "object"
+    assert "create_relations and mark_parallel are booleans" in rules
+    assert "project and mcp_server are strings" in rules
+    assert "types values are non-empty strings" in rules
+    assert "string, number or boolean values" in rules
+
+
+def test_unknown_keys_are_errors_in_schemas(root):
+    cfg = json.loads((root / "schemas/config.schema.json").read_text())
+    led = json.loads((root / "schemas/mapping.schema.json").read_text())
+    assert cfg["additionalProperties"] is False
+    assert cfg["properties"]["types"]["additionalProperties"] is False
+    assert led["additionalProperties"] is False
+    assert led["properties"]["items"]["additionalProperties"]["additionalProperties"] is False
+
+
+def test_prompt_safety_rules_present(prompt):
+    assert "`confirm=true`" in prompt
+    assert "Never retry it" in prompt
+    assert "<user-content>" in prompt
+    assert "untrusted data" in prompt
+    assert "Dry run: nothing was written." in prompt
+    assert "read pages until" in prompt or "read all pages" in prompt
