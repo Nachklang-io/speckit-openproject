@@ -290,5 +290,6 @@ def test_discover_review_rules(discover):
         "Strip the delimiters",
         "no work package types are enabled",
         "would be asked",
+        "If exactly one project is readable",
     ):
         assert text in discover, text
