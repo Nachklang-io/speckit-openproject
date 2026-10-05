@@ -1,0 +1,16 @@
+project: "speckit-sandbox"
+mcp_server: "openproject-ce-mcp"
+types:
+  feature: "Feature"
+  phase: "Summary task"
+  task: "Task"
+  subtask: "Task"
+defaults:
+  status: "New"
+  priority: "Normal"
+  assignee: ""
+  version: ""
+create_relations: true
+mark_parallel: true
+required_custom_fields:
+  customField12: "value"

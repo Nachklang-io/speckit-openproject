@@ -14,12 +14,46 @@ def test_preset_config_template_matches_schema(root):
     jsonschema.validate(cfg, schema(root, "config.schema.json"))
 
 
-def test_mapping_valid(root):
-    data = json.loads((root / "tests/fixtures/mapping.valid.json").read_text())
-    jsonschema.validate(data, schema(root, "mapping.schema.json"))
+def fixtures(root, sub, pattern):
+    return sorted((root / "tests" / "fixtures" / sub).glob(pattern))
 
 
-def test_mapping_invalid(root):
-    data = json.loads((root / "tests/fixtures/mapping.invalid.json").read_text())
-    with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(data, schema(root, "mapping.schema.json"))
+def test_fixture_sets_not_empty(root):
+    assert fixtures(root, "config", "valid-*.yml")
+    assert fixtures(root, "config", "invalid-*.yml")
+    assert fixtures(root, "mapping", "valid-*.json")
+    assert fixtures(root, "mapping", "invalid-*.json")
+
+
+def test_config_fixtures(root):
+    s = schema(root, "config.schema.json")
+    for path in fixtures(root, "config", "valid-*.yml"):
+        jsonschema.validate(yaml.safe_load(path.read_text()), s)
+    for path in fixtures(root, "config", "invalid-*.yml"):
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(yaml.safe_load(path.read_text()), s)
+
+
+def test_mapping_fixtures(root):
+    s = schema(root, "mapping.schema.json")
+    for path in fixtures(root, "mapping", "valid-*.json"):
+        jsonschema.validate(json.loads(path.read_text()), s)
+    for path in fixtures(root, "mapping", "invalid-*.json"):
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(json.loads(path.read_text()), s)
+
+
+def test_s1_ledger_has_14_unique_items(root):
+    data = json.loads((root / "tests/fixtures/mapping/valid-s1.json").read_text())
+    ids = [item["id"] for item in data["items"].values()]
+    assert len(ids) == 14
+    assert len(set(ids)) == 14
+    kinds = [item["kind"] for item in data["items"].values()]
+    assert (kinds.count("feature"), kinds.count("phase"), kinds.count("task")) == (1, 3, 10)
+
+
+def test_relations_reference_known_items(root):
+    data = json.loads((root / "tests/fixtures/mapping/valid-with-relations.json").read_text())
+    for rel in data["relations"]:
+        assert rel["from"] in data["items"]
+        assert rel["to"] in data["items"]

@@ -9,8 +9,9 @@
     "mcp_server": {"type": "string"},
     "types": {
       "type": "object",
-      "required": ["phase", "task"],
+      "required": ["feature", "phase", "task"],
       "properties": {
+        "feature": {"type": "string", "minLength": 1},
         "phase": {"type": "string", "minLength": 1},
         "task": {"type": "string", "minLength": 1},
         "subtask": {"type": "string"}
@@ -23,14 +24,12 @@
         "status": {"type": "string"},
         "priority": {"type": "string"},
         "assignee": {"type": "string"},
-        "version": {"type": "string"}
+        "version": {"type": "string", "$comment": "ignored by speckit.taskstoissues"}
       },
       "additionalProperties": false
     },
-    "feature_tag_prefix": {"type": "string"},
     "create_relations": {"type": "boolean"},
     "mark_parallel": {"type": "boolean"},
-    "mapping_file": {"type": "string"},
     "required_custom_fields": {"type": "object", "additionalProperties": {"type": ["string", "number", "boolean"]}}
   },
   "additionalProperties": false

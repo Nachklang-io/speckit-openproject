@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "project": "speckit-sandbox",
+  "feature": "001-demo",
+  "items": {
+    "feature": {
+      "kind": "feature",
+      "id": 100,
+      "url": "/work_packages/100"
+    },
+    "phase-1": {
+      "kind": "phase",
+      "id": 101,
+      "url": "/work_packages/101"
+    },
+    "phase-2": {
+      "kind": "phase",
+      "id": 102,
+      "url": "/work_packages/102"
+    },
+    "phase-3": {
+      "kind": "phase",
+      "id": 103,
+      "url": "/work_packages/103"
+    },
+    "T001": {
+      "id": 111,
+      "url": "/work_packages/111"
+    },
+    "T002": {
+      "kind": "task",
+      "id": 112,
+      "url": "/work_packages/112"
+    },
+    "T003": {
+      "kind": "task",
+      "id": 113,
+      "url": "/work_packages/113"
+    },
+    "T004": {
+      "kind": "task",
+      "id": 114,
+      "url": "/work_packages/114"
+    },
+    "T005": {
+      "kind": "task",
+      "id": 115,
+      "url": "/work_packages/115"
+    },
+    "T006": {
+      "kind": "task",
+      "id": 116,
+      "url": "/work_packages/116"
+    },
+    "T007": {
+      "kind": "task",
+      "id": 117,
+      "url": "/work_packages/117"
+    },
+    "T008": {
+      "kind": "task",
+      "id": 118,
+      "url": "/work_packages/118"
+    },
+    "T009": {
+      "kind": "task",
+      "id": 119,
+      "url": "/work_packages/119"
+    },
+    "T010": {
+      "kind": "task",
+      "id": 120,
+      "url": "/work_packages/120"
+    }
+  }
+}

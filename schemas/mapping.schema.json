@@ -3,20 +3,36 @@
   "$id": "https://example.invalid/speckit-openproject/mapping.schema.json",
   "title": "spec-kit OpenProject mapping ledger",
   "type": "object",
-  "required": ["project", "feature", "items"],
+  "required": ["schema_version", "project", "feature", "items"],
   "properties": {
+    "schema_version": {"const": "1.0"},
     "project": {"type": "string"},
-    "feature": {"type": "string"},
+    "feature": {"type": "string", "description": "feature directory name, e.g. 001-tasks-to-work-packages"},
     "items": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["id"],
+        "required": ["kind", "id"],
         "properties": {
+          "kind": {"enum": ["feature", "phase", "task"]},
           "id": {"type": "integer", "minimum": 1},
-          "url": {"type": "string"},
+          "url": {"type": "string", "description": "path only, no host"},
           "hash": {"type": "string", "description": "content hash of the source item at last sync"},
           "status": {"type": "string", "description": "last synced status"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "type"],
+        "properties": {
+          "from": {"type": "string", "description": "successor item key"},
+          "to": {"type": "string", "description": "predecessor item key"},
+          "type": {"enum": ["follows"]},
+          "id": {"type": "integer", "minimum": 1}
         },
         "additionalProperties": false
       }
