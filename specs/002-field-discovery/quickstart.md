@@ -27,7 +27,7 @@ Expected: `openproject` listed in both.
 | S10 | Bootstrap | no `.specify/openproject/config.yml` in the scratch project | one run, accepted proposals, file schema-valid, `taskstoissues --dry-run` reports no configuration error; with the mandatory custom field and no value: file written, run `incomplete`, warning names the field |
 | S11 | Re-run after hand edits | add a comment, change `types.phase`, add `create_relations: false` | diff shown; `none` leaves file byte-identical (compare checksum); partial approval changes only the chosen keys; comment and extra key survive; unchanged project: `no changes` |
 | S12 | Dry run | any state | overview and diff shown, line `Dry run: nothing was written.`, file checksum unchanged |
-| S13 | Failures | (a) project not set and no projects readable, (b) unknown project, (c) project outside the server allowlist, (d) MCP server not connected | each stops with a specific message, no file created or changed |
+| S13 | Failures | (a) project not set and no projects readable, (b) unknown project, (c) project outside the server allowlist, (d) MCP server not connected, (e) invalid existing config | (a)–(d) each stop with a specific message, no file created or changed; (e) lists all violations and offers a rebuild diff, file unchanged unless approved |
 
 Run each through the installed skill in a fresh session, `--dry-run` first, then for real. Record what was executed; paths not executed (command mode, list-type custom field, versions with data) stay labelled untested.
 

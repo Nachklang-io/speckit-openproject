@@ -24,7 +24,7 @@ Managed by this command:
 | `project` | identifier of the resolved project; string |
 | `types.feature`, `types.phase`, `types.task` | name of an enabled type; non-empty string |
 | `types.subtask` | never proposed; left as is |
-| `defaults.priority`, `defaults.version`, `defaults.assignee` | only if the user asks; value must exist in the snapshot; `defaults.status` is never written (not applied on create) |
+| `defaults.priority`, `defaults.version`, `defaults.assignee` | only if the user asks; priority and version must exist in the snapshot, the assignee is written as entered and not verified; `defaults.status` is never written (not applied on create) |
 | `statuses.open`, `statuses.in_progress`, `statuses.done` | **new, optional, additive**; name of a status available for the task type; non-empty string; each key individually optional |
 | `required_custom_fields` | `customField<N>` → string, number or boolean, for mandatory fields of the used types |
 
