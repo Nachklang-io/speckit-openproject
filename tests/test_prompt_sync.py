@@ -293,5 +293,6 @@ def test_discover_review_rules(discover):
         "If exactly one project is readable",
         "never make a run `incomplete`",
         "read back and validated before the move",
+        "outside the project",
     ):
         assert text in discover, text

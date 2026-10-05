@@ -133,7 +133,7 @@ Every run starts from scratch. Execute steps 1–13 in order, every time, even i
    Every field without a value or without a representable value is listed and the run result becomes `incomplete`. Never invent or guess a value, never write a placeholder. An entry in `required_custom_fields` whose key is no longer a blocker is reported as "stale, kept" and never removed.
    The proposals of (a), (b), (d) and (e) are confirmed with one grouped question: "accept all, or give the numbers of the proposals for which you want a different value". (This is not the approval of step 11.) With `--dry-run` no question of this step is asked: the proposals are shown as if all were accepted, and each mandatory field is listed as "would be asked" (the dry-run result then counts it as without value).
 
-8. **Build the proposed file.** In memory, never on disk yet.
+8. **Build the proposed file.** In memory, never on disk yet. If a shell diff needs a file, use a file in the session's scratch directory outside the project; never create anything inside `.specify/openproject/` before step 12.
    - Bootstrap: instantiate the config template with the approved values.
    - Existing valid config: change **only the approved keys**. Replace the value on the key's own line. Add a missing key at the end of its section (a missing top-level key at the end of the file) together with the template's comment. Never reorder, never touch comments, blank lines, unknown lines or keys this command does not manage; they stay byte for byte. Replace `{}` by a block mapping when the first entry is added.
    - Rebuild (invalid existing config): start from the template and the discovered values; keep nothing that violates the rules; list every dropped line in the diff.
