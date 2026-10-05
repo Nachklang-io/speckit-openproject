@@ -32,7 +32,7 @@ All OpenProject access goes through an MCP server (never the REST API, never Git
 | search-work-packages | `search_work_packages` | search, project, limit, offset | yes |
 | get-work-package | `get_work_package` | work_package_id | yes |
 | create-work-package | `create_work_package` | project, type, subject, description, parent, custom_fields, priority, assignee, confirm | yes |
-| update-work-package | `update_work_package` | work_package_id, subject, description, confirm | no |
+| update-work-package | `update_work_package` | work_package_id, subject, description, confirm | yes |
 | get-relations | `get_work_package_relations` | work_package_id | yes |
 | create-relation | `create_work_package_relation` | work_package_id, related_to_work_package_id, relation_type, confirm | yes |
 <!-- END capability-map -->
@@ -100,8 +100,8 @@ Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.ta
 8. **Load the ledger.** Read `.specify/openproject/mapping.json`. If it exists, validate it against the ledger rules and stop on violations; its `project` and `feature` must equal the resolved project and `FEATURE`, otherwise stop. If it does not exist, treat it as empty; do not create it yet.
 
 9. **Plan.** For every item in the order feature, phases, tasks decide exactly one action:
-   - `skip`: key is in the ledger and `get-work-package` finds the work package. With `--update`, compare the stored hash with the current hash (see step 14); without it, differing items are reported as "differs, not updated".
-   - `stale`: key is in the ledger but `get-work-package` reports not found. Report it; do not recreate; do not change the ledger.
+   - `skip`: key is in the ledger and the work package exists. Existence check: `search-work-packages` (search = the ledger id, project); it exists only if a result (or `exact_match`) has an `id` equal to the ledger id. Do not use `get-work-package` for this check: for a missing id it fails with a generic error that cannot be told apart from a connection error. With `--update`, compare the stored hash with the current hash (see step 14); without it, differing items are reported as "differs, not updated".
+   - `stale`: key is in the ledger, the existence check above succeeded and found no work package with that id. Report it; do not recreate; do not change the ledger. If the search call itself fails, that is a tool failure (step 12), not `stale`.
    - `adopt`: key is not in the ledger and exactly one matching work package exists. Matching: `search-work-packages` (search = task key, or `Phase N:`, or `FEATURE`; project). The search is a **substring** match on subject and id, so accept a hit only if its subject starts with the key text followed by a space (phase: starts with `Phase N:`), and, except for the feature itself, its parent chain (`parent_id` and `ancestors` from `get-work-package`) contains the feature work package. Read all result pages. Several matches: report them, action `blocked` (reason "ambiguous"); never guess.
    - `create`: nothing matches.
    - `blocked`: the parent is `blocked`, or an earlier problem applies.

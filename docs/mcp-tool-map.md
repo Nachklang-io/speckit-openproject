@@ -10,7 +10,7 @@ Single place that maps capabilities used by the commands to tool names. Add a co
 | search-work-packages | `search_work_packages` | search, project, limit, offset | yes |
 | get-work-package | `get_work_package` | work_package_id | yes |
 | create-work-package | `create_work_package` | project, type, subject, description, parent, custom_fields, priority, assignee, confirm | yes |
-| update-work-package | `update_work_package` | work_package_id, subject, description, confirm | no |
+| update-work-package | `update_work_package` | work_package_id, subject, description, confirm | yes |
 | get-relations | `get_work_package_relations` | work_package_id | yes |
 | create-relation | `create_work_package_relation` | work_package_id, related_to_work_package_id, relation_type, confirm | yes |
 
@@ -52,3 +52,4 @@ Differences from the server's published docs: relation parameters are `related_t
 Not yet verified live: mandatory custom field behaviour (sandbox has none), `update_work_package` (`--update`), `bulk_create_work_packages` with `confirm=true` and with parents.
 - `get_project_work_package_context` (verified 2026-10-05, sandbox with enabled types): each field has `required`, `writable`, `has_default`. `status` and `priority` are required but have defaults, so only fields that are required, writable and without default can block creation. The sandbox reports no custom fields.
 - With a mandatory text custom field assigned to type Task only (S6 setup, 2026-10-05): `get_project_work_package_context(type=Task)` lists it under `custom_fields` and in `fields` with key `customField<N>`, `required: true`, `writable: true`, `has_default: false`; for type Feature `custom_fields` is empty. Not yet verified: how `create_work_package` expects the value (`custom_fields={"customField<N>": "..."}`) and what the preview returns when it is missing.
+- Verified live 2026-10-05 (sandbox): `update_work_package` preview shows the full payload (including `lockVersion`) and the confirm updates only the given fields (`lock_version` increments). A rejected preview (e.g. missing mandatory custom field) is `state: "rejected"`, `ready: false` with readable `validation_errors`; it is **not** a tool error. Unknown type, project outside the allowlist, unknown parent and `get_work_package` on a missing id fail with the generic client error `Error executing tool <name>`. `create_work_package` accepts `custom_fields={"customField<N>": "..."}`. Creating a `follows` relation switches the successor to automatic scheduling (`schedule_manually: false`). `search_work_packages` by numeric id returns `total: 0` without error when the id does not exist.

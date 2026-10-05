@@ -51,8 +51,8 @@ Labels (`[US#]`, `[P]`) are written as plain text in the first line of the descr
 ## Untested paths
 
 Labelled honestly until a scenario in `docs/TESTING.md` has been run:
-- `--update` (`update_work_package` has not been exercised against a live instance).
-- Mandatory custom fields (the sandbox had none).
+- `--update` was exercised only in a manual walkthrough against a sandbox (see `docs/TESTING.md`), not through the installed command.
+- Mandatory custom fields: exercised in a manual walkthrough only.
 - Lists of 100+ tasks beyond a dry run.
 - Command mode (`/speckit.taskstoissues`) and other MCP servers.
 
@@ -60,7 +60,8 @@ Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 
 - Work packages have no native labels; markers are written into the description.
 - The server cannot set a status when creating; the default status of the type applies (`defaults.status` is not applied).
-- Searching for existing work packages is a substring search on the subject; the command filters the hits itself. Re-runs read each ledger item once to detect stale entries, so large lists need many tool calls.
+- Searching for existing work packages is a substring search on the subject; the command filters the hits itself. Re-runs search once per ledger item to detect stale entries, so large lists need many tool calls.
+- The ledger `.specify/openproject/mapping.json` belongs to one feature; a second feature in the same repository needs its own ledger (open design question).
 - Each write is a separate preview and confirm call; bulk creation is not used.
 - Types, statuses, workflows and mandatory custom fields differ per project. The command reports problems instead of guessing.
 - LLM execution is not fully deterministic; the mapping file is what guarantees idempotency.
