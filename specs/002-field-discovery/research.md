@@ -30,7 +30,7 @@ Facts marked *live* were read from the sandbox (OpenProject 17.9.1, project `spe
 | phase | Phase, Summary task | ask |
 | task | Task, User story | ask |
 
-Milestone is never proposed for phase (a point in time, not a container; `is_milestone: true` in the type list). Every proposal states its reason ("exact name", "closest built-in"). `subtask` is not proposed and not written unless it already exists in the config.
+Milestone is never proposed for phase (a point in time, not a container; `is_milestone: true` in the type list). If several candidates of a role's rule exist in the project, all are listed and the first is recommended. Every proposal states its reason ("exact name", "closest built-in"). `subtask` is not proposed and not written unless it already exists in the config.
 
 **Rationale**: A default instance has no "Phase" type (001 research, live). Rules must be deterministic (CLAUDE.md: prompts are code).
 
@@ -88,7 +88,7 @@ Source: the Task type's `available_statuses` intersected with `list-statuses` by
 ## R10. Out of scope / deferred
 
 - Non-interactive mode (`--yes`): not in the brief; the run needs answers. Revisit with feature 006 if CI use appears.
-- Writing `defaults.priority`/`defaults.version`: proposed only when the user asks for it in the defaults step; empty is the default answer (OpenProject's own default applies).
+- Writing `defaults.priority`/`defaults.version`/`defaults.assignee`: only when the user asks for it in the defaults step (spec FR-006); priority and version come from the snapshot, the assignee is taken as entered and not verified (no capability lists users); empty is the default answer (OpenProject's own default applies).
 - Environment variables: if any `SPECKIT_OPENPROJECT_*` variable is set, the final report lists it, because write commands resolve env after the file and before asking, so a stale env value can hide the discovered config.
 
 ## R11. Tests and fixtures

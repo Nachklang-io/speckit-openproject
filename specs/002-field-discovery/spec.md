@@ -117,7 +117,7 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 - **FR-003**: The command MUST determine the target project from, in order, a command argument, the existing config, an environment variable, and finally by listing readable projects and asking the user.
 - **FR-004**: The command MUST present an overview of the discovered data before proposing any mapping.
 - **FR-005**: The command MUST propose a type for each of feature, phase and task from the project's enabled types, explain the reasoning, and let the user pick any enabled type instead.
-- **FR-006**: The command MUST propose optional defaults (priority, version, assignee) only from values that exist in the project, and MUST leave them empty when the user declines.
+- **FR-006**: The command MUST set optional defaults (priority, version, assignee) only when the user asks for them. Priority and version MUST be chosen from values that exist in the project; the assignee is taken as the user enters it and is not verified. Defaults the user does not ask for stay empty.
 - **FR-007**: The command MUST ask the user for a value for every custom field that is mandatory for a used type and not yet in the config, and store the answers in the config's required-custom-fields section. If the user gives no value, the command MUST still write the config without that value, MUST warn naming the field and the type it is mandatory for, MUST NOT invent a placeholder value, and MUST report the run result as "incomplete" in the final summary.
 - **FR-008**: The command MUST write a config that validates against the shared config schema; it MUST validate before writing and refuse to write invalid content.
 - **FR-009**: When a config already exists, the command MUST keep all existing values by default, show a diff of every proposed change, and apply a change only after explicit user approval.
@@ -127,7 +127,7 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 - **FR-013**: The command MUST work in skills mode and command mode and MUST support a `--dry-run` argument.
 - **FR-014**: The command MUST apply an approved change by editing only the approved keys, leaving comments, key order and keys it does not manage untouched. Where an edit cannot preserve something (for example a comment attached to a replaced value), the diff MUST say so before anything is written.
 - **FR-015**: The command MUST propose, from the project's statuses, a mapping of spec-kit task states (open, in progress, done) to OpenProject status names and store it in a new optional config section `statuses`. The section is additive: configs without it stay valid, no shipped key is renamed or removed, and the shared config schema is extended accordingly. The mapping is consumed by feature 003 (status sync); this feature only writes it.
-- **FR-016**: The command MUST summarize at the end what was read, what was proposed, what was written or skipped, and the next recommended command.
+- **FR-016**: The command MUST summarize at the end what was read, what was proposed, what was written or skipped, and the next recommended command. It MUST also list any `SPECKIT_OPENPROJECT_*` environment variable that is set, because write commands resolve those after the config file and a stale value can hide the discovered config.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -145,7 +145,7 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 - **SC-003**: After a bootstrap run, `speckit.taskstoissues --dry-run` against the same project reports zero configuration errors (unknown type, missing mandatory custom field) in the sandbox scenario, provided the run was not reported as "incomplete".
 - **SC-004**: Re-running on an unchanged project and config produces zero file modifications.
 - **SC-005**: In the edit-and-re-run scenario, 100% of user-edited values survive unless the user explicitly approves their replacement.
-- **SC-006**: All failure scenarios (no server, unknown project, unreadable project, invalid existing config) end with a specific message and zero file changes.
+- **SC-006**: All failure scenarios (no server, unknown project, unreadable project) end with a specific message and zero file changes. For an invalid existing config, the file stays unchanged unless the user approves the proposed rebuild.
 
 ## Assumptions
 
