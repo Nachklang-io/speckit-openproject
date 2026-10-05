@@ -39,3 +39,9 @@ def test_s4_parallel_tasks_have_no_dependency(root):
     assert parallel == {"T001", "T002", "T003"}
     dependents = {s for s, _ in re.findall(r"^- (T\d{3}) depends on (T\d{3})$", text, re.MULTILINE)}
     assert not parallel & dependents
+
+
+def test_s6_counts(root):
+    text = read(root, "s6-tasks.md")
+    assert len(PHASE.findall(text)) == 1
+    assert len(TASK.findall(text)) == 3
