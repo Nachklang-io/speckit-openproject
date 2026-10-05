@@ -51,12 +51,11 @@ Labels (`[US#]`, `[P]`) are written as plain text in the first line of the descr
 ## Untested paths
 
 Labelled honestly until a scenario in `docs/TESTING.md` has been run:
-- `--update` was exercised only in a manual walkthrough against a sandbox (see `docs/TESTING.md`), not through the installed command.
-- Mandatory custom fields: exercised in a manual walkthrough only.
+- Mandatory custom fields: exercised in a manual walkthrough only (not through the installed command).
 - Lists of 100+ tasks beyond a dry run.
 - Command mode (`/speckit.taskstoissues`) and other MCP servers.
-- The installed skill itself: tool filter in the front matter (`tools: ['openproject-ce-mcp/*']`), argument parsing and the confirmation dialogue; all runs so far were manual walkthroughs of the prompt steps (see `docs/TESTING.md`).
-- Scenarios S5 (unknown type, logic only), S7 (project outside the server allowlist only, not the OpenProject read-only role) and S8 (dry run, partial) as well as the S1 duration (SC-004).
+- Other MCP servers and other server names: the front matter filter `tools: ['openproject-ce-mcp/*']` worked in the runs with the server configured as `openproject`; behaviour with other servers is untested.
+- The installed skill was run in skills mode only (S1–S4, S8, S9, see `docs/TESTING.md`); S5 (logic only), S6 and S7 (project outside the server allowlist only, not the OpenProject read-only role) were manual walkthroughs.
 - spec-kit 1.0.x: not tested, so `requires.speckit_version` is `>=1.1.0`.
 
 ## Limitations
