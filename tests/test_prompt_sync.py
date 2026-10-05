@@ -294,5 +294,6 @@ def test_discover_review_rules(discover):
         "never make a run `incomplete`",
         "read back and validated before the move",
         "outside the project",
+        "Bootstrap with partial approval",
     ):
         assert text in discover, text
