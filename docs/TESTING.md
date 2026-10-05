@@ -20,10 +20,27 @@ Use a sandbox project. Always run with `--dry-run` first. Record date, OpenProje
 
 | ID | Scenario | Expected | Last run | Result |
 |---|---|---|---|---|
-| S1 | 3 phases / 10 tasks, no existing WPs | 3 phase WPs, 10 task WPs with parents, mapping has 13 entries | – | – |
-| S2 | Re-run S1 | 0 creations, report says all skipped | – | – |
-| S3 | Interrupt after 5 creations, re-run | resumes, no duplicates | – | – |
-| S4 | Dependencies between tasks, `[P]` tasks | `follows` relations only for real dependencies | – | – |
+| S1 | 3 phases / 10 tasks, no existing WPs | 1 feature WP, 3 phase WPs, 10 task WPs with parents, mapping has 14 entries | – | – |
+| S2 | Re-run S1 | 0 created, 14 skipped, 0 relations created | – | – |
+| S3 | Interrupt after 5 creations (answer "stop" at the second phase confirmation), re-run | remaining items created, existing ones skipped, 0 duplicates | – | – |
+| S4 | `tests/fixtures/tasks/s4-tasks.md` (dependencies, `[P]` tasks) | exactly 3 `follows` relations: T004→T002, T005→T004, T006→T001; none between `[P]` tasks | – | – |
 | S5 | Type from config does not exist | stops, lists available types | – | – |
 | S6 | Mandatory custom field in project | stops for that item, reports field | – | – |
 | S7 | Project not in write allowlist | clear error, nothing written | – | – |
+| S8 | `--dry-run` on the S1 input | plan with 14 entries; 0 work packages created; `.specify/openproject/mapping.json` absent or byte-identical | 2026-10-05 | partial: plan logic checked by hand (see run log); not run via the installed skill |
+| S9 | Change one task title, run without then with `--update`; add a ledger entry pointing to a non-existent work package | without `--update`: "differs, not updated"; with `--update`: that work package updated; the bogus entry is reported as stale, not recreated | – | – |
+
+## Notes for the scenarios
+- Before S1: delete leftover `VERIFY-*` work packages from earlier checks, otherwise search hits and counts differ.
+- S1 and S2 run in both modes: skills mode (`/speckit-taskstoissues`) and command mode (`/speckit.taskstoissues`). Note which one was not run.
+- S6 needs a mandatory custom field on the sandbox project (create it in the admin UI, remove it afterwards).
+- Large list (`tests/fixtures/tasks/s-large-tasks.md`, 120 tasks): `--dry-run` only; not run live.
+- Record the S1 duration (SC-004: under 5 minutes including the dry-run review).
+- Claude Code must be started with the MCP server variables exported (`set -a; source .env; set +a; claude`).
+
+## Run log
+### 2026-10-05 – S8 (dry-run), manual walkthrough, partial
+- What was executed: steps 1–10 of `preset/commands/speckit.taskstoissues.md` were followed by hand in a Claude Code session against `speckit-sandbox`, using only read capabilities (`list-projects`, `list-types`, `get-write-context` for Feature/Summary task/Task, `search-work-packages` for the feature, `Phase 1:` and `T001`, `list_work_packages`). Input: `tests/fixtures/tasks/s1-tasks.md`.
+- Result: sandbox empty before; no matches; plan = 4 create (feature + 3 phases), 10 blocked (type Task requires `customField1`, S6 setup), 0 relations. No write call was made and no ledger file was created.
+- Not covered: the installed skill was not invoked, so frontmatter `tools:` matching, argument parsing and the confirmation dialogue are untested. S1–S7 and S9 not run.
+- Environment: OpenProject version not recorded, MCP server `openproject-ce-mcp` 0.4.1 as pinned in the repo docs (not re-read at runtime), spec-kit 1.1.1.dev0.
