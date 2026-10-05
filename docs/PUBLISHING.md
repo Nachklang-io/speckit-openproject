@@ -3,9 +3,9 @@
 ## Create the private GitHub repo and push
 ```bash
 git branch -M main            # already main
-gh repo create <owner>/speckit-openproject --private --source=. --remote=origin --push
+gh repo create ringind/speckit-openproject --private --source=. --remote=origin --push
 ```
-Then replace `<owner>` in `preset/preset.yml`, `extension/extension.yml` and `README.md`.
+Then replace `ringind` in `preset/preset.yml`, `extension/extension.yml` and `README.md`.
 
 ## Before making it public
 - No secrets in history (`git log -p | grep -i token`), no private instance URLs.
