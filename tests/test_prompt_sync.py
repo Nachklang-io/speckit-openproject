@@ -156,3 +156,9 @@ def test_description_parts_are_separated_by_blank_lines(prompt):
 def test_task_title_rule_drops_preposition_before_file_hint(prompt):
     assert "the preposition directly in front of it" in prompt
     assert "`T001 Create database schema`" in prompt
+
+
+def test_every_run_starts_from_scratch_and_hashes_are_computed(prompt):
+    assert "Every run starts from scratch" in prompt
+    assert "never reuse parsed content, hashes or tool results" in prompt
+    assert "never compare by eye or from memory" in prompt
