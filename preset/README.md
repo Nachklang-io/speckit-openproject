@@ -42,7 +42,7 @@ In command mode use `/speckit.taskstoissues`. Configuration order per value: arg
 1. Validates the config, verifies the MCP capabilities, the project and the three types.
 2. Parses phases, tasks, `[P]` markers, `[US#]` labels and dependencies from `tasks.md`.
 3. Plans every item: skip (already in the ledger), adopt (found in OpenProject by its subject prefix), create, stale (ledger entry whose work package is gone, reported only), blocked.
-4. Asks for confirmation once per phase, then creates the hierarchy Feature → Phase → Task, one work package at a time (preview, then confirm), and writes the ledger `.specify/openproject/mapping.json` after every write. Subjects start with the task id (`T012 …`); the feature subject starts with the feature directory name.
+4. Asks for confirmation once per phase, then creates the hierarchy Feature → Phase → Task, one work package at a time (preview, then confirm), and writes the ledger `.specify/openproject/mapping-<feature>.json` after every write. Subjects start with the task id (`T012 …`); the feature subject starts with the feature directory name.
 5. Creates `follows` relations for real dependencies only (not for `[P]` tasks).
 6. Prints a report with counts, work package ids and reasons for blocked, stale and failed items.
 
@@ -61,7 +61,7 @@ Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 - Work packages have no native labels; markers are written into the description.
 - The server cannot set a status when creating; the default status of the type applies (`defaults.status` is not applied).
 - Searching for existing work packages is a substring search on the subject; the command filters the hits itself. Re-runs search once per ledger item to detect stale entries, so large lists need many tool calls.
-- The ledger `.specify/openproject/mapping.json` belongs to one feature; a second feature in the same repository needs its own ledger (open design question).
+- The ledger is kept per feature (`.specify/openproject/mapping-<feature>.json`), so several features in one repository do not collide. The configuration is shared per project.
 - Each write is a separate preview and confirm call; bulk creation is not used.
 - Types, statuses, workflows and mandatory custom fields differ per project. The command reports problems instead of guessing.
 - LLM execution is not fully deterministic; the mapping file is what guarantees idempotency.

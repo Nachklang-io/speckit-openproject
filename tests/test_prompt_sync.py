@@ -103,3 +103,10 @@ def test_no_delete_capability(root, prompt):
         row.split("|")[1].strip().startswith("delete")
         for row in table_rows((root / "docs" / "mcp-tool-map.md").read_text())[2:]
     )
+
+
+def test_ledger_is_per_feature_and_label_line_is_labels(prompt):
+    assert "mapping-<FEATURE>.json" in prompt
+    assert "mapping.json" not in prompt
+    assert "`Labels: US1 · parallel`" in prompt
+    assert "Story:" not in prompt
