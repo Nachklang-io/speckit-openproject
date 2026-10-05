@@ -1,0 +1,158 @@
+{
+  "results": [
+    {
+      "id": 1,
+      "name": "New",
+      "is_default": true,
+      "is_closed": false,
+      "color": "#1098AD",
+      "position": 1,
+      "is_readonly": false,
+      "default_done_ratio": 0,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 2,
+      "name": "In specification",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#A5D8FF",
+      "position": 2,
+      "is_readonly": false,
+      "default_done_ratio": 10,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 3,
+      "name": "Specified",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#A5D8FF",
+      "position": 3,
+      "is_readonly": false,
+      "default_done_ratio": 20,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 4,
+      "name": "Confirmed",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#D0BFFF",
+      "position": 4,
+      "is_readonly": false,
+      "default_done_ratio": 20,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 5,
+      "name": "To be scheduled",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#FFEC99",
+      "position": 5,
+      "is_readonly": false,
+      "default_done_ratio": 20,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 6,
+      "name": "Scheduled",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#D8F5A2",
+      "position": 6,
+      "is_readonly": false,
+      "default_done_ratio": 20,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 7,
+      "name": "In progress",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#CC5DE8",
+      "position": 7,
+      "is_readonly": false,
+      "default_done_ratio": 40,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 8,
+      "name": "Developed",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#8CE99A",
+      "position": 8,
+      "is_readonly": false,
+      "default_done_ratio": 70,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 9,
+      "name": "In testing",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#22B8CF",
+      "position": 9,
+      "is_readonly": false,
+      "default_done_ratio": 80,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 10,
+      "name": "Tested",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#12B886",
+      "position": 10,
+      "is_readonly": false,
+      "default_done_ratio": 90,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 11,
+      "name": "Test failed",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#FF6B6B",
+      "position": 11,
+      "is_readonly": false,
+      "default_done_ratio": 70,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 12,
+      "name": "Closed",
+      "is_default": false,
+      "is_closed": true,
+      "color": "#DEE2E6",
+      "position": 12,
+      "is_readonly": false,
+      "default_done_ratio": 100,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 13,
+      "name": "On hold",
+      "is_default": false,
+      "is_closed": false,
+      "color": "#FFC078",
+      "position": 13,
+      "is_readonly": false,
+      "default_done_ratio": 0,
+      "excluded_from_totals": false
+    },
+    {
+      "id": 14,
+      "name": "Rejected",
+      "is_default": false,
+      "is_closed": true,
+      "color": "#FFA8A8",
+      "position": 14,
+      "is_readonly": false,
+      "default_done_ratio": 0,
+      "excluded_from_totals": false
+    }
+  ]
+}

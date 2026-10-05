@@ -6,6 +6,9 @@ import re
 import pytest
 
 PROMPT = "preset/commands/speckit.taskstoissues.md"
+# Prompts that embed capability rows and config rules. The extension prompt is added with its
+# own tests once the command exists (feature 002, T013).
+PROMPTS = [PROMPT]
 
 
 def block(text, name):
@@ -30,18 +33,34 @@ def prompt(root):
     return (root / PROMPT).read_text()
 
 
+@pytest.fixture(scope="module", params=PROMPTS)
+def any_prompt(request, root):
+    return (root / request.param).read_text()
+
+
 def j(keys):
     return ", ".join(sorted(keys))
 
 
-def test_capability_block_matches_tool_map(root, prompt):
+def test_capability_block_rows_are_identical_to_tool_map_rows(root, any_prompt):
     expected = table_rows((root / "docs" / "mcp-tool-map.md").read_text())
-    assert block(prompt, "capability-map").splitlines() == expected
+    embedded = block(any_prompt, "capability-map").splitlines()
+    assert embedded[:2] == expected[:2]
+    assert len(embedded) > 2
+    rows = expected[2:]
+    positions = []
+    for row in embedded[2:]:
+        assert row in rows, f"embedded row not in tool map: {row}"
+        positions.append(rows.index(row))
+    assert positions == sorted(positions), "embedded rows must keep the tool map order"
 
 
-def test_prompt_uses_no_tool_name_outside_capability_block(root, prompt):
+def test_prompt_uses_no_tool_name_outside_capability_block(root, any_prompt):
     outside = re.sub(
-        r"<!-- BEGIN capability-map -->.*?<!-- END capability-map -->", "", prompt, flags=re.DOTALL
+        r"<!-- BEGIN capability-map -->.*?<!-- END capability-map -->",
+        "",
+        any_prompt,
+        flags=re.DOTALL,
     )
     rows = table_rows((root / "docs" / "mcp-tool-map.md").read_text())[2:]
     for row in rows:
@@ -49,15 +68,16 @@ def test_prompt_uses_no_tool_name_outside_capability_block(root, prompt):
         assert tool not in outside, f"tool name {tool} used outside the capability block"
 
 
-def test_config_rules_match_schema(root, prompt):
+def test_config_rules_match_schema(root, any_prompt):
     cfg = json.loads((root / "schemas/config.schema.json").read_text())
-    rules = block(prompt, "config-rules")
+    rules = block(any_prompt, "config-rules")
     expected = [
         f"- top-level keys: {j(cfg['properties'])}",
         f"- required top-level keys: {j(cfg['required'])}",
         f"- types keys: {j(cfg['properties']['types']['properties'])}",
         f"- required types keys: {j(cfg['properties']['types']['required'])}",
         f"- defaults keys: {j(cfg['properties']['defaults']['properties'])}",
+        f"- statuses keys: {j(cfg['properties']['statuses']['properties'])}",
     ]
     for line in expected:
         assert line in rules.splitlines(), line
@@ -84,7 +104,10 @@ def test_ledger_rules_match_schema(root, prompt):
 
 
 def scanned_files(root):
-    files = list((root / "preset" / "commands").rglob("*"))
+    files = []
+    for rel in PROMPTS:
+        files.append(root / rel)
+    files += list((root / "preset" / "commands").rglob("*"))
     files += list((root / "tests" / "fixtures").rglob("*"))
     return [p for p in files if p.is_file()]
 
@@ -112,10 +135,12 @@ def test_ledger_is_per_feature_and_label_line_is_labels(prompt):
     assert "Story:" not in prompt
 
 
-def test_config_value_types_match_schema(root, prompt):
+def test_config_value_types_match_schema(root, any_prompt):
     cfg = json.loads((root / "schemas/config.schema.json").read_text())
     props = cfg["properties"]
-    rules = block(prompt, "config-rules")
+    rules = block(any_prompt, "config-rules")
+    assert all(v["minLength"] == 1 for v in props["statuses"]["properties"].values())
+    assert "statuses values are non-empty strings" in rules
     assert props["create_relations"]["type"] == "boolean"
     assert props["mark_parallel"]["type"] == "boolean"
     assert props["project"]["type"] == "string"

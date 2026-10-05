@@ -51,12 +51,13 @@ Paging: `offset` of the search and list capabilities is a **page number** starti
 Validate the configuration and the ledger against these rules. Any violation is an error: print every violation and stop; never repair or overwrite the file.
 
 <!-- BEGIN config-rules -->
-- top-level keys: create_relations, defaults, mark_parallel, mcp_server, project, required_custom_fields, types
+- top-level keys: create_relations, defaults, mark_parallel, mcp_server, project, required_custom_fields, statuses, types
 - required top-level keys: project, types
 - types keys: feature, phase, subtask, task
 - required types keys: feature, phase, task
 - defaults keys: assignee, priority, status, version
-- value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; required_custom_fields is an object with string, number or boolean values
+- statuses keys: done, in_progress, open
+- value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
 - unknown keys are errors
 <!-- END config-rules -->
 
@@ -73,6 +74,8 @@ Validate the configuration and the ledger against these rules. Any violation is 
 - ledger relation type values: follows
 - unknown keys are errors
 <!-- END ledger-rules -->
+
+`statuses` (written by `speckit.openproject.discover-fields`) is accepted and ignored by this command.
 
 Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.task` = "Task". `defaults.version` is ignored by this command. `defaults.status` cannot be applied on creation (no status parameter); the type's default status applies.
 

@@ -1,0 +1,9 @@
+# unknown key under statuses
+project: "speckit-sandbox"
+types:
+  feature: "Feature"
+  phase: "Summary task"
+  task: "Task"
+statuses:
+  open: "New"
+  blocked: "On hold"
