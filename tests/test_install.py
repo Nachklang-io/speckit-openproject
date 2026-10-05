@@ -24,7 +24,18 @@ def run(cmd, cwd):
 
 @pytest.fixture()
 def project(tmp_path):
-    run(["specify", "init", "proj", "--non-interactive", "--integration", "claude"], tmp_path)
+    run(
+        [
+            "specify",
+            "init",
+            "proj",
+            "--non-interactive",
+            "--integration",
+            "claude",
+            "--ignore-agent-tools",
+        ],
+        tmp_path,
+    )
     return tmp_path / "proj"
 
 
