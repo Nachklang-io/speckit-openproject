@@ -55,6 +55,9 @@ Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 - Mandatory custom fields: exercised in a manual walkthrough only.
 - Lists of 100+ tasks beyond a dry run.
 - Command mode (`/speckit.taskstoissues`) and other MCP servers.
+- The installed skill itself: tool filter in the front matter (`tools: ['openproject-ce-mcp/*']`), argument parsing and the confirmation dialogue; all runs so far were manual walkthroughs of the prompt steps (see `docs/TESTING.md`).
+- Scenarios S5 (unknown type, logic only), S7 (project outside the server allowlist only, not the OpenProject read-only role) and S8 (dry run, partial) as well as the S1 duration (SC-004).
+- spec-kit 1.0.x: not tested, so `requires.speckit_version` is `>=1.1.0`.
 
 ## Limitations
 
