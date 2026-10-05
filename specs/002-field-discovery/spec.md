@@ -13,6 +13,8 @@
 ### Session 2026-10-05
 
 - Q: Does this feature add a status mapping to the config, or only display statuses? → A: It adds an optional, additive `statuses` section (open / in progress / done → OpenProject status name); feature 003 consumes it.
+- Q: What happens when the user cannot or will not give a value for a mandatory custom field? → A: The config is still written without that value; the command warns, names the field and type, and reports the result as "incomplete". No placeholder value is invented.
+- Q: Does an approved change edit only the approved keys or rewrite the whole file? → A: Only the approved keys are changed; comments, key order and unknown keys stay as they are. Where that is not possible, the diff says so before anything is written.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -98,7 +100,7 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 - A project with no versions, or only closed versions: versions are shown as "none open" and no default version is proposed.
 - Several types plausibly fit one role (for example two summary-like types): all candidates are shown with a recommendation; the user decides.
 - A custom field is mandatory for the task type but not for the feature type (or vice versa): the config stores values only for what is required for the types actually used.
-- A mandatory custom field has a type for which no sensible value can be proposed (for example a user or multi-select field): the user is asked, and the command does not invent a value.
+- A mandatory custom field has a type for which no sensible value can be proposed (for example a user or multi-select field): the user is asked, and the command does not invent a value; if no value is given, the config is written without it and the run is reported as "incomplete" (FR-007).
 - The existing config file is invalid (YAML or schema errors): the command reports the problems and offers to rebuild from discovery results, showing the diff; it never discards the file silently.
 - The existing config contains keys unknown to the schema or comments: they are kept as they are and the diff only touches approved keys.
 - Names differing only by case or whitespace between config and OpenProject: treated as a mismatch and shown, not auto-corrected.
@@ -116,14 +118,14 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 - **FR-004**: The command MUST present an overview of the discovered data before proposing any mapping.
 - **FR-005**: The command MUST propose a type for each of feature, phase and task from the project's enabled types, explain the reasoning, and let the user pick any enabled type instead.
 - **FR-006**: The command MUST propose optional defaults (priority, version, assignee) only from values that exist in the project, and MUST leave them empty when the user declines.
-- **FR-007**: The command MUST ask the user for a value for every custom field that is mandatory for a used type and not yet in the config, and store the answers in the config's required-custom-fields section.
+- **FR-007**: The command MUST ask the user for a value for every custom field that is mandatory for a used type and not yet in the config, and store the answers in the config's required-custom-fields section. If the user gives no value, the command MUST still write the config without that value, MUST warn naming the field and the type it is mandatory for, MUST NOT invent a placeholder value, and MUST report the run result as "incomplete" in the final summary.
 - **FR-008**: The command MUST write a config that validates against the shared config schema; it MUST validate before writing and refuse to write invalid content.
 - **FR-009**: When a config already exists, the command MUST keep all existing values by default, show a diff of every proposed change, and apply a change only after explicit user approval.
 - **FR-010**: Declining the diff, `--dry-run`, or an interruption MUST leave the config file unchanged.
 - **FR-011**: The command MUST NOT write API tokens, instance URLs or other secrets to any file or output, and MUST NOT modify anything in OpenProject.
 - **FR-012**: Re-running the command with an unchanged project and unchanged config MUST report "no changes" and MUST NOT modify the file (idempotent).
 - **FR-013**: The command MUST work in skills mode and command mode and MUST support a `--dry-run` argument.
-- **FR-014**: The command MUST preserve existing keys it does not manage and existing comments where the format allows, and MUST report any it could not preserve.
+- **FR-014**: The command MUST apply an approved change by editing only the approved keys, leaving comments, key order and keys it does not manage untouched. Where an edit cannot preserve something (for example a comment attached to a replaced value), the diff MUST say so before anything is written.
 - **FR-015**: The command MUST propose, from the project's statuses, a mapping of spec-kit task states (open, in progress, done) to OpenProject status names and store it in a new optional config section `statuses`. The section is additive: configs without it stay valid, no shipped key is renamed or removed, and the shared config schema is extended accordingly. The mapping is consumed by feature 003 (status sync); this feature only writes it.
 - **FR-016**: The command MUST summarize at the end what was read, what was proposed, what was written or skipped, and the next recommended command.
 
@@ -140,7 +142,7 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 
 - **SC-001**: A user with a fresh project and no config reaches a valid config in a single run in under 5 minutes, answering only questions about choices (no file editing).
 - **SC-002**: 100% of configs written by the command validate against the shared config schema.
-- **SC-003**: After a bootstrap run, `speckit.taskstoissues --dry-run` against the same project reports zero configuration errors (unknown type, missing mandatory custom field) in the sandbox scenario.
+- **SC-003**: After a bootstrap run, `speckit.taskstoissues --dry-run` against the same project reports zero configuration errors (unknown type, missing mandatory custom field) in the sandbox scenario, provided the run was not reported as "incomplete".
 - **SC-004**: Re-running on an unchanged project and config produces zero file modifications.
 - **SC-005**: In the edit-and-re-run scenario, 100% of user-edited values survive unless the user explicitly approves their replacement.
 - **SC-006**: All failure scenarios (no server, unknown project, unreadable project, invalid existing config) end with a specific message and zero file changes.
