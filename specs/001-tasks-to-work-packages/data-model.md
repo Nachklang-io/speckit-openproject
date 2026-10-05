@@ -52,7 +52,7 @@ relations:
 ### Subjects and descriptions
 - Feature: `<feature-dir-name> <Feature title>` (e.g. `001-tasks-to-work-packages Tasks → Work Packages`), same string as the ledger field `feature` (research R15).
 - Phase: `Phase N: <title>`; Task: `T### <title>`.
-- Description first lines: `Labels: US1 · parallel` (only present parts), then task text, file hint, repo-relative links to `spec.md`/`plan.md`.
+- Description: `Labels: US1 · parallel` (only present parts), the task text, `File: \`<hint>\``, repo-relative links to `spec.md`/`plan.md`; each part separated from the next by one blank line.
 
 ## State transitions per plan item
 `planned → (create|adopt|skip|update|blocked|stale) → confirmed → recorded`. `failed` is terminal for the run only; next run replans from ledger + search.

@@ -16,20 +16,20 @@
 Optional, for scenario S6: create a mandatory text custom field in Administration -> Custom fields, assign it to type Task (type form configuration) and remove or deactivate it afterwards. The OpenProject version of the sandbox was not recorded in the runs below; record it on every future run.
 
 ## Scenario checklist (manual, against the maintainer's test instance)
-Status of the results below: every entry is a **manual walkthrough** (the steps of the command prompt followed by hand with the MCP tools, not the installed skill), done on an **earlier revision** of the prompt. The prompt has changed since (per-feature ledger, `Labels:` line, stale check by search, failure classes, relation confirmation). None of the scenarios has been run through the installed skill or in command mode yet, and the OpenProject version was not recorded. SC-001 is therefore not demonstrated.
+Status of the results below: S1, S2 and S8 were run through the **installed skill** (skills mode) on prompt revision 0808402. All other entries are **manual walkthroughs** (the steps of the command prompt followed by hand with the MCP tools) on an **earlier revision**; the prompt has changed since (per-feature ledger, `Labels:` line, stale check by search, failure classes, relation and update confirmation). Command mode has not been run, and the OpenProject version was not recorded. SC-001 is therefore only partly demonstrated (S1, S2, S8).
 
 Use a sandbox project. Always run with `--dry-run` first. Record date, OpenProject version, MCP server version, spec-kit version and result.
 
 | ID | Scenario | Expected | Last run | Result |
 |---|---|---|---|---|
-| S1 | 3 phases / 10 tasks, no existing WPs | 1 feature WP, 3 phase WPs, 10 task WPs with parents, mapping has 14 entries | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; pass (manual walkthrough, see run log) |
-| S2 | Re-run S1 | 0 created, 14 skipped, 0 relations created | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; pass (manual walkthrough, see run log) |
+| S1 | 3 phases / 10 tasks, no existing WPs | 1 feature WP, 3 phase WPs, 10 task WPs with parents, mapping has 14 entries | 2026-10-05 | pass via the installed skill (skills mode, `--dry-run` first, three phase confirmations, 3 min), prompt revision 0808402; see run log |
+| S2 | Re-run S1 | 0 created, 14 skipped, 0 relations created | 2026-10-05 | pass via the installed skill (skills mode, 14 × skip, nothing written), prompt revision 0808402; see run log |
 | S3 | Interrupt after 5 creations (answer "stop" at the second phase confirmation), re-run | remaining items created, existing ones skipped, 0 duplicates | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; pass (manual walkthrough; interruption simulated by answering "stop" after phase 1) |
 | S4 | `tests/fixtures/tasks/s4-tasks.md` (dependencies, `[P]` tasks) | exactly 3 `follows` relations: T004→T002, T005→T004, T006→T001; none between `[P]` tasks | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; pass (manual walkthrough) |
 | S5 | Type from config does not exist | stops, lists available types | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; logic only: stop condition derived from the real `list-types` output, no end-to-end run |
 | S6 | Mandatory custom field in project | stops for that item, reports field | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; pass (manual walkthrough) |
 | S7 | Project not in write allowlist | clear error, nothing written | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; partial: project outside the server allowlist only; OpenProject-side reader role not tested |
-| S8 | `--dry-run` on the S1 input | plan with 14 entries; 0 work packages created; `.specify/openproject/mapping-<feature>.json` absent or byte-identical | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; partial: plan logic checked by hand (see run log); not run via the installed skill |
+| S8 | `--dry-run` on the S1 input | plan with 14 entries; 0 work packages created; `.specify/openproject/mapping-<feature>.json` absent or byte-identical | 2026-10-05 | pass via the installed skill (skills mode), prompt revision 0808402; see run log |
 | S9 | Change one task title, run without then with `--update`; add a ledger entry pointing to a non-existent work package | without `--update`: "differs, not updated"; with `--update`: that work package updated; the bogus entry is reported as stale, not recreated | 2026-10-05 | walkthrough on an earlier prompt revision, not re-run; pass (manual walkthrough) |
 
 ## Notes for the scenarios
@@ -72,3 +72,12 @@ All steps were followed by hand against `speckit-sandbox` with the MCP tools (no
 
 ### 2026-10-05 – follow-up decisions (no new run)
 - The ledger is now kept per feature (`mapping-<feature>.json`) and the first description line is `Labels: …`. The walkthroughs above were executed before this change with `mapping.json` and the line `Story: …`; they were not repeated.
+
+### 2026-10-05 – S8, S1, S2 through the installed skill (skills mode), prompt revision 0808402
+- Setup: scratch spec-kit project `.scratch/proj` created by `scripts/dev-install.sh`, config from the template (types Feature / Summary task / Task), feature `001-sandbox-demo` from `tests/fixtures/tasks/s1-tasks.md`, sandbox empty, the test custom field not mandatory. Claude Code was started in the scratch project with the MCP server variables exported. The maintainer ran `/speckit-taskstoissues` and pasted the output; the results below were checked afterwards against OpenProject and the ledger file from the main session.
+- **S8 (dry run)**: plan with 14 entries (all create, no relations, no blockers), last line "Dry run: nothing was written."; afterwards the sandbox still had 0 work packages and no ledger file existed.
+- **S1**: after the dry run, a real run with one confirmation per phase (feature together with phase 1): 14 work packages created (ids 64–77), parents correct, subjects without labels, first description line `Labels: parallel` where applicable, file paths in backticks. Ledger `mapping-001-sandbox-demo.json` schema-valid, header (`schema_version`, `project`, `feature`) written, 14 unique ids, only `/work_packages/<id>` paths. Duration measured by the maintainer: 3 minutes (SC-004: under 5 minutes, including the dry-run review).
+- **S2**: re-run without `--dry-run`: plan 14 × skip (existence checked by search per ledger id), no confirmation asked, nothing written; work package count stayed at 14 and the ledger file was unchanged (same modification time as at the end of S1).
+- Finding fixed afterwards: the skill separated the description parts by single line breaks (OpenProject renders them as one line); the prompt now requires a blank line between the parts and states that the plan table shows exactly the written subject. This changes the content hash, so the walkthrough results were not repeated for it.
+- Not covered by this run: command mode, S3–S7 and S9 through the skill, the hash comparison for "differs, not updated" in the skill (reported by the skill as not verified separately), the OpenProject version (not recorded), `--update` via the skill.
+- Leftover state: feature `001-sandbox-demo` (ids 64–77) remains in `speckit-sandbox`.
