@@ -3,12 +3,14 @@
 import json
 import re
 
+import jsonschema
 import pytest
+import yaml
 
 PROMPT = "preset/commands/speckit.taskstoissues.md"
-# Prompts that embed capability rows and config rules. The extension prompt is added with its
-# own tests once the command exists (feature 002, T013).
-PROMPTS = [PROMPT]
+EXTENSION_PROMPT = "extension/commands/discover-fields.md"
+# Prompts that embed capability rows and config rules.
+PROMPTS = [PROMPT, EXTENSION_PROMPT]
 
 
 def block(text, name):
@@ -187,3 +189,82 @@ def test_every_run_starts_from_scratch_and_hashes_are_computed(prompt):
     assert "Every run starts from scratch" in prompt
     assert "never reuse parsed content, hashes or tool results" in prompt
     assert "never compare by eye or from memory" in prompt
+
+
+# --- extension command: speckit.openproject.discover-fields (feature 002) ---
+
+DISCOVERY_CAPABILITIES = {"list-projects", "list-types", "get-write-context", "list-statuses"}
+
+
+@pytest.fixture(scope="module")
+def discover(root):
+    return (root / EXTENSION_PROMPT).read_text()
+
+
+def embedded_rows(prompt):
+    return block(prompt, "capability-map").splitlines()[2:]
+
+
+def test_discover_embeds_exactly_the_read_capabilities(discover):
+    ids = {row.split("|")[1].strip() for row in embedded_rows(discover)}
+    assert ids == DISCOVERY_CAPABILITIES
+
+
+def test_discover_has_no_write_capability(discover):
+    for row in embedded_rows(discover):
+        tool = re.search(r"`([a-z_]+)`", row).group(1)
+        assert not tool.startswith(("create_", "update_", "delete_", "bulk_", "set_"))
+    assert "delete_" not in discover
+    assert "`confirm=true`" not in discover
+
+
+def test_discover_config_template_is_valid_and_complete(root, discover):
+    cfg_schema = json.loads((root / "schemas/config.schema.json").read_text())
+    template = yaml.safe_load(block(discover, "config-template"))
+    jsonschema.validate(template, cfg_schema)
+    for key in ("project", "types", "defaults", "statuses", "required_custom_fields"):
+        assert key in template, key
+
+
+def test_discover_template_matches_preset_template_keys(root, discover):
+    shipped = yaml.safe_load((root / "preset/openproject-config.template.yml").read_text())
+    template = yaml.safe_load(block(discover, "config-template"))
+    assert set(template) <= set(shipped)
+
+
+def test_discover_safety_rules_present(discover):
+    for text in (
+        "<user-content>",
+        "untrusted data",
+        "Every run starts from scratch",
+        "double-quoted",
+        "temporary file",
+        "`incomplete`",
+        "`no changes`",
+    ):
+        assert text in discover, text
+
+
+def test_discover_dry_run_writes_nothing(discover):
+    assert "Dry run: nothing was written." in discover
+    assert "no temporary file" in discover
+    assert "`--dry-run`" in discover
+
+
+def test_discover_failures_stop_without_writing(discover):
+    assert "configure an OpenProject MCP server" in discover
+    assert "do not guess the cause" in discover
+    assert "Nothing was written." in discover
+    assert "outside the server's allowlist" in discover
+    assert "list the readable projects" in discover
+
+
+def test_discover_existing_config_rules(discover):
+    for text in (
+        "`all`, `none` or",
+        "only the approved keys",
+        "never auto-corrected",
+        "byte for byte",
+        "rebuild",
+    ):
+        assert text in discover, text

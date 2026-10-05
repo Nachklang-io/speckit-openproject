@@ -1,0 +1,22 @@
+# Hand-edited config used by scenario S11 (feature 002).
+# Expectations: comments, spacing and `create_relations` survive a discover-fields run;
+# the quoted type name below must survive parsing unchanged.
+project:   "speckit-sandbox"     # my sandbox
+mcp_server: "openproject-ce-mcp"
+
+types:
+  feature: "Feature"
+  phase:   "Task: v2 #1"          # edited by hand, differs from the proposal "Summary task"
+  task: "Task"
+
+defaults:
+  priority: "High"                # kept unless the user approves a replacement
+
+# do not create relations in this project
+create_relations: false
+
+statuses:
+  open: "New"
+
+required_custom_fields:
+  customField1: "n/a"

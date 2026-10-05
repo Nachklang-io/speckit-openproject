@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "openproject"
   name: "OpenProject Integration"
-  version: "0.0.1"
+  version: "0.0.2"
   description: "Field discovery, status sync, documentation sync, versions and time tracking between spec-kit and OpenProject via MCP"
   author: "Daniel Ring"
   repository: "https://github.com/ringind/speckit-openproject"
@@ -16,7 +16,7 @@ provides:
   commands:
     - name: "speckit.openproject.discover-fields"
       file: "commands/discover-fields.md"
-      description: "Discover OpenProject types, statuses and custom fields and write the integration config"
+      description: "Read the target project's types, statuses and mandatory custom fields from OpenProject (read-only) and create or update .specify/openproject/config.yml after a shown diff"
 
 tags:
   - "openproject"

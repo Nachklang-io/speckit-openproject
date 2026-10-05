@@ -22,10 +22,10 @@ spec-kit project                         OpenProject (CE)
 - **Schemas** (`schemas/`): `config.schema.json`, `mapping.schema.json`. Both packages and tests use them.
 
 ## Config and state
-- `.specify/openproject/config.yml` – user config (project, type/status mapping, defaults). Resolution order: argument → file → `SPECKIT_OPENPROJECT_*` env → ask.
+- `.specify/openproject/config.yml` – user config (project, type mapping, optional `statuses` mapping open / in_progress / done, defaults, mandatory custom field values). Created and updated by `speckit.openproject.discover-fields` (read-only towards OpenProject, diff and approval before every change, atomic write); read by the write commands. `speckit.taskstoissues` ignores `statuses`; status sync (feature 003) will read it. Resolution order: argument → file → `SPECKIT_OPENPROJECT_*` env → ask.
 - `.specify/openproject/mapping-<feature>.json` – ledger (one file per feature): task/phase/feature ID → work package ID, URL, content hash, last synced status. Written after every successful write.
 - Hierarchy created by the preset: Feature work package → Phase work packages → Task work packages (subjects start with the feature directory name, `Phase N:` and the task id). The ledger also records `follows` relations (`relations` list).
-- The installed command is self-contained: only the command text reaches a user's project, so the capability map and the config/ledger rules are embedded in it between marker comments and kept identical to `docs/mcp-tool-map.md` and `schemas/*.json` by `tests/test_prompt_sync.py`.
+- The installed command is self-contained: only the command text reaches a user's project, so each command embeds the capability rows it uses (a subset of `docs/mcp-tool-map.md`) and the config/ledger rules between marker comments; `tests/test_prompt_sync.py` keeps them identical to the tool map and `schemas/*.json`.
 
 ## Data flow principles
 1. Discover before write (types, statuses, custom fields).

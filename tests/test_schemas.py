@@ -93,3 +93,14 @@ def test_statuses_is_additive(root):
     s = schema(root, "config.schema.json")
     assert "statuses" not in s["required"]
     assert s["properties"]["statuses"]["additionalProperties"] is False
+
+
+def test_hand_edited_fixture_validates_and_keeps_its_shape(root):
+    path = root / "tests/fixtures/config/valid-hand-edited.yml"
+    text = path.read_text()
+    cfg = yaml.safe_load(text)
+    jsonschema.validate(cfg, schema(root, "config.schema.json"))
+    assert cfg["types"]["phase"] == "Task: v2 #1"
+    assert cfg["create_relations"] is False
+    assert "# my sandbox" in text
+    assert "project:   " in text
