@@ -101,7 +101,7 @@ Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.ta
 
 7. **Subjects and descriptions.**
    - Feature: subject `<FEATURE> <title>` where title is the first `# Tasks:` heading text after the colon (or `FEATURE` if absent). Key `feature`.
-   - Phase: `Phase N: <title>`. Task: `T### <text without markers and file hint>`.
+   - Phase: `Phase N: <title>`. Task: `T### <title>` where the title is the task text without the markers (`[P]`, `[US#]`), without a dependency clause such as `(depends on T002)`, and without the file hint **and the preposition directly in front of it** (`in`, `at`, `to`, `for`, `from`, `into`, `under`); example: `Create database schema in db/schema.sql` becomes `T001 Create database schema`.
    - Description (Markdown): the following parts, only those that exist, **each separated from the next by one blank line** (single line breaks would be rendered as one line):
      1. `Labels: US1 · parallel` (story and, if `mark_parallel`, parallel);
      2. the task text;

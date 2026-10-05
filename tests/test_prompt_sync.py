@@ -151,3 +151,8 @@ def test_prompt_safety_rules_present(prompt):
 def test_description_parts_are_separated_by_blank_lines(prompt):
     assert "each separated from the next by one blank line" in prompt
     assert "exactly the subject that will be written" in prompt
+
+
+def test_task_title_rule_drops_preposition_before_file_hint(prompt):
+    assert "the preposition directly in front of it" in prompt
+    assert "`T001 Create database schema`" in prompt
