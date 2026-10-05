@@ -139,12 +139,12 @@ Monorepo: `preset/`, `schemas/`, `tests/`, `docs/`. `extension/` is not touched.
 - [X] T040 [P] Update `preset/preset.yml`: bump `version` to `0.2.0`, review `requires.speckit_version` against `.specify/init-options.json` (`speckit_version` 1.1.x) and the constitution's "current and previous minor" rule; `uv run pytest tests/test_manifests.py` must pass
 - [X] T041 [P] Update `docs/ARCHITECTURE.md`: remove the "unify paths in feature 001" note, describe the Feature → Phase → Task hierarchy, the ledger `relations` list and the self-contained command (research R14)
 - [X] T042 Re-read `preset/commands/speckit.taskstoissues.md` end to end against `contracts/command-contract.md`: numbered steps, explicit stop conditions, capability ids only, works in skills and command mode (hard rules in `CLAUDE.md`); `uv run pytest tests/test_prompt_sync.py` green
-- [ ] T043 Manual prerequisites for the maintainer (document in `docs/TESTING.md` test-instance setup): (a) delete the `VERIFY-*` work packages 38–40 from the sandbox, (b) types Feature, Summary task, Task are enabled in `speckit-sandbox` (done), (c) create one **mandatory** custom field in the sandbox for S6 and remove it afterwards, (d) start Claude Code with the variables from `.env` exported so the `openproject` MCP server connects
+- [X] T043 Manual prerequisites for the maintainer (document in `docs/TESTING.md` test-instance setup): (a) delete the `VERIFY-*` work packages 38–40 from the sandbox, (b) types Feature, Summary task, Task are enabled in `speckit-sandbox` (done), (c) create one **mandatory** custom field in the sandbox for S6 and remove it afterwards, (d) start Claude Code with the variables from `.env` exported so the `openproject` MCP server connects
 - [X] T044 Run `uv run pytest`, `uv run ruff check . && uv run ruff format --check .`, then `scripts/dev-install.sh`; `specify preset list` shows `openproject` (verification steps 1–2 in `CLAUDE.md`)
 - [ ] T045 Execute S1–S9 per `quickstart.md`, always `--dry-run` first; run S1 and S2 in **both** skills mode and command mode (or mark one mode untested); measure the S1 duration for SC-004; run `s-large-tasks.md` as `--dry-run` only; record date, OpenProject version, MCP server version, spec-kit version and result per scenario in `docs/TESTING.md`; report exactly what was executed, mark anything not run as untested
 - [X] T046 Fill remaining unverified items in `docs/mcp-tool-map.md` from T038 and T045 (mandatory custom field behaviour, `update-work-package`); `bulk_create_work_packages` stays deferred (research R10)
-- [ ] T047 Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings
-- [ ] T048 Commit in small Conventional Commits on branch `001-tasks-to-work-packages` (schemas, fixtures/tests, prompt, docs, preset manifest) and open one PR
+- [X] T047 Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings
+- [X] T048 Commit in small Conventional Commits on branch `001-tasks-to-work-packages` (schemas, fixtures/tests, prompt, docs, preset manifest) and open one PR
 
 ---
 
