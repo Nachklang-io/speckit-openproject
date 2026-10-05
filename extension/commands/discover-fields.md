@@ -155,6 +155,7 @@ Every run starts from scratch. Execute steps 1–13 in order, every time, even i
    - `no changes`: nothing differed; the file was not touched;
    - `dry run`: shown only;
    - `stopped`: a prerequisite failed or the user stopped. Nothing was written.
+   Proposals the user did not approve (for example `statuses.done`) never make a run `incomplete`: list them as skipped and say what follows from it (for example that status sync cannot mark tasks as done without `statuses.done`). Only a mandatory custom field without a value, or one that cannot be stored, makes a run `incomplete`. When a file was written, state that the temporary file was read back and validated before the move.
    List what was read, which keys were changed, kept or skipped, all warnings (stale entries, unrepresentable fields), and every `SPECKIT_OPENPROJECT_*` environment variable that is set (names only, not values): write commands resolve them after the config file, so a stale value can hide the discovered config. The next command is `/speckit-taskstoissues --dry-run` (skills mode) or `/speckit.taskstoissues --dry-run`; if the result is `incomplete`, first say which value is missing.
 
 ## Rules

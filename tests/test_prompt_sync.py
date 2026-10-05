@@ -291,5 +291,7 @@ def test_discover_review_rules(discover):
         "no work package types are enabled",
         "would be asked",
         "If exactly one project is readable",
+        "never make a run `incomplete`",
+        "read back and validated before the move",
     ):
         assert text in discover, text
