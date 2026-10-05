@@ -9,11 +9,12 @@
 | `types.phase` | string | required; default "Summary task" (decision 2026-10-05; a default instance has no "Phase" type) |
 | `types.task` | string | required; default "Task" |
 | `types.subtask` | string | optional |
-| `defaults.{status,priority,assignee}` | string | applied on create when non-empty |
+| `defaults.{priority,assignee}` | string | applied on create when non-empty |
+| `defaults.status` | string | not applied: the server has no status parameter on create; the default status of the type applies |
 | `defaults.version` | string | kept, ignored by this command (FR-004) |
 | ~~`feature_tag_prefix`~~ | – | removed; labels are plain description text (FR-017), identity lives in the subject (FR-007) |
 | `create_relations`, `mark_parallel` | bool | as before |
-| `required_custom_fields` | map | `cf_<N>` → scalar |
+| `required_custom_fields` | map | `customField<N>` → scalar (only entries that appear in the write context of the item's type are sent) |
 | ~~`mapping_file`~~ | – | removed; ledger path fixed |
 
 No secrets, no URLs of instances.

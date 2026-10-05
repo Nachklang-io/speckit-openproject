@@ -30,7 +30,7 @@ A team has finished `/speckit-tasks` and wants the plan visible in OpenProject. 
 
 **Acceptance Scenarios**:
 
-1. **Given** a `tasks.md` with 3 phases and 10 tasks and no existing work packages, **When** the user runs the command, **Then** 3 phase work packages and 10 task work packages exist, each task is a child of its phase, and the summary lists all 13 as created.
+1. **Given** a `tasks.md` with 3 phases and 10 tasks and no existing work packages, **When** the user runs the command, **Then** 3 phase work packages and 10 task work packages exist, each task is a child of its phase, and the summary lists all 14 as created.
 2. **Given** the same input, **When** the run completes, **Then** every created item is recorded in the mapping ledger with its task identifier and work package identifier.
 
 ---
