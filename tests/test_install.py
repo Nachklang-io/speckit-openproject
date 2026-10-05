@@ -9,9 +9,11 @@ pytestmark = pytest.mark.skipif(shutil.which("specify") is None, reason="specify
 
 
 def run(cmd, cwd):
-    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=False)
     if result.returncode != 0:
-        version = subprocess.run(["specify", "--version"], capture_output=True, text=True)
+        version = subprocess.run(
+            ["specify", "--version"], capture_output=True, text=True, check=False
+        )
         pytest.fail(
             f"{' '.join(cmd)} exited with {result.returncode} "
             f"(specify: {version.stdout.strip() or version.stderr.strip()})\n"
