@@ -94,7 +94,7 @@ Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.ta
 7. **Subjects and descriptions.**
    - Feature: subject `<FEATURE> <title>` where title is the first `# Tasks:` heading text after the colon (or `FEATURE` if absent). Key `feature`.
    - Phase: `Phase N: <title>`. Task: `T### <text without markers and file hint>`.
-   - Description (Markdown), only the parts that exist: first line `Story: US1 · parallel` (story and, if `mark_parallel`, parallel); blank line; the task text; `File: <hint>`; `Spec: specs/<FEATURE>/spec.md · Plan: specs/<FEATURE>/plan.md`. Never put URLs of the OpenProject instance, tokens or credentials into subjects or descriptions.
+   - Description (Markdown), only the parts that exist: first line `Story: US1 · parallel` (story and, if `mark_parallel`, parallel); blank line; the task text; ``File: `<hint>` `` (the path in backticks, otherwise Markdown turns `__init__.py` into bold text); `Spec: specs/<FEATURE>/spec.md · Plan: specs/<FEATURE>/plan.md`. Never put URLs of the OpenProject instance, tokens or credentials into subjects or descriptions.
    - Content hash of an item: lowercase hex SHA-256 of `subject`, a newline, `description`, computed with `shasum -a 256` (or `sha256sum`).
 
 8. **Load the ledger.** Read `.specify/openproject/mapping.json`. If it exists, validate it against the ledger rules and stop on violations; its `project` and `feature` must equal the resolved project and `FEATURE`, otherwise stop. If it does not exist, treat it as empty; do not create it yet.
