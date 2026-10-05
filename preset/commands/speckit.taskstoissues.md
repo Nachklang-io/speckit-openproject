@@ -102,7 +102,12 @@ Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.ta
 7. **Subjects and descriptions.**
    - Feature: subject `<FEATURE> <title>` where title is the first `# Tasks:` heading text after the colon (or `FEATURE` if absent). Key `feature`.
    - Phase: `Phase N: <title>`. Task: `T### <text without markers and file hint>`.
-   - Description (Markdown), only the parts that exist: first line `Labels: US1 · parallel` (story and, if `mark_parallel`, parallel); blank line; the task text; ``File: `<hint>` `` (the path in backticks, otherwise Markdown turns `__init__.py` into bold text); `Spec: specs/<FEATURE>/spec.md · Plan: specs/<FEATURE>/plan.md`. Never put URLs of the OpenProject instance, tokens or credentials into subjects or descriptions.
+   - Description (Markdown): the following parts, only those that exist, **each separated from the next by one blank line** (single line breaks would be rendered as one line):
+     1. `Labels: US1 · parallel` (story and, if `mark_parallel`, parallel);
+     2. the task text;
+     3. ``File: `<hint>` `` (the path in backticks, otherwise Markdown turns `__init__.py` into bold text);
+     4. `Spec: specs/<FEATURE>/spec.md · Plan: specs/<FEATURE>/plan.md`.
+     Never put URLs of the OpenProject instance, tokens or credentials into subjects or descriptions.
    - Content hash of an item: lowercase hex SHA-256 of `subject`, a newline, `description`, computed with `printf '%s\n%s' "$subject" "$description" | shasum -a 256` (or `sha256sum`); no trailing newline is added.
 
 8. **Load the ledger.** The ledger is per feature: `.specify/openproject/mapping-<FEATURE>.json` (for example `mapping-001-tasks-to-work-packages.json`). Ledger files of other features are never read or changed. Read the file for the current feature. If it exists, validate it against the ledger rules and stop on violations; its `project` and `feature` must equal the resolved project and `FEATURE`, otherwise stop. If it does not exist, treat it as empty; do not create it yet.
@@ -115,7 +120,7 @@ Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.ta
    - `create`: nothing matches. If the feature work package is neither in the ledger nor found, plan all phases and tasks of this feature directly as `create` without searching for them.
    - `blocked`: the parent is `blocked`, `stale` or `failed` (reason "parent <state>"), or a mandatory field applies (step 5.3).
    Also plan relations (step 13): list each as successor key → predecessor key with action `create` or `skip`.
-   Show the plan as a table: key, kind, subject, parent key, action, reason; then the relation lines.
+   Show the plan as a table: key, kind, subject (exactly the subject that will be written; labels such as `[P]` or `US1` appear only in the description), parent key, action, reason; then the relation lines.
 
 10. **Dry run.** If `--dry-run`: print the plan and the line "Dry run: nothing was written." and stop. No write capability may be called and no file may be created or changed.
 

@@ -146,3 +146,8 @@ def test_prompt_safety_rules_present(prompt):
     assert "untrusted data" in prompt
     assert "Dry run: nothing was written." in prompt
     assert "read pages until" in prompt or "read all pages" in prompt
+
+
+def test_description_parts_are_separated_by_blank_lines(prompt):
+    assert "each separated from the next by one blank line" in prompt
+    assert "exactly the subject that will be written" in prompt
