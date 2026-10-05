@@ -48,7 +48,7 @@ Sources: `jtauschl/openproject-ce-mcp` docs (`docs/tools.md`) and, where marked 
 - **Dependency inference**: explicit statements and Dependencies section only; phase ordering yields phase-level `follows` between consecutive phase WPs? **Decision: no** — only explicit task dependencies create relations (spec S4: "only for real dependencies").
 
 ## R9. Stale ledger entries
-- **Decision**: If `get_work_package` for a ledger id returns not-found, report "stale", do not recreate, do not edit the ledger; user fixes by removing the entry manually (no deletes by the project).
+- **Decision**: Existence of a ledger id is checked with `search_work_packages(search=<id>)` (live finding 2026-10-05: `get_work_package` on a missing id fails with a generic error, search returns `total: 0`). If no result has that id, report "stale", do not recreate, do not edit the ledger; user fixes by removing the entry manually (no deletes by the project).
 - **Rationale**: Edge case in spec; constitution III.
 
 ## Unresolved (to verify during implementation, not blockers for tasks)
@@ -82,3 +82,8 @@ Sources: `jtauschl/openproject-ce-mcp` docs (`docs/tools.md`) and, where marked 
 
 ## R15. Feature identifier in the subject
 - **Decision**: feature work package subject = `<feature-dir-name> <title>` (e.g. `001-tasks-to-work-packages Tasks → Work Packages`). Lookup: `search` by the full directory name, accept a hit whose subject starts with it followed by a space. Avoids the substring collisions seen with `001` (research R13).
+
+## R16. Ledger is per project but tied to one feature (finding 2026-10-05)
+- Step 8 of the command requires the ledger's `feature` to equal the current feature, but there is exactly one ledger file `.specify/openproject/mapping.json`. A second feature in the same repository therefore stops at step 8, or its ledger would overwrite the first.
+- Options: (a) one ledger per feature, e.g. `.specify/openproject/mapping-<feature>.json` (simple, no schema change besides the path); (b) one ledger with a top-level `features` map; (c) keep one file and tell users to archive it.
+- **Open decision for the maintainer.** It changes FR-005, `schemas/mapping.schema.json` and the extension commands that read the ledger; no change was made. Recommendation: (a).

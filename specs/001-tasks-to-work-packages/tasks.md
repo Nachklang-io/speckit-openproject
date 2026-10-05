@@ -79,7 +79,7 @@ Monorepo: `preset/`, `schemas/`, `tests/`, `docs/`. `extension/` is not touched.
 
 - [X] T022 [US2] Add the planning step in `preset/commands/speckit.taskstoissues.md`: for every parsed item decide `skip` (in ledger and work package still exists), `create`, `adopt`, `stale` or `blocked`; build the plan table (key, kind, subject, parent, action, reason)
 - [X] T023 [US2] Add the search-and-adopt rule in `preset/commands/speckit.taskstoissues.md` (FR-007, research R2/R13/R15): `search-work-packages` is a **substring** match, so accept a result only if its subject starts with the item id (tasks) or the full feature directory name (feature) followed by a space **and** its ancestors lead to the feature work package; exactly one match → adopt into the ledger; several matches → report and skip, never guess
-- [X] T024 [US2] Add stale-entry handling in `preset/commands/speckit.taskstoissues.md` (research R9): `get-work-package` not found for a ledger id → action `stale`, reported, not recreated, ledger untouched
+- [X] T024 [US2] Add stale-entry handling in `preset/commands/speckit.taskstoissues.md` (research R9): a ledger id with no matching work package (existence check by `search-work-packages`, not `get-work-package`) → action `stale`, reported, not recreated, ledger untouched
 - [X] T025 [US2] Add resume semantics in `preset/commands/speckit.taskstoissues.md`: a re-run replans from ledger plus search; new tasks in `tasks.md` are created, existing ones skipped; a tool failure stops the run with the ledger current to the last confirmed write (spec edge case "mid-run failure")
 - [X] T026 [US2] Update `docs/TESTING.md`: S1 stays at 14 entries; state exact expectations for S2 (0 created, 14 skipped) and S3 (remaining items created, 0 duplicates; simulate by stopping after the second phase confirmation); add **S8** (`--dry-run` on S1 input: plan with 14 entries, 0 work packages created, ledger file unchanged) and **S9** (change one task title, run without then with `--update`; plus a ledger entry pointing to a non-existent work package → reported as stale, not recreated)
 
@@ -129,7 +129,7 @@ Monorepo: `preset/`, `schemas/`, `tests/`, `docs/`. `extension/` is not touched.
 
 - [X] T036 [US5] Add change detection in `preset/commands/speckit.taskstoissues.md`: compute a content hash of subject + description source text per item, store it in the ledger `hash`; without `--update` report "differs, not updated" and call no update capability (FR-010)
 - [X] T037 [US5] Add the update step in `preset/commands/speckit.taskstoissues.md`: with `--update`, `update-work-package` (subject, description) via preview then confirm; never change status, assignee or time (OpenProject owns those, ARCHITECTURE principle 3); update the ledger `hash` after the confirmed write
-- [ ] T038 [US5] Verify `update-work-package` live in the sandbox (after T043) and record preview shape and conflict behaviour in `docs/mcp-tool-map.md`; until done, `preset/README.md` labels `--update` as untested (constitution IV)
+- [X] T038 [US5] Verify `update-work-package` live in the sandbox (after T043) and record preview shape and conflict behaviour in `docs/mcp-tool-map.md`; until done, `preset/README.md` labels `--update` as untested (constitution IV)
 
 ---
 
@@ -142,7 +142,7 @@ Monorepo: `preset/`, `schemas/`, `tests/`, `docs/`. `extension/` is not touched.
 - [ ] T043 Manual prerequisites for the maintainer (document in `docs/TESTING.md` test-instance setup): (a) delete the `VERIFY-*` work packages 38–40 from the sandbox, (b) types Feature, Summary task, Task are enabled in `speckit-sandbox` (done), (c) create one **mandatory** custom field in the sandbox for S6 and remove it afterwards, (d) start Claude Code with the variables from `.env` exported so the `openproject` MCP server connects
 - [X] T044 Run `uv run pytest`, `uv run ruff check . && uv run ruff format --check .`, then `scripts/dev-install.sh`; `specify preset list` shows `openproject` (verification steps 1–2 in `CLAUDE.md`)
 - [ ] T045 Execute S1–S9 per `quickstart.md`, always `--dry-run` first; run S1 and S2 in **both** skills mode and command mode (or mark one mode untested); measure the S1 duration for SC-004; run `s-large-tasks.md` as `--dry-run` only; record date, OpenProject version, MCP server version, spec-kit version and result per scenario in `docs/TESTING.md`; report exactly what was executed, mark anything not run as untested
-- [ ] T046 Fill remaining unverified items in `docs/mcp-tool-map.md` from T038 and T045 (mandatory custom field behaviour, `update-work-package`); `bulk_create_work_packages` stays deferred (research R10)
+- [X] T046 Fill remaining unverified items in `docs/mcp-tool-map.md` from T038 and T045 (mandatory custom field behaviour, `update-work-package`); `bulk_create_work_packages` stays deferred (research R10)
 - [ ] T047 Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings
 - [ ] T048 Commit in small Conventional Commits on branch `001-tasks-to-work-packages` (schemas, fixtures/tests, prompt, docs, preset manifest) and open one PR
 
