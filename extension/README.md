@@ -31,4 +31,6 @@ Rules: it only reads from OpenProject, it never writes tokens, URLs or `.env` co
 - Custom fields of type list: the chosen title is stored as a string; whether the server accepts that on creation is **untested**. Custom fields of type user, multi-select, hierarchy or formatted text cannot be stored in `required_custom_fields` and are reported.
 - `available_versions` with real versions and the per-project list of enabled types are not yet verified against a live instance; see `docs/TESTING.md` for what was executed.
 - Command mode (`/speckit.openproject.discover-fields`) is untested unless `docs/TESTING.md` says otherwise.
-- spec-kit fires hooks for core commands only, so this command has no `before`/`after` hooks.
+- It was not verified how spec-kit forms hook keys for extension commands, so this command has no hook check.
+- The project must be readable by the server; if it reports `can_update` false the run warns that write commands will fail. The server's own allowlist cannot be inspected.
+- Error text from the server is shown with URLs and host names replaced by `<redacted-host>`.

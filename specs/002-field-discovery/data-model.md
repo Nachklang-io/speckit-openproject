@@ -42,7 +42,7 @@ Validation: every value must come from the snapshot (type, status, priority, ver
 |---|---|
 | `complete` | file written or already up to date; every mandatory field of the used types has a value |
 | `incomplete` | file written (or up to date) but at least one mandatory field has no value or cannot be stored (FR-007) |
-| `no changes` | no proposal differs from the file; file not touched (FR-012) |
+| `no changes` | no proposal differs from the file; file not touched (FR-012); reported as `incomplete (file unchanged)` if a mandatory field still has no value |
 | `dry run` | proposals and diff shown; nothing written (FR-010) |
 | `stopped` | prerequisite failure or user stop; nothing written |
 

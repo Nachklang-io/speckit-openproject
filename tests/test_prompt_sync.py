@@ -1,5 +1,6 @@
 """The installed command is self-contained: its embedded blocks must match the repo sources."""
 
+import itertools
 import json
 import re
 
@@ -54,7 +55,9 @@ def test_capability_block_rows_are_identical_to_tool_map_rows(root, any_prompt):
     for row in embedded[2:]:
         assert row in rows, f"embedded row not in tool map: {row}"
         positions.append(rows.index(row))
-    assert positions == sorted(positions), "embedded rows must keep the tool map order"
+    assert all(a < b for a, b in itertools.pairwise(positions)), (
+        "embedded rows must keep the tool map order without duplicates"
+    )
 
 
 def test_prompt_uses_no_tool_name_outside_capability_block(root, any_prompt):
@@ -230,6 +233,10 @@ def test_discover_template_matches_preset_template_keys(root, discover):
     shipped = yaml.safe_load((root / "preset/openproject-config.template.yml").read_text())
     template = yaml.safe_load(block(discover, "config-template"))
     assert set(template) <= set(shipped)
+    for key in ("project", "mcp_server", "create_relations", "mark_parallel"):
+        assert template[key] == shipped[key], key
+    for key in ("feature", "phase", "task"):
+        assert template["types"][key] == shipped["types"][key], key
 
 
 def test_discover_safety_rules_present(discover):
@@ -266,5 +273,22 @@ def test_discover_existing_config_rules(discover):
         "never auto-corrected",
         "byte for byte",
         "rebuild",
+    ):
+        assert text in discover, text
+
+
+def test_discover_review_rules(discover):
+    for text in (
+        "<redacted-host>",
+        "`config.yml.tmp`",
+        "`can_update`",
+        "**Project.**",
+        "control character",
+        "is_milestone",
+        "paging was not understood",
+        "`incomplete (file unchanged)`",
+        "Strip the delimiters",
+        "no work package types are enabled",
+        "would be asked",
     ):
         assert text in discover, text

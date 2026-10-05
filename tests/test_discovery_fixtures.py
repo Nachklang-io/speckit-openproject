@@ -90,3 +90,12 @@ def test_fixtures_contain_no_hosts_or_secrets(root):
         text = path.read_text().lower()
         assert "http://" not in text and "https://" not in text
         assert "token" not in text and "apikey" not in text
+
+
+def test_list_types_has_milestone_flag(root):
+    results = load(root, "list-types.json")["results"]
+    assert {t["name"] for t in results if t["is_milestone"]} == {"Milestone"}
+    for t in results:
+        assert {"id", "name", "is_milestone"} <= set(t)
+    ctx_types = {t["title"] for t in load(root, "context-task-plain.json")["available_types"]}
+    assert {t["name"] for t in results} == ctx_types
