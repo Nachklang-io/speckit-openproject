@@ -36,7 +36,7 @@ Sources: `jtauschl/openproject-ce-mcp` docs (`docs/tools.md`) and, where marked 
 - **Rationale**: Command cannot see MCP server env vars; the preview is side-effect free.
 
 ## R7. Ledger and config format
-- **Decision**: Config `.specify/openproject/config.yml` (adds `types.feature`; drops `mapping_file`, ledger path is fixed). Ledger `.specify/openproject/mapping.json` gets `schema_version`, per-item `kind`, and a `relations` list so relations are idempotent without a server read. Details in `data-model.md`.
+- **Decision**: Config `.specify/openproject/config.yml` (adds `types.feature`; drops `mapping_file`, ledger path is `.specify/openproject/mapping-<feature>.json`, see R16). Ledger `.specify/openproject/mapping.json` gets `schema_version`, per-item `kind`, and a `relations` list so relations are idempotent without a server read. Details in `data-model.md`.
 - **Rationale**: Spec FR-001/FR-005, ADR docs. Preset has never been tagged (two commits on `main`), so reshaping keys is not a breaking change under the constitution; recorded here instead of an ADR.
 - **Alternatives**: Keep `mapping_file` configurable — adds an untested axis.
 - **Open**: `defaults.version` stays in the schema because the extension will use it, but this command ignores it (FR-004).
@@ -86,4 +86,5 @@ Sources: `jtauschl/openproject-ce-mcp` docs (`docs/tools.md`) and, where marked 
 ## R16. Ledger is per project but tied to one feature (finding 2026-10-05)
 - Step 8 of the command requires the ledger's `feature` to equal the current feature, but there is exactly one ledger file `.specify/openproject/mapping.json`. A second feature in the same repository therefore stops at step 8, or its ledger would overwrite the first.
 - Options: (a) one ledger per feature, e.g. `.specify/openproject/mapping-<feature>.json` (simple, no schema change besides the path); (b) one ledger with a top-level `features` map; (c) keep one file and tell users to archive it.
-- **Open decision for the maintainer.** It changes FR-005, `schemas/mapping.schema.json` and the extension commands that read the ledger; no change was made. Recommendation: (a).
+- **Decision (maintainer, 2026-10-05): (a), one ledger per feature**: `.specify/openproject/mapping-<feature>.json`. The schema is unchanged; FR-005, the command (step 8), README, ARCHITECTURE and TESTING were updated. `CLAUDE.md` still names `.specify/openproject/mapping.json` and has to be adjusted by the maintainer. Extension commands derive the file from the feature name (`.specify/feature.json`).
+- **Label line decision (2026-10-05)**: the first description line is `Labels: US1 · parallel` instead of `Story: …`.

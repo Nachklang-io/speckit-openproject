@@ -18,7 +18,7 @@
 
 No secrets, no URLs of instances.
 
-## Ledger (`.specify/openproject/mapping.json`, schema `schemas/mapping.schema.json`)
+## Ledger (`.specify/openproject/mapping-<feature>.json`, one file per feature; schema `schemas/mapping.schema.json`)
 ```
 schema_version: "1.0"
 project: string
@@ -51,7 +51,7 @@ relations:
 ### Subjects and descriptions
 - Feature: `<feature-dir-name> <Feature title>` (e.g. `001-tasks-to-work-packages Tasks → Work Packages`), same string as the ledger field `feature` (research R15).
 - Phase: `Phase N: <title>`; Task: `T### <title>`.
-- Description first lines: `Story: US1 · parallel` (only present parts), then task text, file hint, repo-relative links to `spec.md`/`plan.md`.
+- Description first lines: `Labels: US1 · parallel` (only present parts), then task text, file hint, repo-relative links to `spec.md`/`plan.md`.
 
 ## State transitions per plan item
 `planned → (create|adopt|skip|update|blocked|stale) → confirmed → recorded`. `failed` is terminal for the run only; next run replans from ledger + search.

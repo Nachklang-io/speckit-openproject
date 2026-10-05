@@ -27,7 +27,7 @@ Use a sandbox project. Always run with `--dry-run` first. Record date, OpenProje
 | S5 | Type from config does not exist | stops, lists available types | 2026-10-05 | logic only: stop condition derived from the real `list-types` output, no end-to-end run |
 | S6 | Mandatory custom field in project | stops for that item, reports field | 2026-10-05 | pass (manual walkthrough) |
 | S7 | Project not in write allowlist | clear error, nothing written | 2026-10-05 | partial: project outside the server allowlist only; OpenProject-side reader role not tested |
-| S8 | `--dry-run` on the S1 input | plan with 14 entries; 0 work packages created; `.specify/openproject/mapping.json` absent or byte-identical | 2026-10-05 | partial: plan logic checked by hand (see run log); not run via the installed skill |
+| S8 | `--dry-run` on the S1 input | plan with 14 entries; 0 work packages created; `.specify/openproject/mapping-<feature>.json` absent or byte-identical | 2026-10-05 | partial: plan logic checked by hand (see run log); not run via the installed skill |
 | S9 | Change one task title, run without then with `--update`; add a ledger entry pointing to a non-existent work package | without `--update`: "differs, not updated"; with `--update`: that work package updated; the bogus entry is reported as stale, not recreated | 2026-10-05 | pass (manual walkthrough) |
 
 ## Notes for the scenarios
@@ -67,3 +67,6 @@ All steps were followed by hand against `speckit-sandbox` with the MCP tools (no
 - **Open findings**: (1) the ledger is one file per project but is tied to one `feature`; a second feature in the same repo stops at step 8 (design question, see research R16). (2) `Story: parallel` reads oddly for `[P]`-only tasks.
 - **Not covered**: installed skill, command mode, `--update` via arguments, dry-run output of this feature, S1 timing, 100+ tasks live.
 - **Leftover state**: feature `003-s4-demo` (ids 55–63, 3 relations) remains in `speckit-sandbox`; delete before repeating.
+
+### 2026-10-05 – follow-up decisions (no new run)
+- The ledger is now kept per feature (`mapping-<feature>.json`) and the first description line is `Labels: …`. The walkthroughs above were executed before this change with `mapping.json` and the line `Story: …`; they were not repeated.

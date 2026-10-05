@@ -14,7 +14,7 @@ Harden the preset's `speckit.taskstoissues` override so `tasks.md` becomes a Fea
 
 **Primary Dependencies**: shipped: none. Dev: pytest, pyyaml, jsonschema, ruff (already in `pyproject.toml`). Runtime: spec-kit ≥ 1.1, MCP server `jtauschl/openproject-ce-mcp` ≥ 0.4.1
 
-**Storage**: `.specify/openproject/config.yml`, `.specify/openproject/mapping.json` (ledger)
+**Storage**: `.specify/openproject/config.yml`, `.specify/openproject/mapping-<feature>.json` (ledger, one per feature)
 
 **Testing**: pytest (schemas, manifests, fixtures, install smoke); manual scenarios S1–S9 in `docs/TESTING.md`
 

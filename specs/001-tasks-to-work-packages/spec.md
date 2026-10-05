@@ -135,7 +135,7 @@ Misconfiguration is detected before any write: missing configuration, unavailabl
 - **FR-002**: The command MUST verify before any write that the required OpenProject capabilities are available, the target project exists and is writable, and the configured work package types exist.
 - **FR-003**: The command MUST parse `tasks.md` into phases, tasks, task identifiers, parallel markers (`[P]`) and stated dependencies.
 - **FR-004**: The command MUST create one parent work package for the feature, one work package per phase (child of the feature work package) and one per task (child of its phase). The command MUST NOT create or assign OpenProject versions.
-- **FR-005**: The command MUST keep a mapping ledger at `.specify/openproject/mapping.json`, validated against the shared mapping schema, and update it immediately after each successful write.
+- **FR-005**: The command MUST keep a mapping ledger per feature at `.specify/openproject/mapping-<feature>.json` (feature = the feature directory name), validated against the shared mapping schema, and update it immediately after each successful write.
 - **FR-006**: The command MUST NOT create a work package for an item that is already in the ledger.
 - **FR-007**: Every work package created by the command MUST carry its `tasks.md` identifier as a subject prefix (e.g. "T012 Create schema"); the feature work package subject MUST start with the full feature directory name followed by a space (identical to the ledger field `feature`). Before creating an item that is not in the ledger, the command MUST search the project by that prefix, restricted to the feature's work package tree, and adopt a match instead of duplicating. Multiple matches MUST be reported and the item skipped, never guessed.
 - **FR-008**: The command MUST create an ordered ("follows") relation for each real dependency, MUST NOT create relations solely because tasks are marked `[P]`, and MUST NOT duplicate existing relations.
@@ -147,7 +147,7 @@ Misconfiguration is detected before any write: missing configuration, unavailabl
 - **FR-014**: The command MUST work in both skills mode and command mode.
 - **FR-015**: The command MUST ask for confirmation once per phase (covering the phase work package and all its tasks), not per work package, regardless of list size (including 100+ tasks). Each confirmation MUST show what will be created in that phase. If the OpenProject tool layer requires its own preview-then-confirm step per write, the command MUST satisfy it without prompting the user again for items already confirmed.
 - **FR-016**: The feature MUST be represented in OpenProject by a single parent work package above the phases, tracked in the ledger like any other item.
-- **FR-017**: Task labels and markers from `tasks.md` (user-story reference, `[P]`) MUST be written as plain text in the work package description (e.g. a line "Story: US1 · parallel"). The command MUST NOT create or require categories or custom fields for this purpose.
+- **FR-017**: Task labels and markers from `tasks.md` (user-story reference, `[P]`) MUST be written as plain text in the work package description (e.g. a line "Labels: US1 · parallel"). The command MUST NOT create or require categories or custom fields for this purpose.
 - **FR-018**: The shared config and mapping JSON schemas MUST exist in `schemas/`, be referenced by the preset, and be covered by automated fixture tests.
 
 ### Key Entities *(include if feature involves data)*
