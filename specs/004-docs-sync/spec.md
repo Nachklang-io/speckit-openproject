@@ -14,6 +14,7 @@
 
 - Q: In which order is a changed attachment replaced? → A: Upload the new attachment first, then delete the old one (identified by the attachment id in the ledger). An interruption can leave two attachments for a moment; the next run deletes the old one.
 - Q: What does the generated summary contain? → A: A purely mechanical list per document: file name, link to its attachment, short hash and the date the document was last synced as changed. No excerpts and no model-written text, so the same input always yields the same summary.
+- Q: What happens when the attachment upload capability is missing? → A: The command stops before any write (also with `--dry-run`) and names the missing capability and the server setting that enables it; there is no description-only fallback, because it would link to attachments that do not exist.
 
 ## User Scenarios & Testing *(mandatory)*
 
