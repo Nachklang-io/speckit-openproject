@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project": "speckit-sandbox",
+  "feature": "001-demo",
+  "items": {
+    "T001": {
+      "kind": "task",
+      "id": 111,
+      "url": "/work_packages/111",
+      "status": "New",
+      "assignee": ""
+    }
+  }
+}

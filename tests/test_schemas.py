@@ -104,3 +104,21 @@ def test_hand_edited_fixture_validates_and_keeps_its_shape(root):
     assert cfg["create_relations"] is False
     assert "# my sandbox" in text
     assert "project:   " in text
+
+
+def test_assignee_is_an_optional_non_empty_string(root):
+    item = schema(root, "mapping.schema.json")["properties"]["items"]["additionalProperties"]
+    assert "assignee" not in item["required"]
+    assert item["properties"]["assignee"]["type"] == "string"
+    assert item["properties"]["assignee"]["minLength"] == 1
+
+
+def test_assignee_fixtures(root):
+    s = schema(root, "mapping.schema.json")
+    ok = json.loads((root / "tests/fixtures/mapping/valid-with-assignee.json").read_text())
+    jsonschema.validate(ok, s)
+    assert ok["items"]["T001"]["assignee"] == "Ada Example"
+    for name in ("invalid-assignee-type", "invalid-assignee-empty"):
+        bad = json.loads((root / f"tests/fixtures/mapping/{name}.json").read_text())
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(bad, s)

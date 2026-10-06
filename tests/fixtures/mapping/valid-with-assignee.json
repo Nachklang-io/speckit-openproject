@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "project": "speckit-sandbox",
+  "feature": "001-demo",
+  "items": {
+    "feature": {
+      "kind": "feature",
+      "id": 100,
+      "url": "/work_packages/100"
+    },
+    "T001": {
+      "kind": "task",
+      "id": 111,
+      "url": "/work_packages/111",
+      "status": "Closed",
+      "assignee": "Ada Example"
+    },
+    "T002": {
+      "kind": "task",
+      "id": 112,
+      "url": "/work_packages/112",
+      "status": "In progress"
+    },
+    "T003": {
+      "kind": "task",
+      "id": 113,
+      "url": "/work_packages/113"
+    }
+  }
+}

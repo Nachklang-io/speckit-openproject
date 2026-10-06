@@ -9,24 +9,27 @@ Facts marked *live* come from earlier sandbox runs recorded in `docs/mcp-tool-ma
 - `C` = checkbox of the task in `tasks.md` (checked / open).
 - `O` = current OpenProject status name; `Od` = `O` equals `statuses.done`.
 - `B` = `status` in the ledger (last synced); `Bd` = `B` equals `statuses.done`. A missing `B` counts as not done and the item is labelled **baseline** (FR-004a).
-- `tc` = `(C is checked) != Bd`: the task side changed. `oc` = `Od != Bd`: the OpenProject side changed (in done-ness).
+- `tc` = `(C is checked) != Bd`: the task side changed since the last sync.
+- `oc` = `O != B` (the status name differs from the ledger); for a baseline item (`B` missing) `oc` = `Od`.
 
 | tc | oc | Condition | Action | Writes |
 |---|---|---|---|---|
-| no | no | | none, or `refresh` if `status` name or `assignee` differ from the ledger | ledger: refresh `status` (name) and `assignee` |
+| no | no | | none | nothing |
+| no | yes | `C checked != Od` | pull | set the box to `Od` (check if done, uncheck otherwise); ledger |
+| no | yes | `C checked == Od` | refresh | ledger only (for example New → In progress, label "in progress") |
 | yes | no | C checked, not Od | push | work package → `statuses.done`; ledger |
 | yes | no | C open, Od (reverted) | pull | check the box; ledger; report "reverted" (FR-004b) |
-| no | yes | Od | pull | check the box; ledger |
-| no | yes | not Od | pull | uncheck the box; ledger |
-| yes | yes | `C checked == Od` | none | ledger only |
+| yes | yes | `C checked == Od` | refresh | ledger only (both sides moved the same way) |
 | yes | yes | `C checked != Od` | conflict, OpenProject wins | box := `Od`; ledger; report names the overwritten `tasks.md` state |
+
+A conflict can only arise when the base is not done, the box was checked and OpenProject moved the work package to another status that is not done (for example New → On hold): the checked box is overwritten and named in the report.
 
 Overrides applied before the table is read:
 1. `O` is a closed status other than done ("closed, not done", FR-003): the action is never a push and never changes the box; the item is informational, the ledger records `O`. It does not count as a change, so a run with only such items ends `no changes`.
 2. Task has no ledger entry: `unpublished`. Ledger entry whose work package is gone: `stale`. Ledger task entry without a task line: `orphan`. Items of kind `feature` and `phase`: shown only.
 3. A push that the server will not accept: `blocked` (R4).
 
-**Rationale**: Using done-ness for both sides keeps the table to seven rows and makes a conflict a pure comparison (spec User Story 3). Baseline needs no special row: with `Bd` false, both sides can only have changed towards done, so they agree and no conflict can arise. After any completed run `status` in the ledger equals `O`, so `tc` and `oc` are false, and the second run is a no-op (SC-002). A status change that does not alter done-ness (New → In progress) only refreshes the ledger and is shown as "in progress".
+**Rationale**: The checkbox side is compared by done-ness (it has two states), the OpenProject side by status name, so that a move to "In progress" or "On hold" counts as a change (spec User Story 3). The table has seven rows. Baseline needs no special row: `Bd` is false and `oc` is `Od`, so both sides can only have changed towards done, they agree and no conflict can arise. After any completed run `status` in the ledger equals `O`, so `tc` and `oc` are false, and the second run is a no-op (SC-002). A status change that does not alter done-ness (New → In progress) only refreshes the ledger and is shown as "in progress".
 
 **Alternatives**: a three-way merge on status names (needs a representable "in progress" in `tasks.md`, which has only two states); asking per conflict (rejected by the maintainer, spec clarification).
 

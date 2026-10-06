@@ -18,7 +18,8 @@
           "id": {"type": "integer", "minimum": 1},
           "url": {"type": "string", "description": "path only, no host"},
           "hash": {"type": "string", "description": "content hash of the source item at last sync"},
-          "status": {"type": "string", "description": "last synced status"}
+          "status": {"type": "string", "description": "last synced status"},
+          "assignee": {"type": "string", "minLength": 1, "description": "display name at last sync; never a URL, host or token"}
         },
         "additionalProperties": false
       }

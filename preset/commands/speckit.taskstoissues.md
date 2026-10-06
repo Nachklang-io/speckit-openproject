@@ -65,10 +65,11 @@ Validate the configuration and the ledger against these rules. Any violation is 
 - ledger top-level keys: feature, items, project, relations, schema_version
 - ledger required top-level keys: feature, items, project, schema_version
 - ledger schema_version: 1.0
-- ledger item keys: hash, id, kind, status, url
+- ledger item keys: assignee, hash, id, kind, status, url
 - ledger required item keys: id, kind
 - ledger kind values: feature, phase, task
 - ledger id: integer >= 1
+- ledger assignee: non-empty string (never written by this command)
 - ledger relation keys: from, id, to, type
 - ledger required relation keys: from, to, type
 - ledger relation type values: follows
