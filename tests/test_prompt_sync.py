@@ -555,7 +555,7 @@ def test_docs_summary_block_rules(docs):
         "`description_truncated`",
         "strip the `<user-content>` wrapper",
         "without the wrapper",
-        "scheme and host",
+        "scheme, host, query and fragment removed",
     ):
         assert text in docs, text
     assert not re.search(r"\]\(attachment:", docs)  # that link form renders without a target
@@ -566,3 +566,47 @@ def test_docs_report_counts_and_results(docs):
     assert "attached N, replaced N, restored N, cleaned N, unchanged N" in docs
     assert "orphan N, blocked N, failed N, skipped N" in docs
     assert "`failed`, `blocked`" in docs
+
+
+def test_docs_markers_are_checked_before_any_write(docs):
+    step5 = docs[docs.index("5. **Read OpenProject.**") : docs.index("6. **Classify.**")]
+    assert "apply the marker rule" in step5
+    assert "also with `--dry-run`, with zero writes" in step5
+    assert "descriptive" not in step5
+
+
+def test_docs_delete_is_checked_against_ledger_and_work_package(docs):
+    for text in (
+        "`result.container_id` must equal `items.feature.id`",
+        "`result.file_name` must equal the document's file name",
+        "must equal the ledger id",
+        "`pending_delete` must differ from `attachment_id`",
+        "never an id that does not come from the ledger entry",
+    ):
+        assert text in docs, text
+
+
+def test_docs_link_rules(docs):
+    for text in (
+        "no query string, no fragment",
+        "`<prefix>/api/v3/attachments/<id>/content`",
+        "never match by file name",
+        "equals the ledger `attachment_id`",
+    ):
+        assert text in docs, text
+
+
+def test_docs_order_upload_before_delete_before_ledger(docs):
+    step10 = docs[docs.index("10. **Documents.**") : docs.index("11. **Link paths.**")]
+    assert (
+        step10.index("upload first")
+        < step10.index("Immediately after the confirmed upload write the ledger")
+        < step10.index("delete the replaced attachment")
+    )
+
+
+def test_docs_append_rule_and_counts(docs):
+    assert "the text before the block is never trimmed or changed" in docs
+    assert "not as `replaced`" in docs
+    assert "`Description: update` whenever any document is `new`, `changed` or `restored`" in docs
+    assert "stop with an error if it does not increase" in docs

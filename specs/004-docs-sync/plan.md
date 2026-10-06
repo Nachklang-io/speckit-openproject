@@ -22,7 +22,7 @@ Add the extension command `speckit.openproject.sync-docs` (`extension/commands/s
 
 **Project Type**: spec-kit extension (prompt package) in a monorepo, plus an additive ledger schema change and a constitution amendment
 
-**Performance Goals**: SC-006: four documents, one confirmation, under 2 minutes of user time; one `list_work_package_attachments` plus one `get_work_package` per run
+**Performance Goals**: SC-006: four documents, one confirmation, under 2 minutes of user time; two `list_work_package_attachments` (before the writes and again for the link paths) and two `get_work_package` (before the writes, again right before the description write) per run that writes; one of each when nothing is written
 
 **Constraints**: MCP-only (ADR-0002); no secrets, hosts or URLs in files or output (attachment links are path-only, host removed, R5); writes only through preview-then-confirm; ledger updated right after each write; deletes only attachments this command uploaded and replaced; the file handed to the upload tool must lie under the server's upload root (R1)
 

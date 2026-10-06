@@ -8,6 +8,7 @@ from docs_reference import (
     BEGIN,
     END,
     BlockError,
+    check_markers,
     classify,
     description_needs_write,
     link_path,
@@ -163,7 +164,7 @@ def test_replace_block_appends_once_and_is_stable(root):
     text = fixture_text(root, "summary-no-block.md")
     block = render_block(DOCS, PATHS)
     out = replace_block(text, block)
-    assert out == "Plain description without markers.\n\n" + block
+    assert out == text + "\n\n" + block
     assert replace_block(out, block) == out
     assert replace_block("", block) == block
 
@@ -181,3 +182,23 @@ def test_unchanged_documents_cause_no_description_write(root):
     assert not description_needs_write(description, block)
     changed = render_block({**DOCS, "spec.md": {**DOCS["spec.md"], "hash": "c" * 64}}, PATHS)
     assert description_needs_write(description, changed)
+
+
+def test_append_never_trims_the_text_before_the_block(root):
+    block = render_block(DOCS, PATHS)
+    for name in ("summary-trailing-newlines.md", "summary-whitespace-only.md"):
+        text = fixture_text(root, name)
+        out = replace_block(text, block)
+        assert out.startswith(text), name  # byte for byte, nothing trimmed
+        assert out == text + "\n\n" + block
+        assert replace_block(out, block) == out  # second run: stable
+        assert not description_needs_write(out, block)
+
+
+def test_inconsistent_markers_are_detected_before_any_write(root):
+    """Step 5 of the prompt applies check_markers to the description it read."""
+    assert check_markers(fixture_text(root, "summary-no-block.md")) == "none"
+    assert check_markers(fixture_text(root, "summary-text-around.md")) == "one"
+    for name in ("summary-dup-markers.md", "summary-end-before-begin.md", "summary-missing-end.md"):
+        with pytest.raises(BlockError):
+            check_markers(fixture_text(root, name))

@@ -144,22 +144,32 @@ def strip_wrapper(description):
     return description
 
 
+def check_markers(description):
+    """Return "none" or "one" for a consistent marker state; raise BlockError otherwise.
+
+    The prompt applies this rule to the description it read (step 5), before any write.
+    """
+    nb, ne = description.count(BEGIN), description.count(END)
+    if nb == 0 and ne == 0:
+        return "none"
+    if nb != 1 or ne != 1:
+        raise BlockError(f"markers: begin x{nb}, end x{ne}")
+    if description.index(END) < description.index(BEGIN):
+        raise BlockError("end marker before begin marker")
+    return "one"
+
+
 def replace_block(description, block):
     """Replace the summary block or append it once; text outside the markers is kept.
 
     Raises BlockError for any marker state other than 'both exactly once, begin first' or
     'neither'.
     """
-    nb, ne = description.count(BEGIN), description.count(END)
-    if nb == 0 and ne == 0:
-        if description.strip() == "":
+    if check_markers(description) == "none":
+        if description == "":
             return block
-        return description.rstrip("\n") + "\n\n" + block
-    if nb != 1 or ne != 1:
-        raise BlockError(f"markers: begin x{nb}, end x{ne}")
+        return description + "\n\n" + block
     i, j = description.index(BEGIN), description.index(END)
-    if j < i:
-        raise BlockError("end marker before begin marker")
     return description[:i] + block + description[j + len(END) :]
 
 
