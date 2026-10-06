@@ -147,7 +147,7 @@ When `/speckit-implement` finishes, the user is offered to run the sync so that 
 - **Work package status**: the OpenProject status of the work package that belongs to a task; "done" means the configured done status.
 - **Ledger entry**: the record that links a task key to a work package and, new in this feature, holds the last synced status and the assignee.
 - **Configured statuses**: the names for open, in progress and done from the config; the vocabulary of the sync.
-- **Sync plan item**: one task with its three values (checkbox, OpenProject status, last synced status), the classified action (pull, push, none, conflict, blocked, stale, orphan, unpublished) and the reason.
+- **Sync plan item**: one task with its three values (checkbox, OpenProject status, last synced status), the classified action (pull, push, none, refresh, conflict, blocked, stale, orphan, unpublished, info) and the reason.
 - **Conflict**: a task whose checkbox and OpenProject status both differ from the last synced status in different ways.
 
 ## Success Criteria *(mandatory)*
