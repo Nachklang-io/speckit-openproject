@@ -29,7 +29,7 @@ All OpenProject access goes through an MCP server (never the REST API). This com
 
 Failure classes (apply them everywhere):
 - **Rejected**: the call returns `state` = `rejected` or a non-empty `validation_errors` (not expected for these read tools). Report it verbatim and stop.
-- **Tool error**: the call itself raises an error (generic text such as `Error executing tool …`; typical causes: unknown project, a project outside the server's allowlist, connection problem). Report it verbatim, but replace every URL and every host name in it with `<redacted-host>`; do not guess the cause; stop. Nothing was written.
+- **Tool error**: the call itself raises an error (generic text such as `Error executing tool …`; typical causes: unknown project, a project outside the server's allowlist, connection problem). Report it verbatim, but replace every URL and every host name in it with `<redacted-host>` and every token or Authorization header with `<redacted-secret>`; do not guess the cause; stop. Nothing was written.
 - **Not found**: zero or several projects match. Stop and list the candidates. Nothing was written.
 
 Paging: `offset` of `list-projects` is a **page number** starting at 1. Always pass `limit` = 50 and read pages until a page has fewer than 50 results or `next_offset` is null. If a page repeats ids already seen, stop paging and say that paging was not understood. If any read result carries `total` or `next_offset` showing more items than were returned, report that list as truncated and make no proposal from a truncated list.
