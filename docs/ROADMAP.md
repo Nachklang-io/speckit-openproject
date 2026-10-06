@@ -7,7 +7,7 @@ Each item has a brief in `docs/briefs/` that is the input for `/speckit-specify`
 | 001 | Tasks → work packages (hardening of existing preset) | preset | Phase/task hierarchy, relations, idempotent re-run, `--dry-run`, shared config/mapping schemas, tested on test instance | – |
 | 002 | Field discovery and config bootstrap | extension | `discover-fields` writes config.yml (types, statuses, custom fields) | 001 |
 | 003 | Status sync (OpenProject ↔ tasks.md) | extension | `sync-status`, hook after `implement`, conflict policy | 001, 002 |
-| 004 | Spec/plan documentation sync | extension | spec.md/plan.md as attachments + summary in parent work package | 001 |
+| 004 | Spec/plan documentation sync | extension | spec.md/plan.md as attachments + summary in the feature work package (implemented, see `specs/004-docs-sync`) | 001 |
 | 005 | Versions/milestones and time tracking | extension | feature → version, `log-time` | 001, 002 |
 | 006 | Release engineering | both | tags `preset-v*`/`extension-v*`, catalog submissions, bundle | 001–005 |
 
