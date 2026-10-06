@@ -8,6 +8,12 @@
 
 **Input**: User description: "docs/briefs/004-docs-sync.md" — a command that publishes a feature's design documents (`spec.md`, `plan.md`, optionally `research.md` and `data-model.md`) to the feature's parent work package in OpenProject: each file is attached, an outdated attachment is replaced when the file's content changed, and a generated summary with links is kept in the work package description. Wiki pages cannot be created through the API (ADR-0003). It builds on the mapping ledger (feature 001), which knows the feature work package.
 
+## Clarifications
+
+### Session 2026-10-06
+
+- Q: In which order is a changed attachment replaced? → A: Upload the new attachment first, then delete the old one (identified by the attachment id in the ledger). An interruption can leave two attachments for a moment; the next run deletes the old one.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Publish the design documents (Priority: P1)
@@ -54,7 +60,7 @@ Every run starts with a plan table (one line per document: file, hash state, act
 **Acceptance Scenarios**:
 
 1. **Given** `--dry-run`, **When** the command runs, **Then** the plan and report are shown and nothing is written on any side.
-2. **Given** a run interrupted between removing an outdated attachment and attaching the new one, **When** the command runs again, **Then** it detects the missing attachment and attaches the file; no duplicate exists.
+2. **Given** a run interrupted after the new attachment was uploaded but before the old one was deleted, **When** the command runs again, **Then** it deletes the outdated attachment (the one named by the ledger) and no duplicate remains.
 3. **Given** one upload fails, **When** the command runs, **Then** the other documents are still processed, the error is reported with URLs and host names redacted, and the result is `incomplete`.
 
 ---
@@ -91,7 +97,7 @@ The attachment upload tool of the MCP server is only available when the server i
 - **FR-001**: The command MUST read the configuration, the ledger of the current feature and the feature directory on every run, and MUST stop before any write if a mandatory input is missing or invalid (config `project`, ledger with the feature work package, `spec.md`), naming what to fix.
 - **FR-002**: The command MUST sync `spec.md` and `plan.md` when present and MUST sync `research.md` and `data-model.md` when present; absent optional documents are skipped silently, a missing `plan.md` is reported as a warning.
 - **FR-003**: For each document the command MUST compare the content hash of the local file with the hash recorded in the ledger and with the attachments currently on the feature work package, and classify it as new, changed, unchanged, restored or orphan.
-- **FR-004**: A changed document MUST end as exactly one attachment under its file name with the new content; the outdated attachment MUST be removed only after the new content is verified to be uploaded or in a way that an interrupted run can be repeated without duplicates.
+- **FR-004**: A changed document MUST end as exactly one attachment under its file name with the new content. The new attachment MUST be uploaded first and the outdated one (identified by the attachment id in the ledger) deleted afterwards; the ledger MUST be updated with the new attachment id right after the upload, so that a repeated run finds and deletes the outdated one.
 - **FR-005**: An unchanged document MUST cause no write to OpenProject and no write to the ledger.
 - **FR-006**: The command MUST keep a generated summary in the feature work package description, inside fixed markers, listing each synced document with its file name, a link to its attachment and a short note on its state; text outside the markers MUST NOT be changed.
 - **FR-007**: The ledger MUST record, per document, the content hash and the attachment identifier of the last sync; the change MUST be additive so that existing ledgers stay valid.
