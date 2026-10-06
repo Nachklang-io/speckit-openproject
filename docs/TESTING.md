@@ -215,3 +215,9 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Checked afterwards: `.specify/openproject/` does not exist in that project, so nothing was written.
 - Not covered: a real bootstrap in command mode (needs answers; FR-013 asks for one), command mode on a project initialised by the Claude integration (not possible: skills only), hook keys.
 
+### 2026-10-06 – S10 overview with versions that have data, headless dry run, prompt revision f039927
+- Setup: the main session created two versions in `speckit-sandbox` through the MCP server (with the maintainer's approval): `S10 open version` (id 5, open) and `S10 closed version` (id 6, closed); before that `list_versions` returned none. A fresh headless session ran `/speckit-openproject-discover-fields --dry-run` with the complete config (sha256 `9d6c9d06…18bb`).
+- Output: the overview lists both versions with their status and states that target versions allow only the open one (from the write context of the work package form); every existing config value kept; `customField1` already set; result `no changes` (also in a dry run, file untouched); no warnings; no `SPECKIT_OPENPROJECT_*` variable set.
+- Checked afterwards: sha256 of `config.yml` unchanged.
+- Observations: (1) the answer was in German, although the prompt has no language rule; the scratch project sits inside this repository, so its session loads the repository's instruction to talk German to the maintainer. This is a test-setup effect, not shown to be a prompt defect. (2) This settles research Unresolved 2 (versions with data) only for the overview; the web UI comparison (T031) and the per-project list of enabled types were not compared with the UI here.
+
