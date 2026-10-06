@@ -188,3 +188,10 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Checked afterwards: `.specify/openproject/` is still empty (listing after: `total 0`, same modification time 08:05 as before the run). The config was then restored from the backup (sha256 identical).
 - Observation: the report says the earlier config "is gone" and that the value `test` "was lost together with the file". That knowledge comes from the session, not from the file system, so this run was probably not in a fresh session; it does not affect the result.
 - S12 is complete for both cases in skills mode (T029). Command mode stays untested.
+
+### 2026-10-06 – S13 (e), invalid existing config, dry run, prompt revision f039927
+- Setup: `tests/fixtures/config/invalid-statuses-key.yml` (sha256 `3734f12c…6d25`, unknown key `statuses.blocked`) as the config in the scratch project. The maintainer ran `/speckit-openproject-discover-fields --dry-run` and pasted the output.
+- Output: overview; the existing config reported as violating the rules (`statuses.blocked: unknown key`) and the run treated as a rebuild; valid values kept (`project`, the three types, `statuses.open`); 7 proposals; a lettered change list including what would be dropped (the unknown key and the leading comment line, since a rebuild starts from the template); a unified diff; the statement that the proposed text validates; `Dry run: nothing was written.`; result `dry run`; no `SPECKIT_OPENPROJECT_*` variable set.
+- Checked afterwards: `config.yml` is byte-identical to the fixture (`cmp`), sha256 `3734f12c…6d25`, no other file in `.specify/openproject/`.
+- Not covered: the fixture has only one violation, so "all violations listed" was shown for a single entry; the real run with approval of the rebuild was not run. The report lists "priorities and versions were not requested" as a warning, which is noise rather than a warning (not changed).
+
