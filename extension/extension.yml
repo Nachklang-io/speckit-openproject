@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "openproject"
   name: "OpenProject Integration"
-  version: "0.0.3"
+  version: "0.0.4"
   description: "Field discovery, status sync, documentation sync, versions and time tracking between spec-kit and OpenProject via MCP"
   author: "Daniel Ring"
   repository: "https://github.com/ringind/speckit-openproject"
@@ -20,6 +20,9 @@ provides:
     - name: "speckit.openproject.sync-status"
       file: "commands/sync-status.md"
       description: "Sync task progress between OpenProject work packages and the checkboxes of tasks.md: pull status and assignee, push completed tasks along allowed transitions, OpenProject wins conflicts; supports --dry-run"
+    - name: "speckit.openproject.sync-docs"
+      file: "commands/sync-docs.md"
+      description: "Attach the feature's design documents (spec.md, plan.md, optionally research.md and data-model.md) to the feature work package, replace changed ones by content hash and keep a generated summary in its description; needs the MCP server's upload directory (OPENPROJECT_ATTACHMENT_ROOT); supports --dry-run"
 
 hooks:
   after_implement:

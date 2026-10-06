@@ -9,7 +9,7 @@ Every feature is specified, planned and tasked with spec-kit before implementati
 All OpenProject interaction goes through an MCP server. No direct REST calls, no credentials in the repo. Tool names are resolved by capability in one mapping table so alternative MCP servers can be supported without rewriting commands.
 
 ### III. Idempotent and Safe by Default (NON-NEGOTIABLE)
-Re-running any command never duplicates or destroys data. Every write command supports `--dry-run`, shows a plan first, honors the MCP server's preview-then-confirm flow, and records results in the mapping ledger immediately after each write. Deletions are never performed by this project.
+Re-running any command never duplicates or destroys data. Every write command supports `--dry-run`, shows a plan first, honors the MCP server's preview-then-confirm flow, and records results in the mapping ledger immediately after each write. Deletions are never performed by this project. Exception: an attachment this project uploaded itself, identified by the ledger, may be deleted when a newer version of the same document replaces it, and only after the plan was shown and confirmed (ADR-0004).
 
 ### IV. Test-First, Including the Prompts
 Schemas, manifests and helper scripts are covered by automated tests. Command prompts have scenario checklists in `docs/TESTING.md` that are executed against a real test instance before each release. Untested paths are labeled as such in docs.
@@ -46,4 +46,4 @@ with it, the constitution wins and the conflicting artifact MUST be fixed.
   reviewers MUST reject PRs that violate a principle without a justified, documented exception.
 - **Runtime guidance**: `CLAUDE.md` holds day-to-day instructions and MUST NOT contradict this file.
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-05 | **Last Amended**: 2026-10-05
+**Version**: 1.2.0 | **Ratified**: 2026-10-05 | **Last Amended**: 2026-10-06

@@ -1,6 +1,6 @@
 # spec-kit extension: openproject
 
-Work in progress (version 0.0.3). Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`. Planned: `sync-docs`, `log-time` (see `../docs/ROADMAP.md`). Requires the `openproject` preset for `speckit.taskstoissues`.
+Work in progress (version 0.0.4). Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`, `speckit.openproject.sync-docs`. Planned: `log-time` (see `../docs/ROADMAP.md`). Requires the `openproject` preset for `speckit.taskstoissues`.
 
 ## `discover-fields`
 
@@ -74,3 +74,43 @@ Optional hook: the manifest registers an optional `after_implement` hook (`optio
 - "Writes only the status" is enforced by the prompt, not by the client (same caveat as `discover-fields`).
 - A closed status sets the percentage done to 100 on the server (observed in the preview); the command does not touch that field itself.
 - Run so far (2026-10-06, skills mode, headless, sandbox, 7 work packages created by hand, hand-written ledger): on earlier prompt revisions (the prompt changed afterwards): pull, push, baseline, conflict, reverted, a transition the server rejects (`blocked`, restricted workflow), the stop conditions and the `tasks.md`-changed-during-the-run case (S14, S15, S16 blocked path, S17; details and defects in `../docs/TESTING.md`). **Untested:** the label `closed, not done` with a Rejected work package, accepting the hook offer inside the `implement` flow, command mode, a stale work package, a failed single confirm, and a re-run of `speckit.taskstoissues` over a synced ledger. A 14-work-package feature (ledger written by `taskstoissues`) was synced with one confirmation in 88 s of command time.
+
+## `sync-docs`
+
+Publishes the design documents of a feature to its feature work package: `spec.md`, `plan.md` and, if they exist, `research.md` and `data-model.md` become attachments, and one generated summary block in the work package description lists them with a link and a short hash. Wiki pages cannot be created through the OpenProject API (ADR-0003), so attachments and the description are used.
+
+```text
+/speckit-openproject-sync-docs [feature] [--dry-run]    # skills mode
+/speckit.openproject.sync-docs [feature] [--dry-run]    # command mode
+```
+
+**Prerequisite: the upload directory.** The MCP server registers its upload tool only when it runs with `OPENPROJECT_ATTACHMENT_ROOT` set to an absolute directory, and it accepts only files under that directory. Set it in the MCP client configuration (not in this repo's files) to a directory that contains your project, for example the project root, and restart the server. Without it the command stops at its first step (also with `--dry-run`) and names the missing capability; it has no description-only fallback.
+
+Needs the config written by `discover-fields` (`project`) and the ledger `.specify/openproject/mapping-<feature>.json` with the feature work package (created by `speckit.taskstoissues`). The command never creates a work package.
+
+Per document it compares the SHA-256 of the file, the hash in the ledger (`documents.<file>`) and the attachments on the work package:
+
+| Situation | Result |
+|---|---|
+| never synced, no attachment of that name | uploaded (`new`) |
+| file changed since the last sync | the new version is uploaded first, then the outdated attachment is deleted (`changed`) |
+| nothing changed | nothing is written, not even the ledger (`unchanged`) |
+| the attachment was removed in OpenProject | uploaded again (`restored`) |
+| the file no longer exists | the attachment stays, reported as `orphan` |
+| an attachment of that name that the ledger does not know | `blocked`: nothing is written or deleted for that document; resolve it by hand |
+| an interrupted replacement (ledger has `pending_delete`) | the next run deletes the superseded attachment (`cleaned`) |
+
+The description is changed only between the markers `<!-- speckit-docs:begin -->` and `<!-- speckit-docs:end -->` (appended once if absent); all text outside is kept. The block is rendered from the ledger: file name as a path-only link, short hash (8 characters) and sync date; no excerpts. Text before the block is never trimmed. Inconsistent markers (a marker twice or missing, end before begin) stop the run before any write, also with `--dry-run`; repair the description by hand.
+
+**Deletion.** The only thing this command deletes is the attachment it uploaded itself and replaced, identified by the attachment id in the ledger (ADR-0004, constitution principle III). It never deletes attachments it did not upload.
+
+A run prints a plan table first. `--dry-run` shows it and writes nothing; otherwise you confirm the whole plan once, and the question names every attachment that will be deleted. Uploads and the description update go through the server's preview, then confirm; the ledger is written after every write through a temporary file that is read back and validated.
+
+### Limitations and untested paths
+
+- Interactive only; one feature per run; at most four documents; the file names are fixed.
+- OpenProject does not version attachments: "a new version" means a new attachment with the same name replaces the old one. Content changed in OpenProject by someone else is not detected (the ledger hash decides).
+- A crash between an upload and the ledger write leaves an attachment the ledger does not know: the next run reports it as `blocked` and deletes nothing; remove it by hand.
+- Links are paths without a host (`/…/api/v3/attachments/<id>/content`); they break if the instance's path prefix changes and are rewritten the next time a document changes.
+- Run so far (2026-10-06, skills mode, headless, sandbox, scratch ledger written by hand for one feature work package; the last runs on prompt revision a1d7224 after the review, the earlier ones on 42ddf12): first sync, no-change run, replacement of a changed document, `restored`, `cleaned`, `blocked` (foreign and ambiguous), stops for a missing `spec.md` and a missing ledger; a stale work package was observed once by accident (an earlier scratch work package had been deleted). The interrupted run was simulated by writing the ledger state by hand.
+- Not run: the stop for an MCP server that is not connected (two runs ended with `CONNECT_TIMEOUT` under host load and stopped at the capability check, which is not a planned scenario), the equality of the dry-run plan and the real-run plan (only the unchanged ledger checksum was compared), command mode, a ledger written by `taskstoissues` in the same run, the stop for a missing upload capability (server without `OPENPROJECT_ATTACHMENT_ROOT`), inconsistent markers in a real description, a truncated description, files above the server's size limit or outside the upload directory through the command, a real interruption, other instances and servers. See `../docs/TESTING.md`.

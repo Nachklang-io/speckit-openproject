@@ -1,0 +1,22 @@
+{
+  "offset": 1,
+  "limit": 10,
+  "total": 1,
+  "next_offset": null,
+  "results": [
+    {
+      "id": 4,
+      "title": "probe.md",
+      "file_name": "probe.md",
+      "file_size_bytes": 39,
+      "description": "",
+      "content_type": "text/plain",
+      "status": "uploaded",
+      "author": "speckit bot",
+      "container_type": "WorkPackage",
+      "container_id": 113,
+      "created_at": "2026-10-06T12:52:57.915Z",
+      "download_url": "/openproject/api/v3/attachments/4/content"
+    }
+  ]
+}

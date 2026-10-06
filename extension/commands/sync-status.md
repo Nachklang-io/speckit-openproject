@@ -57,7 +57,7 @@ Validate the configuration and the ledger against these rules. They are the rule
 <!-- END config-rules -->
 
 <!-- BEGIN ledger-rules -->
-- ledger top-level keys: feature, items, project, relations, schema_version
+- ledger top-level keys: documents, feature, items, project, relations, schema_version
 - ledger required top-level keys: feature, items, project, schema_version
 - ledger schema_version: 1.0
 - ledger item keys: assignee, hash, id, kind, status, url
@@ -65,13 +65,14 @@ Validate the configuration and the ledger against these rules. They are the rule
 - ledger kind values: feature, phase, task
 - ledger id: integer >= 1
 - ledger assignee: non-empty string
+- ledger documents keys: spec.md, plan.md, research.md, data-model.md; entry keys: attachment_id, hash, pending_delete, synced; required entry keys: attachment_id, hash, synced
 - ledger relation keys: from, id, to, type
 - ledger required relation keys: from, to, type
 - ledger relation type values: follows
 - unknown keys are errors
 <!-- END ledger-rules -->
 
-This command needs `project`, `types.task` and `statuses.done` from the configuration. It reads `statuses.open` and `statuses.in_progress` only to show "in progress" and to check that the names exist.
+`documents` (written by `speckit.openproject.sync-docs`) is accepted and left unchanged by this command, like every other key it does not write. This command needs `project`, `types.task` and `statuses.done` from the configuration. It reads `statuses.open` and `statuses.in_progress` only to show "in progress" and to check that the names exist.
 
 ## Decision table
 

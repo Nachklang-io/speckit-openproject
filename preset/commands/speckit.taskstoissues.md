@@ -62,7 +62,7 @@ Validate the configuration and the ledger against these rules. Any violation is 
 <!-- END config-rules -->
 
 <!-- BEGIN ledger-rules -->
-- ledger top-level keys: feature, items, project, relations, schema_version
+- ledger top-level keys: documents, feature, items, project, relations, schema_version
 - ledger required top-level keys: feature, items, project, schema_version
 - ledger schema_version: 1.0
 - ledger item keys: assignee, hash, id, kind, status, url
@@ -70,13 +70,14 @@ Validate the configuration and the ledger against these rules. Any violation is 
 - ledger kind values: feature, phase, task
 - ledger id: integer >= 1
 - ledger assignee: non-empty string (never written by this command)
+- ledger documents keys: spec.md, plan.md, research.md, data-model.md; entry keys: attachment_id, hash, pending_delete, synced; required entry keys: attachment_id, hash, synced
 - ledger relation keys: from, id, to, type
 - ledger required relation keys: from, to, type
 - ledger relation type values: follows
 - unknown keys are errors
 <!-- END ledger-rules -->
 
-`statuses` (written by `speckit.openproject.discover-fields`) is accepted and ignored by this command.
+`statuses` (written by `speckit.openproject.discover-fields`) is accepted and ignored by this command. `documents` in the ledger is accepted and left unchanged by this command.
 
 Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.task` = "Task". `defaults.version` is ignored by this command. `defaults.status` cannot be applied on creation (no status parameter); the type's default status applies.
 
@@ -135,7 +136,7 @@ Every run starts from scratch. Execute steps 1–15 in order, every time, even i
 12. **Create, phase by phase.** Ask the user for confirmation **once per phase** (the feature work package is confirmed together with the first phase): show the items of that phase that will be created or adopted and wait for yes. On "no" or "stop", stop and go to the report. For each confirmed item, in order:
     1. `create-work-package` with project, type (`types.feature` / `types.phase` / `types.task`), subject, description, parent = the work package id of the parent item as a string (none for the feature), `defaults.priority` / `defaults.assignee` if non-empty, `custom_fields` = only those entries of `required_custom_fields` whose key appears in the write context of that item's type (step 5.3).
     2. Preview, check validity, then confirm. Take the new id from the response.
-    3. **Immediately** write the ledger. If the file does not exist, create it first as `{"schema_version": "1.0", "project": <identifier>, "feature": FEATURE, "items": {}}`. Then set `items.<key>` = `kind`, `id`, `url` = `/work_packages/<id>` (path only, no host), `hash`; when an entry already exists change only these keys and keep every other key of it (`status` and `assignee` are written by `speckit.openproject.sync-status`). Adopted items are written the same way without a write call. The `relations` array is created with the first relation (step 13).
+    3. **Immediately** write the ledger. If the file does not exist, create it first as `{"schema_version": "1.0", "project": <identifier>, "feature": FEATURE, "items": {}}`. Then set `items.<key>` = `kind`, `id`, `url` = `/work_packages/<id>` (path only, no host), `hash`; when an entry already exists change only these keys and keep every other key of it (`status` and `assignee` are written by `speckit.openproject.sync-status`). Keep every other top-level key of the ledger unchanged (`documents` is written by `speckit.openproject.sync-docs`). Adopted items are written the same way without a write call. The `relations` array is created with the first relation (step 13).
     4. A rejected preview: the item is `failed` with the server message, its children become `blocked` (failure classes). If the feature fails, stop.
     A tool error or an unconfirmed write stops the run (failure classes); the ledger already reflects every confirmed write and a re-run resumes.
 

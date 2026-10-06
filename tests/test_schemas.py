@@ -122,3 +122,29 @@ def test_assignee_fixtures(root):
         bad = json.loads((root / f"tests/fixtures/mapping/{name}.json").read_text())
         with pytest.raises(jsonschema.ValidationError):
             jsonschema.validate(bad, s)
+
+
+def test_documents_is_optional_and_closed(root):
+    led = schema(root, "mapping.schema.json")
+    assert "documents" not in led["required"]
+    docs = led["properties"]["documents"]
+    assert docs["propertyNames"]["enum"] == ["spec.md", "plan.md", "research.md", "data-model.md"]
+    entry = docs["additionalProperties"]
+    assert entry["required"] == ["hash", "attachment_id", "synced"]
+    assert entry["additionalProperties"] is False
+    assert led["properties"]["schema_version"]["const"] == "1.0"
+
+
+def test_documents_fixtures(root):
+    s = schema(root, "mapping.schema.json")
+    ok = json.loads((root / "tests/fixtures/mapping/valid-with-documents.json").read_text())
+    jsonschema.validate(ok, s)
+    assert ok["documents"]["plan.md"]["pending_delete"] == 5
+    for name in (
+        "invalid-documents-unknown-name",
+        "invalid-documents-hash",
+        "invalid-documents-missing-id",
+    ):
+        bad = json.loads((root / f"tests/fixtures/mapping/{name}.json").read_text())
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(bad, s)

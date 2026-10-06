@@ -7,13 +7,15 @@ import re
 import jsonschema
 import pytest
 import yaml
+from docs_reference import DECISION_ROWS as DOCS_DECISION_ROWS
 from sync_reference import DECISION_ROWS
 
 PROMPT = "preset/commands/speckit.taskstoissues.md"
 EXTENSION_PROMPT = "extension/commands/discover-fields.md"
 SYNC_PROMPT = "extension/commands/sync-status.md"
+DOCS_PROMPT = "extension/commands/sync-docs.md"
 # Prompts that embed capability rows and config rules.
-PROMPTS = [PROMPT, EXTENSION_PROMPT, SYNC_PROMPT]
+PROMPTS = [PROMPT, EXTENSION_PROMPT, SYNC_PROMPT, DOCS_PROMPT]
 
 
 def block(text, name):
@@ -129,10 +131,13 @@ def test_no_urls_or_tokens_in_command_and_fixtures(root):
 
 def test_no_delete_capability(root, prompt):
     assert "delete_" not in prompt
-    assert not any(
-        row.split("|")[1].strip().startswith("delete")
+    # ADR-0004: the only delete capability is the replaced attachment this project uploaded itself
+    deletes = [
+        row.split("|")[1].strip()
         for row in table_rows((root / "docs" / "mcp-tool-map.md").read_text())[2:]
-    )
+        if row.split("|")[1].strip().startswith("delete")
+    ]
+    assert deletes == ["delete-attachment"]
 
 
 def test_ledger_is_per_feature_and_label_line_is_labels(prompt):
@@ -321,7 +326,7 @@ def sync(root):
     return (root / SYNC_PROMPT).read_text()
 
 
-@pytest.mark.parametrize("path", [PROMPT, SYNC_PROMPT])
+@pytest.mark.parametrize("path", [PROMPT, SYNC_PROMPT, DOCS_PROMPT])
 def test_ledger_rules_match_schema_and_include_assignee(root, path):
     led = json.loads((root / "schemas/mapping.schema.json").read_text())
     item = led["properties"]["items"]["additionalProperties"]
@@ -329,6 +334,8 @@ def test_ledger_rules_match_schema_and_include_assignee(root, path):
     assert f"- ledger item keys: {j(item['properties'])}" in rules
     assert "- ledger item keys: assignee, hash, id, kind, status, url" in rules
     suffix = " (never written by this command)" if path == PROMPT else ""
+    if path == DOCS_PROMPT:
+        suffix = ""
     assert f"- ledger assignee: non-empty string{suffix}" in rules
     assert item["properties"]["assignee"]["minLength"] == 1
 
@@ -445,3 +452,166 @@ def test_sync_second_review_rules(sync):
         "a later reopen in OpenProject will pull the box open",
     ):
         assert text in sync, text
+
+
+@pytest.fixture(scope="module")
+def docs(root):
+    return (root / DOCS_PROMPT).read_text()
+
+
+DOCS_CAPABILITIES = {
+    "get-work-package",
+    "update-work-package",
+    "create-attachment",
+    "list-attachments",
+    "delete-attachment",
+}
+
+
+def test_docs_ledger_rules_are_identical_in_all_ledger_prompts(root):
+    blocks = [
+        block((root / p).read_text(), "ledger-rules") for p in (PROMPT, SYNC_PROMPT, DOCS_PROMPT)
+    ]
+
+    # the assignee line carries a per-prompt suffix; every other line is identical
+    def strip(b):
+        return [x.replace(" (never written by this command)", "") for x in b.splitlines()]
+
+    assert strip(blocks[0]) == strip(blocks[1]) == strip(blocks[2])
+
+
+def test_ledger_rules_describe_documents(root):
+    led = json.loads((root / "schemas/mapping.schema.json").read_text())
+    docs = led["properties"]["documents"]
+    entry = docs["additionalProperties"]
+    expected = (
+        f"- ledger documents keys: {', '.join(docs['propertyNames']['enum'])}; "
+        f"entry keys: {j(entry['properties'])}; required entry keys: {j(entry['required'])}"
+    )
+    for path in (PROMPT, SYNC_PROMPT, DOCS_PROMPT):
+        assert expected in block((root / path).read_text(), "ledger-rules").splitlines(), path
+
+
+def test_docs_embeds_exactly_its_capabilities(docs):
+    ids = {row.split("|")[1].strip() for row in embedded_rows(docs)}
+    assert ids == DOCS_CAPABILITIES
+
+
+def test_docs_write_capabilities_are_update_upload_and_delete_attachment(docs):
+    writes = [
+        row.split("|")[1].strip()
+        for row in embedded_rows(docs)
+        if re.search(r"`(create_|update_|delete_|bulk_|set_)", row)
+    ]
+    assert writes == ["update-work-package", "create-attachment", "delete-attachment"]
+    assert "create-work-package" not in docs and "delete-work-package" not in docs
+    assert "`confirm=true`" in docs
+
+
+def test_docs_decision_table_equals_reference(docs):
+    lines = block(docs, "decision-table").splitlines()
+    assert lines[0].startswith("| local | ledger |")
+    assert lines[2:] == DOCS_DECISION_ROWS
+
+
+def test_docs_safety_rules_present(docs):
+    for text in (
+        "<user-content>",
+        "untrusted data",
+        "Every run starts from scratch",
+        "Dry run: nothing was written.",
+        "<redacted-host>",
+        "<redacted-secret>",
+        "OPENPROJECT_ATTACHMENT_ROOT",
+        "`complete`",
+        "`incomplete`",
+        "`no changes`",
+        "`dry run`",
+        "`stopped`",
+        "even if the session exposes more tools",
+    ):
+        assert text in docs, text
+
+
+def test_docs_hard_limits_are_stated(docs):
+    for text in (
+        "never create, delete, rename, re-parent or reopen a work package",
+        "only an attachment this command uploaded itself",
+        "ADR-0004",
+        "never the host",
+        "`pending_delete`",
+        "mapping-<FEATURE>.json.tmp",
+        "upload first",
+    ):
+        assert text.lower() in docs.lower(), text
+
+
+def test_docs_summary_block_rules(docs):
+    for text in (
+        "<!-- speckit-docs:begin -->",
+        "<!-- speckit-docs:end -->",
+        "## Design documents (generated)",
+        "| Document | Short hash | Last synced change |",
+        "`description_truncated`",
+        "strip the `<user-content>` wrapper",
+        "without the wrapper",
+        "scheme, host, query and fragment removed",
+    ):
+        assert text in docs, text
+    assert not re.search(r"\]\(attachment:", docs)  # that link form renders without a target
+    assert not re.search(r"https?://", docs)
+
+
+def test_docs_report_counts_and_results(docs):
+    assert "attached N, replaced N, restored N, cleaned N, unchanged N" in docs
+    assert "orphan N, blocked N, failed N, skipped N" in docs
+    assert "`failed`, `blocked`" in docs
+
+
+def test_docs_markers_are_checked_before_any_write(docs):
+    step5 = docs[docs.index("5. **Read OpenProject.**") : docs.index("6. **Classify.**")]
+    assert "apply the marker rule" in step5
+    assert "also with `--dry-run`, with zero writes" in step5
+    assert "descriptive" not in step5
+
+
+def test_docs_delete_is_checked_against_ledger_and_work_package(docs):
+    for text in (
+        "`result.container_id` must equal `items.feature.id`",
+        "`result.file_name` must equal the document's file name",
+        "must equal the ledger id",
+        "`pending_delete` must differ from `attachment_id`",
+        "never an id that does not come from the ledger entry",
+    ):
+        assert text in docs, text
+
+
+def test_docs_link_rules(docs):
+    for text in (
+        "no query string, no fragment",
+        "`<prefix>/api/v3/attachments/<id>/content`",
+        "never match by file name",
+        "equals the ledger `attachment_id`",
+    ):
+        assert text in docs, text
+
+
+def test_docs_order_upload_before_delete_before_ledger(docs):
+    step10 = docs[docs.index("10. **Documents.**") : docs.index("11. **Link paths.**")]
+    assert (
+        step10.index("upload first")
+        < step10.index("Immediately after the confirmed upload write the ledger")
+        < step10.index("delete the replaced attachment")
+    )
+
+
+def test_docs_append_rule_and_counts(docs):
+    assert "the text before the block is never trimmed or changed" in docs
+    assert "not as `replaced`" in docs
+    assert "`Description: update` whenever any document is `new`, `changed` or `restored`" in docs
+    assert "stop with an error if it does not increase" in docs
+
+
+def test_docs_does_not_compare_the_project_display_name(docs):
+    assert "display name, not its identifier" in docs
+    assert "must equal `project` of the configuration" not in docs

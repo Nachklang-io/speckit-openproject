@@ -1,0 +1,14 @@
+{
+  "action": "create",
+  "state": "preview",
+  "ready": true,
+  "attachment_id": null,
+  "work_package_id": 113,
+  "payload": {
+    "fileName": "probe.md",
+    "fileSize": 30,
+    "description": null
+  },
+  "validation_errors": {},
+  "result": null
+}

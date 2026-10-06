@@ -1,0 +1,7 @@
+{
+  "written_raw": "Text before the block.\n\n<!-- speckit-docs:begin -->\n## Design documents (generated)\n\n| Document | Short hash | Last synced change |\n|---|---|---|\n| [probe.md](attachment:probe.md) | `a1b2c3d4` | 2026-10-06 |\n<!-- speckit-docs:end -->\n\nText after the block.",
+  "get_work_package_description": "<user-content>Text before the block.\n\n<!-- speckit-docs:begin -->\n## Design documents (generated)\n\n| Document | Short hash | Last synced change |\n|---|---|---|\n| [probe.md](attachment:probe.md) | `a1b2c3d4` | 2026-10-06 |\n<!-- speckit-docs:end -->\n\nText after the block.</user-content>",
+  "description_truncated": false,
+  "rendered_html_attachment_scheme_link": "<a rel=\"noopener noreferrer nofollow\" target=\"_top\" class=\"op-uc-link\">probe.md</a>",
+  "rendered_html_path_link": "<a href=\"/openproject/api/v3/attachments/4/content\" rel=\"noopener noreferrer nofollow\" target=\"_top\" class=\"op-uc-link\">probe.md</a>"
+}
