@@ -111,7 +111,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`, `.specify/memo
 - [X] T029 Run `scripts/dev-install.sh`; confirm `specify preset list` and `specify extension list` show `openproject` in both and that `.claude/skills/speckit-openproject-sync-docs` exists in the scratch project (depends on T013, T024)
 - [ ] T030 Run `uv run pytest` and `uv run ruff check . && uv run ruff format --check .`; all green (depends on T029)
 - [X] T031 (both reviewers ran once; findings applied, see TESTING.md; run again after any further prompt change) Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings or record the reason for not fixing; rerun once after the last prompt change (depends on T030)
-- [ ] T032 Mark finished tasks in this file, prepare the PR description (summary, executed scenarios, untested paths, the constitution amendment called out); opening the PR is the maintainer's call (depends on T028, T031)
+- [X] T032 (PR description prepared 2026-10-06; T025 stays open as partial, see the untested list) Mark finished tasks in this file, prepare the PR description (summary, executed scenarios, untested paths, the constitution amendment called out); opening the PR is the maintainer's call (depends on T028, T031)
 
 ---
 
