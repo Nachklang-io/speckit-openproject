@@ -63,7 +63,7 @@ The statuses allowed "for the task type" are listed from `get-write-context` (pr
 
 ## R5. Checkbox edits in tasks.md
 
-**Decision**: A task line is a line that matches `^(\s*)- \[( |x|X)\] (T\d{3,})\b`. An edit replaces only the character inside the brackets of the line whose key matches (` ` ↔ `x`; an existing `X` is kept when the box stays checked, otherwise written as ` `). Before writing: re-read the file and compare it with the content read at the start (FR-015); on a difference, no write. Write the whole text to `tasks.md.tmp` in the same directory, read it back, verify that the only differences to the original are the planned bracket characters, then move it over `tasks.md`.
+**Decision**: A task line is a line that matches `^(\s*)- \[( |x|X)\] (T\d{3,})\b`. An edit replaces only the character inside the brackets of the line whose key matches (` ` ↔ `x`; an existing `X` is kept when the box stays checked, otherwise written as ` `). Before writing: compute the SHA-256 of the whole file again with a shell command and compare it with the hash computed before the read at the start of the run (FR-015); on a difference, no write. Write the whole text to `tasks.md.tmp` in the same directory, read it back, verify that the only differences to the original are the planned bracket characters, then move it over `tasks.md`.
 
 **Rationale**: SC-005 demands a diff with only checkbox characters; the keys come from the ledger (`T###`), which also appear in subjects created by 001. The same rule is implemented in `tests/sync_reference.py` so that fixtures can assert it.
 
@@ -91,7 +91,7 @@ The statuses allowed "for the task type" are listed from `get-write-context` (pr
 
 ## R8. Capability rows
 
-**Decision**: The prompt embeds `list-statuses`, `get-work-package`, `get-write-context`, `update-work-package` from `docs/mcp-tool-map.md`. The `update-work-package` row's parameter cell is extended with `status` (verified parameters table already lists it; the live check of 2026-10-05 changed only subject/description, so `status` in a preview is marked verified only after the T-task of R4). The 001 prompt embeds the same row; its prompt-sync test requires identity, so the preset prompt is re-embedded with the new parameter cell (a documentation-level change, no behaviour change).
+**Decision**: The prompt embeds `list-statuses`, `get-work-package`, `get-write-context`, `search-work-packages` (existence check of a ledger work package after a read error) and `update-work-package` from `docs/mcp-tool-map.md`. The `update-work-package` row's parameter cell is extended with `status` (verified parameters table already lists it; the live check of 2026-10-05 changed only subject/description, so `status` in a preview is marked verified only after the T-task of R4). The 001 prompt embeds the same row; its prompt-sync test requires identity, so the preset prompt is re-embedded with the new parameter cell (a documentation-level change, no behaviour change).
 
 **Alternatives**: a separate capability id `set-status` (more rows, same tool; rejected for simplicity).
 
@@ -99,10 +99,16 @@ The statuses allowed "for the task type" are listed from `get-write-context` (pr
 
 **Decision**: Result values as in FR-013: `complete`, `incomplete` (any failed, blocked or skipped), `no changes`, `dry run`, `stopped`. Counts: pulled, pushed, unchanged, refreshed (ledger-only update: status name or assignee differs but done-ness is the same, or "closed, not done" recorded), conflicts, blocked, stale, orphan, unpublished, failed, skipped (a pull or conflict not written because `tasks.md` changed during the run); baseline, reverted and "closed, not done" are labels on items, not counts. `complete` requires at least one applied write (including a ledger-only refresh) and no failed, blocked or skipped item; `no changes` means that nothing was written anywhere. A ledger-only refresh is part of the plan, is shown with the action `refresh` and is written after the single confirmation (in `--dry-run` it is shown, not written).
 
+## R10. Safety additions found during implementation (design additions, not in the spec)
+
+- A notice `N work packages will be set to <done>` before the confirmation when more than 10 pushes are planned (a first run after `taskstoissues` can push many).
+- A recheck: before each confirm the work package is read again; a status that differs from the plan makes the task `failed` (`changed meanwhile`) and writes nothing.
+- The decision table never reaches `feature` and `phase` ledger entries; a missing feature or phase work package is a report line and is not counted as `stale`.
+
 ## Unresolved (to verify live, labelled untested until then)
 
-1. A forbidden transition is rejected in the update **preview** (R4).
-2. The exact `get_work_package` fields for status and assignee (R3); assignee is absent or null for an unassigned work package.
+1. ~~A forbidden transition is rejected in the update preview (R4).~~ Resolved 2026-10-06: it is (see R4).
+2. ~~The exact `get_work_package` fields for status and assignee (R3).~~ Resolved 2026-10-06: `status` is the name, `assignee` the display name or `null`.
 3. Hook output by `/speckit-implement` after `specify extension add --dev` (R7).
 4. Command mode (`/speckit.openproject.sync-status`) end to end.
 5. A work package with a stale `lockVersion` between preview and confirm (concurrent edit): expected to fail the confirm and be reported `failed`.
