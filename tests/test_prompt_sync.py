@@ -388,3 +388,9 @@ def test_sync_hard_limits_are_stated(sync):
 def test_sync_baseline_tasks_are_refreshed_in_the_ledger(sync):
     assert "the ledger has no `status` for the task (baseline)" in sync
     assert "the ledger always records the status read" in sync
+
+
+def test_sync_ledger_is_written_after_each_push_and_tasks_md_is_compared_with_step_4(sync):
+    assert "before the next push call" in sync
+    assert "do not batch it with step 13" in sync
+    assert "the text read at the start of the run" in sync
