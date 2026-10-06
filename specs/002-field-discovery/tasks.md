@@ -123,7 +123,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`. `preset/` is t
 - [X] T032 [US5] Extend `tests/test_prompt_sync.py`: the extension prompt names the stop for a missing capability, for an unknown or unreadable project and for a tool error ("do not guess the cause"), and states that nothing is written in each case (depends on T013)
 - [X] T033 [US5] Complete the failure handling in the prompt: missing capability message with README pointer, project not set → list readable projects and ask (empty list: stop), project not found or outside the server allowlist stated in the message, generic tool error reported verbatim and stopped, no secrets or hosts printed in any message (depends on T030, T032)
 - [X] T034 [US5] Define scenario S13 (a) no projects readable / project not set, (b) unknown project, (c) project outside the allowlist, (d) MCP server not connected, (e) invalid existing config (file unchanged when the rebuild diff is declined; valid result when approved), in `docs/TESTING.md` (depends on T033)
-- [ ] T035 [US5] **(maintainer)** Run S13 (a)–(e) through the installed skill (for (d) start Claude Code without the exported `.env`); record results; a failed variant is a finding, not skipped (depends on T034)
+- [x] T035 [US5] **(maintainer)** Run S13 (a)–(e) through the installed skill (for (d) start Claude Code without the exported `.env`); record results; a failed variant is a finding, not skipped (depends on T034)
 
 ---
 
