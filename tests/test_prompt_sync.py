@@ -383,3 +383,8 @@ def test_sync_hard_limits_are_stated(sync):
         "mapping-<FEATURE>.json.tmp",
     ):
         assert text.lower() in sync.lower(), text
+
+
+def test_sync_baseline_tasks_are_refreshed_in_the_ledger(sync):
+    assert "the ledger has no `status` for the task (baseline)" in sync
+    assert "the ledger always records the status read" in sync

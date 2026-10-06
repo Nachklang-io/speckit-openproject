@@ -101,7 +101,7 @@ Read the row matching `tc` and `oc`. Rows with the same `tc` and `oc` are told a
 
 Overrides, applied before the table:
 1. `O` is a closed status (from `list-statuses`, `is_closed`) other than `done` (for example Rejected): label `closed, not done`; never push, never change the checkbox; the ledger records `O`. This is information, not a change: if the ledger already holds `O` the task counts as unchanged.
-2. The action is `none` but the work package's assignee differs from the ledger (including: unassigned now, ledger has one): the action is `refresh`.
+2. The action is `none`, but the ledger has no `status` for the task (baseline), or `O` differs from `B`, or the work package's assignee differs from the ledger's (including: unassigned now, ledger has one): the action is `refresh`, so that the ledger always records the status read.
 3. A task line without a ledger entry is `unpublished` (point to `speckit.taskstoissues`; nothing is created). A ledger task entry without a task line is `orphan`. A ledger task entry whose work package does not exist is `stale` (never recreated, never removed). Ledger entries of kind `feature` and `phase` are read for the report only and never written.
 4. A push whose preview is not valid (step 7) makes the task `blocked`.
 
