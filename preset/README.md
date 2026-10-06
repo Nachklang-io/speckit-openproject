@@ -62,6 +62,7 @@ Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 - Work packages have no native labels; markers are written into the description.
 - The server cannot set a status when creating; the default status of the type applies (`defaults.status` is not applied).
 - Searching for existing work packages is a substring search on the subject; the command filters the hits itself. Re-runs search once per ledger item to detect stale entries, so large lists need many tool calls.
+- The config may contain an optional `statuses` section (`open`, `in_progress`, `done`) written by `speckit.openproject.discover-fields` of the `openproject` extension. This command accepts and ignores it.
 - The ledger is kept per feature (`.specify/openproject/mapping-<feature>.json`), so several features in one repository do not collide. The configuration is shared per project.
 - Each write is a separate preview and confirm call; bulk creation is not used.
 - Types, statuses, workflows and mandatory custom fields differ per project. The command reports problems instead of guessing.

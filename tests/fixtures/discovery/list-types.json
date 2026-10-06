@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "id": 1,
+      "name": "Task",
+      "position": 1,
+      "is_default": false,
+      "is_milestone": false
+    },
+    {
+      "id": 2,
+      "name": "Milestone",
+      "position": 2,
+      "is_default": false,
+      "is_milestone": true
+    },
+    {
+      "id": 3,
+      "name": "Summary task",
+      "position": 3,
+      "is_default": false,
+      "is_milestone": false
+    },
+    {
+      "id": 4,
+      "name": "Feature",
+      "position": 4,
+      "is_default": false,
+      "is_milestone": false
+    },
+    {
+      "id": 5,
+      "name": "Epic",
+      "position": 5,
+      "is_default": false,
+      "is_milestone": false
+    },
+    {
+      "id": 6,
+      "name": "User story",
+      "position": 6,
+      "is_default": false,
+      "is_milestone": false
+    },
+    {
+      "id": 7,
+      "name": "Bug",
+      "position": 7,
+      "is_default": false,
+      "is_milestone": false
+    }
+  ]
+}

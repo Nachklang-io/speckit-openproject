@@ -1,0 +1,411 @@
+{
+  "project_id": 3,
+  "project_name": "spec-kit Sandbox",
+  "project_identifier": "speckit-sandbox",
+  "selected_type_id": 1,
+  "selected_type_name": "Task",
+  "available_types": [
+    {
+      "id": 1,
+      "title": "Task",
+      "href": "/openproject/api/v3/types/1"
+    },
+    {
+      "id": 2,
+      "title": "Milestone",
+      "href": "/openproject/api/v3/types/2"
+    },
+    {
+      "id": 3,
+      "title": "Summary task",
+      "href": "/openproject/api/v3/types/3"
+    },
+    {
+      "id": 4,
+      "title": "Feature",
+      "href": "/openproject/api/v3/types/4"
+    },
+    {
+      "id": 5,
+      "title": "Epic",
+      "href": "/openproject/api/v3/types/5"
+    },
+    {
+      "id": 6,
+      "title": "User story",
+      "href": "/openproject/api/v3/types/6"
+    },
+    {
+      "id": 7,
+      "title": "Bug",
+      "href": "/openproject/api/v3/types/7"
+    }
+  ],
+  "available_statuses": [
+    {
+      "id": 1,
+      "title": "New",
+      "href": "/openproject/api/v3/statuses/1"
+    },
+    {
+      "id": 7,
+      "title": "In progress",
+      "href": "/openproject/api/v3/statuses/7"
+    },
+    {
+      "id": 12,
+      "title": "Closed",
+      "href": "/openproject/api/v3/statuses/12"
+    },
+    {
+      "id": 13,
+      "title": "On hold",
+      "href": "/openproject/api/v3/statuses/13"
+    },
+    {
+      "id": 14,
+      "title": "Rejected",
+      "href": "/openproject/api/v3/statuses/14"
+    }
+  ],
+  "available_priorities": [
+    {
+      "id": 7,
+      "title": "Low",
+      "href": "/openproject/api/v3/priorities/7"
+    },
+    {
+      "id": 8,
+      "title": "Normal",
+      "href": "/openproject/api/v3/priorities/8"
+    },
+    {
+      "id": 9,
+      "title": "High",
+      "href": "/openproject/api/v3/priorities/9"
+    },
+    {
+      "id": 10,
+      "title": "Immediate",
+      "href": "/openproject/api/v3/priorities/10"
+    }
+  ],
+  "available_categories": [],
+  "available_project_phases": [],
+  "available_versions": [],
+  "fields": [
+    {
+      "key": "subject",
+      "name": "Subject",
+      "type": "String",
+      "required": true,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "description",
+      "name": "Description",
+      "type": "Formattable",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "duration",
+      "name": "Duration",
+      "type": "Duration",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "scheduleManually",
+      "name": "Manual scheduling",
+      "type": "Boolean",
+      "required": false,
+      "writable": true,
+      "has_default": true,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "ignoreNonWorkingDays",
+      "name": "Ignore non working days",
+      "type": "Boolean",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "startDate",
+      "name": "Start date",
+      "type": "Date",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "dueDate",
+      "name": "Finish date",
+      "type": "Date",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "estimatedTime",
+      "name": "Work",
+      "type": "Duration",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "remainingTime",
+      "name": "Remaining work",
+      "type": "Duration",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "percentageDone",
+      "name": "% Complete",
+      "type": "Integer",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "project",
+      "name": "Project",
+      "type": "Project",
+      "required": true,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "parent",
+      "name": "Parent",
+      "type": "WorkPackage",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "assignee",
+      "name": "Assignee",
+      "type": "User",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "responsible",
+      "name": "Accountable",
+      "type": "User",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "type",
+      "name": "Type",
+      "type": "Type",
+      "required": true,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": [
+        {
+          "id": 1,
+          "title": "Task",
+          "href": "/openproject/api/v3/types/1"
+        },
+        {
+          "id": 2,
+          "title": "Milestone",
+          "href": "/openproject/api/v3/types/2"
+        },
+        {
+          "id": 3,
+          "title": "Summary task",
+          "href": "/openproject/api/v3/types/3"
+        },
+        {
+          "id": 4,
+          "title": "Feature",
+          "href": "/openproject/api/v3/types/4"
+        },
+        {
+          "id": 5,
+          "title": "Epic",
+          "href": "/openproject/api/v3/types/5"
+        },
+        {
+          "id": 6,
+          "title": "User story",
+          "href": "/openproject/api/v3/types/6"
+        },
+        {
+          "id": 7,
+          "title": "Bug",
+          "href": "/openproject/api/v3/types/7"
+        }
+      ]
+    },
+    {
+      "key": "status",
+      "name": "Status",
+      "type": "Status",
+      "required": true,
+      "writable": true,
+      "has_default": true,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "category",
+      "name": "Category",
+      "type": "Category",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "targetVersions",
+      "name": "Target versions",
+      "type": "[]Version",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "observedInVersions",
+      "name": "Observed in versions",
+      "type": "[]Version",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "priority",
+      "name": "Priority",
+      "type": "Priority",
+      "required": true,
+      "writable": true,
+      "has_default": true,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "storyPoints",
+      "name": "Story Points",
+      "type": "Integer",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    },
+    {
+      "key": "sprint",
+      "name": "Sprint",
+      "type": "Sprint",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "backlogBucket",
+      "name": "Backlog bucket",
+      "type": "BacklogBucket",
+      "required": false,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": "_links",
+      "allowed_values": []
+    },
+    {
+      "key": "customField1",
+      "name": "S6 Test Field",
+      "type": "String",
+      "required": true,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    }
+  ],
+  "custom_fields": [
+    {
+      "key": "customField1",
+      "name": "S6 Test Field",
+      "type": "String",
+      "required": true,
+      "writable": true,
+      "has_default": false,
+      "placeholder": null,
+      "location": null,
+      "allowed_values": []
+    }
+  ]
+}

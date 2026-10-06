@@ -24,6 +24,10 @@ defaults:
   assignee: ""          # empty = unassigned
   version: ""           # ignored by speckit.taskstoissues
 
+# Status names used by status sync (feature 003). Written by speckit.openproject.discover-fields.
+# Each key is optional (open, in_progress, done). Names must exist in the project. Ignored by speckit.taskstoissues.
+statuses: {}
+
 # Create "follows" relations from dependency info in tasks.md
 create_relations: true
 

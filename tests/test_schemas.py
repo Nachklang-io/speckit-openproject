@@ -57,3 +57,50 @@ def test_relations_reference_known_items(root):
     for rel in data["relations"]:
         assert rel["from"] in data["items"]
         assert rel["to"] in data["items"]
+
+
+BASE_CONFIG = {
+    "project": "p",
+    "types": {"feature": "Feature", "phase": "Summary task", "task": "Task"},
+}
+
+
+@pytest.mark.parametrize(
+    "statuses",
+    [
+        None,
+        {},
+        {"done": "Closed"},
+        {"open": "New", "in_progress": "In progress", "done": "Closed"},
+    ],
+)
+def test_statuses_optional_and_partial(root, statuses):
+    cfg = dict(BASE_CONFIG)
+    if statuses is not None:
+        cfg["statuses"] = statuses
+    jsonschema.validate(cfg, schema(root, "config.schema.json"))
+
+
+@pytest.mark.parametrize("statuses", [{"blocked": "On hold"}, {"done": ""}, {"open": 1}])
+def test_statuses_rejects_unknown_key_and_bad_values(root, statuses):
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(
+            {**BASE_CONFIG, "statuses": statuses}, schema(root, "config.schema.json")
+        )
+
+
+def test_statuses_is_additive(root):
+    s = schema(root, "config.schema.json")
+    assert "statuses" not in s["required"]
+    assert s["properties"]["statuses"]["additionalProperties"] is False
+
+
+def test_hand_edited_fixture_validates_and_keeps_its_shape(root):
+    path = root / "tests/fixtures/config/valid-hand-edited.yml"
+    text = path.read_text()
+    cfg = yaml.safe_load(text)
+    jsonschema.validate(cfg, schema(root, "config.schema.json"))
+    assert cfg["types"]["phase"] == "Task: v2 #1"
+    assert cfg["create_relations"] is False
+    assert "# my sandbox" in text
+    assert "project:   " in text
