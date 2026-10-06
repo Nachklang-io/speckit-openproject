@@ -303,6 +303,12 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Work package 96 (T005, box `[x]`, ledger Closed) was moved to New by the main session. Dry run: plan shown, no file changed. Real run (`yes`): `pulled 1`, result `complete`, SHA-256 of `tasks.md` matched before the write, `tasks.md` differs in one bracket character (T005), ledger updated; re-run: `no changes`, no file changed.
 - Reinstalled with `scripts/dev-install.sh` first (the skill text contained the second-review wording).
 
+### 2026-10-06 – 14 work packages from `taskstoissues`, then sync (SC-004), skills mode, headless, revision 13097f8
+- The scratch project was rebuilt (`scripts/dev-install.sh`, config restored, `tasks.md` = `tests/fixtures/tasks/s1-tasks.md`, a placeholder `plan.md` because `check-prerequisites` requires it). `/speckit-taskstoissues` created the 14 work packages (ids 99–112: 1 feature, 3 phases, 10 tasks; one confirmation per phase) and the ledger `mapping-001-sandbox-demo.json` (schema-valid, no `status` keys, no `assignee`). The model reported two things of that run: a rejected `create` call with an invalid argument (nothing written) and that it did not re-read the created work packages afterwards. It also noted that the task text puts the raw path `src/app/__init__.py` in the description line (rendered as bold `init`); the `File:` line has the backticks. That is an observation about feature 001, not changed here.
+- Setup for the sync: T002 and T005 Closed and T003 In progress in OpenProject; T001 and T004 checked in `tasks.md`. Dry run (55 s): plan with 2 pull, 2 push, 6 refresh (all baseline), no file changed. Real run: plan 52 s, then **one** confirmation (`yes`), apply 36 s, **88 s in total**; result `complete`, `pulled 2, pushed 2, refreshed 6`; T001 and T004 are Closed in OpenProject, `tasks.md` differs in two bracket characters (T002, T005), the ledger has `status` for all ten tasks, schema-valid, no `assignee` (nobody assigned), phase and feature entries untouched. Re-run (42 s): `no changes`, no file changed.
+- What this covers: SC-004 for a feature with 14 work packages without conflicts (one confirmation, 88 s of command time; the user's own time was the one answer), and a sync on a ledger written by `speckit.taskstoissues` (a re-run of `taskstoissues` over a synced ledger was not run).
+- Not covered: elapsed time with a human typing the answers (the headless runs wait for nothing); the 120-task list.
+
 ### Untested after feature 003 (status 2026-10-06)
 Everything below was **not executed**; do not read the scenario table as covering it.
 - S16, hook part: the hook offer after `/speckit-implement` (the manifest side was verified: `specify extension add --dev` accepted the `prompt` key and wrote the hook with `optional: true` into `.specify/extensions.yml`).
@@ -310,9 +316,9 @@ Everything below was **not executed**; do not read the scenario table as coverin
 - Paths no live run exercised at all: the label `closed, not done` and a Rejected work package, the notice for more than 10 pushes, the recheck before the confirm (`changed meanwhile`), the ledger-write failure handling, the three-consecutive-errors stop.
 - Paths run only on earlier prompt revisions: baseline, push, conflict and `reverted` (S14, S15 on 8671d37 to e58a9d2); the counts wording ("pulled" without conflicts) was changed after S15 and was seen live only on later one-pull runs; S17 (a)–(c) ran on f8b02b9 or earlier. The model did not re-validate the written ledger against the ledger rules in the S15 run.
 - Command mode (`/speckit.openproject.sync-status`) in any form.
-- The 14-work-package run and its elapsed time (SC-004); the plan equality of a dry run and a real run compared verbatim (SC-003).
+- The plan equality of a dry run and a real run compared verbatim (SC-003).
 - A stale work package (ledger id without work package), a stale `lockVersion` between preview and confirm, a failed single confirm, a failed ledger write, an interrupted run between a push and the ledger write.
-- The path through `speckit.taskstoissues` that produces the ledger: S14/S15 used a hand-written ledger without `status`; a ledger written by 001 and then synced was not run, and neither was a re-run of `taskstoissues` on a ledger that has `status` and `assignee`.
+- A re-run of `speckit.taskstoissues` on a ledger that already has `status` and `assignee` (a ledger written by 001 and then synced was run, see the 14-work-package entry).
 - Other instances, OpenProject versions, and a second MCP server name.
 - Record of the install check (T034): `scripts/dev-install.sh` on 2026-10-06 ended with `OK`; `specify extension list` showed `OpenProject Integration (v0.0.3)` with `Commands: 2 | Hooks: 1 | Status: Enabled`; the skill `speckit-openproject-sync-status` exists in the scratch project.
 
