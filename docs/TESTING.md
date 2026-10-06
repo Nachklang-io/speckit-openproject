@@ -299,10 +299,14 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Restore: the transition was checked again and saved; a preview of New → Closed on work package 98 was `state: preview`, `ready: true` again. Then a real run pushed T007 (`complete`, `pushed 1`, work package 98 Closed with percent complete 100 as expected), and a re-run reported `no changes` and changed no file.
 - Not covered: the hook part of S16; a transition accepted by the preview but refused at the confirm; the restricted workflow for roles other than Project admin.
 
+### 2026-10-06 – live re-check on the final prompt revision 85acaa0 (headless)
+- Work package 96 (T005, box `[x]`, ledger Closed) was moved to New by the main session. Dry run: plan shown, no file changed. Real run (`yes`): `pulled 1`, result `complete`, SHA-256 of `tasks.md` matched before the write, `tasks.md` differs in one bracket character (T005), ledger updated; re-run: `no changes`, no file changed.
+- Reinstalled with `scripts/dev-install.sh` first (the skill text contained the second-review wording).
+
 ### Untested after feature 003 (status 2026-10-06)
 Everything below was **not executed**; do not read the scenario table as covering it.
 - S16, hook part: the hook offer after `/speckit-implement` (the manifest side was verified: `specify extension add --dev` accepted the `prompt` key and wrote the hook with `optional: true` into `.specify/extensions.yml`).
-- Prompt revisions after b034d8d (second API review: shell requirement and hash before read, read failure of an existing work package, any invalid preview is `blocked`, three consecutive preview tool errors stop the phase, non-fatal write context, ledger-write failure result, recheck tool error, report sentence for `closed, not done`): covered by prompt-text tests only until the live re-check recorded in the run log (if none is recorded, none was run).
+- Prompt revisions after b034d8d (second API review: shell requirement and hash before read, read failure of an existing work package, any invalid preview is `blocked`, three consecutive preview tool errors stop the phase, non-fatal write context, ledger-write failure result, recheck tool error, report sentence for `closed, not done`): covered by prompt-text tests, plus one live re-check on revision 85acaa0 (dry run, one pull with `yes`, re-run `no changes`; see the last run log entry); none of the new failure paths was triggered live.
 - Paths no live run exercised at all: the label `closed, not done` and a Rejected work package, the notice for more than 10 pushes, the recheck before the confirm (`changed meanwhile`), the ledger-write failure handling, the three-consecutive-errors stop.
 - Paths run only on earlier prompt revisions: baseline, push, conflict and `reverted` (S14, S15 on 8671d37 to e58a9d2); the counts wording ("pulled" without conflicts) was changed after S15 and was seen live only on later one-pull runs; S17 (a)–(c) ran on f8b02b9 or earlier. The model did not re-validate the written ledger against the ledger rules in the S15 run.
 - Command mode (`/speckit.openproject.sync-status`) in any form.
