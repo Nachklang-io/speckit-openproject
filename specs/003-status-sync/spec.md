@@ -14,6 +14,10 @@
 
 - Q: How is a task resolved that changed differently on both sides since the last sync? → A: OpenProject wins (it owns the status). `tasks.md` is adjusted to the OpenProject status; the report names every such conflict with the overwritten `tasks.md` state, so nothing is lost silently. No extra file keeps the overwritten state.
 - Q: Where is the assignee kept? → A: In the ledger and in the report only; `tasks.md` carries nothing but the checkboxes.
+- Q: What happens on the first sync when a ledger entry has no last synced status? → A: Baseline run: the missing base counts as "not done". A checked task whose work package is not done is pushed; a done work package with an open task is pulled; a baseline run never yields a conflict.
+- Q: What happens when a task is checked but its work package is in a closed status that is not done (e.g. "Rejected")? → A: Nothing is written on either side: the task is reported as "closed, not done", the checkbox stays, no push happens, and the ledger records the OpenProject status so the next run reports no change.
+- Q: May the sync reach the done status through intermediate statuses when the workflow does not allow a direct transition? → A: No. The task is reported as blocked with the allowed statuses; there is no switch and no automatic path.
+- Q: What happens when a task is reopened in `tasks.md` (checkbox removed) while its work package is still done and the last synced status was done? → A: OpenProject wins: the checkbox is set again and the report lists the task as "reverted" with the reason that OpenProject is still done. This feature never moves a work package out of the done status.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -47,6 +51,7 @@ After implementing, tasks in `tasks.md` are checked. The user runs the sync and 
 1. **Given** a checked task whose work package is not in the done status and the workflow allows the done status for it, **When** the user accepts the plan, **Then** the work package moves to the configured done status through the server's preview-then-confirm flow and the ledger is updated immediately after that write.
 2. **Given** a checked task whose work package cannot move to the done status in the current workflow, **When** the command runs, **Then** the task is reported as blocked with the statuses that are allowed, nothing is written for it, and the run result says so.
 3. **Given** a task that is open in `tasks.md` and in the open status in OpenProject, **When** the command runs, **Then** nothing happens for it.
+4. **Given** a task unchecked in `tasks.md` whose work package is still done (the last sync saw it done), **When** the command runs, **Then** the checkbox is checked again, the report lists the task as "reverted", and nothing is written to OpenProject.
 
 ---
 
@@ -106,11 +111,11 @@ When `/speckit-implement` finishes, the user is offered to run the sync so that 
 - A ledger entry points to a work package that no longer exists: reported as stale; never recreated, never removed from the ledger by this command.
 - A task in `tasks.md` has no ledger entry (not yet published): reported as "unpublished" with a pointer to `speckit.taskstoissues`; nothing is created.
 - A ledger entry has no matching task in `tasks.md` (task removed): reported as orphan; nothing is deleted.
-- The work package is in a closed status that is not the configured done status (for example "Rejected"): reported as "closed, not done"; the checkbox is not changed.
+- The work package is in a closed status that is not the configured done status (for example "Rejected"): reported as "closed, not done"; the checkbox is not changed, no push happens even if the task is checked, and the ledger records the status so that the next run reports no change.
 - Phase and feature work packages: not changed by this feature; their status is shown in the report only.
 - The ledger or `tasks.md` is missing, unreadable or invalid: the command stops and names the file; it does not rebuild anything.
 - The MCP server is not connected or the project is unreadable: the command stops with a specific message and writes nothing.
-- A task is checked in `tasks.md` and the ledger has no last synced status (an entry written by feature 001 before this feature): the first sync treats the OpenProject status at that moment as the base and reports it as a baseline run.
+- A task is checked in `tasks.md` and the ledger has no last synced status (an entry written by feature 001 before this feature): the first sync is reported as a baseline run and treats the missing base as "not done": the checked task is pushed (User Story 2), a done work package with an open task is pulled (User Story 1), and no conflict can arise because a missing base is never a change on either side.
 
 ## Requirements *(mandatory)*
 
@@ -118,9 +123,11 @@ When `/speckit-implement` finishes, the user is offered to run the sync so that 
 
 - **FR-001**: The command MUST read the project configuration, the ledger of the current feature and the feature's `tasks.md` from disk on every run, and MUST stop before any other step if a mandatory input (config `statuses` open/done, ledger, `tasks.md`) is missing or invalid, naming what to fix.
 - **FR-002**: For every task that has a ledger entry, the command MUST read the work package's current status and assignee from OpenProject and classify the task against three values: the `tasks.md` checkbox, the OpenProject status, and the status recorded at the last sync.
-- **FR-003**: A task counts as done in OpenProject only when its status equals the configured done status; any other status counts as not done, and a closed status that is not the done status MUST be reported as "closed, not done".
+- **FR-003**: A task counts as done in OpenProject only when its status equals the configured done status; any other status counts as not done, and a closed status that is not the done status MUST be reported as "closed, not done" and MUST NOT trigger a push or a checkbox change (the status is only recorded in the ledger).
 - **FR-004**: The command MUST apply changes that exist on one side only: a done work package checks an open task; a reopened work package unchecks a checked task; a checked task whose work package is not done is moved to the configured done status.
-- **FR-005**: The command MUST only move a work package to a status that OpenProject allows for it at that moment; a status that is not allowed MUST be reported as blocked, with the allowed statuses, and MUST NOT be forced or reached through intermediate statuses unasked.
+- **FR-004b**: A task that was unchecked in `tasks.md` since the last sync while its work package is still in the done status MUST be resolved by OpenProject's status: the checkbox is checked again and the report names the task as "reverted". The command MUST NOT move a work package out of the done status.
+- **FR-004a**: If a ledger entry has no last synced status, the task MUST be classified as a baseline run with the base "not done": the result is a push or a pull as in FR-004, never a conflict, and the report MUST label the item "baseline".
+- **FR-005**: The command MUST only move a work package to a status that OpenProject allows for it at that moment; a status that is not allowed MUST be reported as blocked, with the allowed statuses, and MUST NOT be forced or reached through intermediate statuses (no option for this exists in this feature).
 - **FR-006**: A task changed differently on both sides MUST be resolved by OpenProject's status (OpenProject wins), which gives the same result for the same input; the report MUST name every conflict, the overwritten `tasks.md` state and the resolution, and no confirmation per conflict is asked.
 - **FR-007**: The command MUST record, per task, the last synced status in the ledger, and MUST record the work package's assignee in the ledger and show it in the report; the assignee MUST NOT be written to `tasks.md`.
 - **FR-008**: The command MUST show a plan (one line per task with action and reason) before any write, MUST support `--dry-run` (no write on any side, line `Dry run: nothing was written.`), and without it MUST ask for confirmation once for the whole plan.
