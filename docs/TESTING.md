@@ -272,7 +272,7 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 
 ### Untested after feature 002 (status 2026-10-06)
 Everything below was **not executed**; do not read the scenario table as covering it.
-- Statuses of a type compared with the web UI (T031): the status administration is not readable for the bot user and the sandbox has no work package; the status lists rest on the MCP response.
+- Statuses of a type compared with the web UI: done on 2026-10-06 (see the run log); only the workflow table of the role Project admin was not read.
 - Command mode in a project set up with the Claude integration (it installs skills only); command mode was run only through the generic integration, as a dry run and as a real bootstrap. Hook keys for extension commands.
 - Skills-mode elapsed time for SC-001 (1 min 8 s was measured in command mode).
 - Custom fields of type list (the chosen title as a string), and of the types user, multi-select, hierarchy and formatted text.
@@ -280,4 +280,11 @@ Everything below was **not executed**; do not read the scenario table as coverin
 - A project with `can_update` false; a server error that contains a secret (redaction); a session that exposes write tools.
 - The prompt revision with the `<redacted-secret>` line in the Tool error class was not installed in the skills-mode scratch project when most runs of 2026-10-06 happened (the command-mode project had it).
 - Other instances, OpenProject versions, and the work with a second MCP server name.
+
+### 2026-10-06 – S10 overview compared with the web UI, statuses (T031 completed), admin session in the browser
+- Method: the maintainer logged the Chrome session in as an administrator; the main session only read pages (nothing was saved or changed; the work package count stays 0). The UI is in German there.
+- Status administration: 14 statuses (New, In specification, Specified, Confirmed, To be scheduled, Scheduled, In progress, Developed, In testing, Tested, Test failed, Closed, On hold, Rejected); `New` is the default; `Closed` and `Rejected` are marked as done. This matches the 14 statuses and the default/closed marks the skill reports.
+- Workflows (role Member, default transitions): Task allows New, In progress, Closed, On hold, Rejected (5, "narrowed set"); Feature allows 11 (New, In specification, Specified, In progress, Developed, In testing, Tested, Test failed, Closed, On hold, Rejected); Summary task allows 7 (New, To be scheduled, Scheduled, In progress, Closed, On hold, Rejected). All three match the per-type lists of the overview, and New, In progress and Closed exist for all three types.
+- Caveat: the workflow tables were read for the role Member; the bot's role in the project is "Project admin" (project members page). The MCP lists for the bot equal the Member tables, so a difference for the other role was not seen but the role's own table was not read.
+- With the earlier comparison (types, versions, priorities, mandatory field) the overview is verified against the web UI for the sandbox; T031 is closed. This settles research Unresolved 2 and 3 for the sandbox.
 

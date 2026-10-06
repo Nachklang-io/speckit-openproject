@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-05
 
-**Status**: Implemented; one check open (T031, statuses compared with the web UI)
+**Status**: Implemented
 
 **Input**: User description: "docs/briefs/002-field-discovery.md" — a command that reads the target OpenProject project's types, statuses, priorities, versions and custom fields (including mandatory ones) and writes or updates the integration config interactively, proposing mappings for phase/task types and status names, never overwriting user edits without showing a diff.
 
