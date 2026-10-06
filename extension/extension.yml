@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "openproject"
   name: "OpenProject Integration"
-  version: "0.0.2"
+  version: "0.0.3"
   description: "Field discovery, status sync, documentation sync, versions and time tracking between spec-kit and OpenProject via MCP"
   author: "Daniel Ring"
   repository: "https://github.com/ringind/speckit-openproject"
@@ -17,6 +17,16 @@ provides:
     - name: "speckit.openproject.discover-fields"
       file: "commands/discover-fields.md"
       description: "Read the target project's types, statuses and mandatory custom fields from OpenProject (read-only) and create or update .specify/openproject/config.yml after a shown diff"
+    - name: "speckit.openproject.sync-status"
+      file: "commands/sync-status.md"
+      description: "Sync task progress between OpenProject work packages and the checkboxes of tasks.md: pull status and assignee, push completed tasks along allowed transitions, OpenProject wins conflicts; supports --dry-run"
+
+hooks:
+  after_implement:
+    command: "speckit.openproject.sync-status"
+    optional: true
+    description: "Sync finished tasks with OpenProject after implementation"
+    prompt: "Sync task status with OpenProject now? Run with --dry-run first to see the plan."
 
 tags:
   - "openproject"

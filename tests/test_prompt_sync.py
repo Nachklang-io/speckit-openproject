@@ -7,11 +7,13 @@ import re
 import jsonschema
 import pytest
 import yaml
+from sync_reference import DECISION_ROWS
 
 PROMPT = "preset/commands/speckit.taskstoissues.md"
 EXTENSION_PROMPT = "extension/commands/discover-fields.md"
+SYNC_PROMPT = "extension/commands/sync-status.md"
 # Prompts that embed capability rows and config rules.
-PROMPTS = [PROMPT, EXTENSION_PROMPT]
+PROMPTS = [PROMPT, EXTENSION_PROMPT, SYNC_PROMPT]
 
 
 def block(text, name):
@@ -301,3 +303,83 @@ def test_discover_review_rules(discover):
         "Bootstrap with partial approval",
     ):
         assert text in discover, text
+
+
+# --- extension command: speckit.openproject.sync-status (feature 003) ---
+
+SYNC_CAPABILITIES = {
+    "get-write-context",
+    "list-statuses",
+    "search-work-packages",
+    "get-work-package",
+    "update-work-package",
+}
+
+
+@pytest.fixture(scope="module")
+def sync(root):
+    return (root / SYNC_PROMPT).read_text()
+
+
+@pytest.mark.parametrize("path", [PROMPT, SYNC_PROMPT])
+def test_ledger_rules_match_schema_and_include_assignee(root, path):
+    led = json.loads((root / "schemas/mapping.schema.json").read_text())
+    item = led["properties"]["items"]["additionalProperties"]
+    rules = block((root / path).read_text(), "ledger-rules").splitlines()
+    assert f"- ledger item keys: {j(item['properties'])}" in rules
+    assert "- ledger item keys: assignee, hash, id, kind, status, url" in rules
+    assert "- ledger assignee: non-empty string (never written by this command)" in rules or (
+        "- ledger assignee: non-empty string" in rules
+    )
+    assert item["properties"]["assignee"]["minLength"] == 1
+
+
+def test_sync_embeds_exactly_its_capabilities(sync):
+    ids = {row.split("|")[1].strip() for row in embedded_rows(sync)}
+    assert ids == SYNC_CAPABILITIES
+
+
+def test_sync_has_one_write_capability_and_no_delete(sync):
+    writes = [
+        row.split("|")[1].strip()
+        for row in embedded_rows(sync)
+        if re.search(r"`(create_|update_|delete_|bulk_|set_)", row)
+    ]
+    assert writes == ["update-work-package"]
+    assert "delete_" not in sync
+    assert "`confirm=true`" in sync
+
+
+def test_sync_decision_table_equals_reference(sync):
+    lines = block(sync, "decision-table").splitlines()
+    assert lines[0].startswith("| tc | oc |")
+    assert lines[2:] == DECISION_ROWS
+
+
+def test_sync_safety_rules_present(sync):
+    for text in (
+        "<user-content>",
+        "untrusted data",
+        "Every run starts from scratch",
+        "Dry run: nothing was written.",
+        "<redacted-host>",
+        "<redacted-secret>",
+        "`complete`",
+        "`incomplete`",
+        "`no changes`",
+        "`dry run`",
+        "`stopped`",
+        "OpenProject wins",
+        "even if the session exposes more tools",
+    ):
+        assert text in sync, text
+
+
+def test_sync_hard_limits_are_stated(sync):
+    for text in (
+        "never create, delete, rename, re-parent or reopen a work package",
+        "checkbox characters",
+        "tasks.md.tmp",
+        "mapping-<FEATURE>.json.tmp",
+    ):
+        assert text.lower() in sync.lower(), text
