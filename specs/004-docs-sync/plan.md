@@ -24,7 +24,7 @@ Add the extension command `speckit.openproject.sync-docs` (`extension/commands/s
 
 **Performance Goals**: SC-006: four documents, one confirmation, under 2 minutes of user time; one `list_work_package_attachments` plus one `get_work_package` per run
 
-**Constraints**: MCP-only (ADR-0002); no secrets, hosts or URLs in files or output (attachment links use the relative `attachment:<name>` form, R5); writes only through preview-then-confirm; ledger updated right after each write; deletes only attachments this command uploaded and replaced; the file handed to the upload tool must lie under the server's upload root (R1)
+**Constraints**: MCP-only (ADR-0002); no secrets, hosts or URLs in files or output (attachment links are path-only, host removed, R5); writes only through preview-then-confirm; ledger updated right after each write; deletes only attachments this command uploaded and replaced; the file handed to the upload tool must lie under the server's upload root (R1)
 
 **Scale/Scope**: one feature per run, at most four documents
 
@@ -34,8 +34,8 @@ Add the extension command `speckit.openproject.sync-docs` (`extension/commands/s
 |---|---|---|
 | I Spec-driven | Pass | specify → clarify → plan; tasks and analyze follow |
 | II MCP-only | Pass | capability ids only, rows embedded from the tool map; no REST, no reading of the upload root setting |
-| III Idempotent/safe (NON-NEGOTIABLE) | **Pass only with the amendment** | `--dry-run`, plan table, one confirmation, preview/confirm per write, ledger after each write, unchanged inputs are a no-op (SC-002). "Deletions are never performed" conflicts with replacing an attachment: resolved by the maintainer's decision of 2026-10-06 to amend III (exception: attachments uploaded by this project, ledger id, only when replaced, only after the confirmed plan) via ADR-0004 and constitution 1.2.0. The amendment is task T001 and must land before the prompt is written |
-| IV Test-first incl. prompts | Pass, with caveat | decision table and summary rendering have a reference implementation and fixtures; S18–S21 manual; the upload path is untested until Task 0 (R1) has run |
+| III Idempotent/safe (NON-NEGOTIABLE) | Pass (amendment landed 2026-10-06, ADR-0004, constitution 1.2.0) | `--dry-run`, plan table, one confirmation, preview/confirm per write, ledger after each write, unchanged inputs are a no-op (SC-002). "Deletions are never performed" conflicts with replacing an attachment: resolved by the maintainer's decision of 2026-10-06 to amend III (exception: attachments uploaded by this project, ledger id, only when replaced, only after the confirmed plan) via ADR-0004 and constitution 1.2.0. The amendment was task T001 (done) |
+| IV Test-first incl. prompts | Pass, with caveat | decision table and summary rendering have a reference implementation and fixtures; S18–S21 manual; Task 0 (T002) ran on 2026-10-06; the full command is untested until S18–S21 ran |
 | V Compatibility | Pass | skills + command mode; schema change additive (`schema_version` stays 1.0) |
 | VI Simplicity/transparency | Pass | no scripts; ambiguous states are `blocked` and named, never guessed |
 
@@ -99,10 +99,10 @@ docs/
 
 ## Risks
 
-1. **Upload path and name (unverified).** The tool takes `file_path`, no filename; the name presumably is the file's base name. The upload root is the maintainer's setting and not readable by the command. Mitigation: Task 0 (T002) verifies preview, upload, name, path rules and `delete_attachment` on a scratch work package before the prompt is written; a rejected path surfaces as a failed document with a message naming the upload-root prerequisite.
-2. **Markers may not survive the description round trip (unverified).** OpenProject may strip HTML comments from Markdown. Mitigation: R4 defines a heading-delimited fallback; T002 decides which one is used.
-3. **`attachment:<name>` link syntax (unverified)** renders as a link in OpenProject Markdown. Fallback: plain file name without a link. Decided in T002.
-4. **Attachment list fields (unverified).** The decision table needs `id` and file name per attachment. Content digests are not needed (the ledger hash decides), but a size or digest field would allow detecting content edited outside this command; not required, reported if present.
+1. **Upload path and name (verified 2026-10-06).** The attachment name is the file's base name; a path outside the upload root fails in the preview with a generic tool error. The upload root is the maintainer's setting and not readable by the command: a rejected path surfaces as a failed document with a message naming the upload-root prerequisite.
+2. **Markers and description round trip (verified 2026-10-06).** The comment markers survive byte for byte; the description arrives wrapped in `<user-content>` tags, which the command strips (R9).
+3. **Link form (verified 2026-10-06).** `attachment:<name>` renders without `href`; path-only links work and use the `download_url` path (host removed), R5. The upload result contains the instance host in `download_url`: it must never reach a file or the report.
+4. **Attachment list fields (verified).** `id`, `file_name`, `file_size_bytes`, `download_url`, no digest; the ledger hash decides what is current. Content edited outside this command is not detected (listed under untested/limitations).
 5. **Crash between upload and ledger write.** The next run sees an attachment with the document's name that the ledger does not know: state `blocked` (ambiguous), nothing is deleted, the report names it; the maintainer removes it by hand. Window is one tool call wide; accepted.
 6. **Description edited concurrently.** The update carries `lock_version`; a stale write is rejected by the server. The command re-reads the description immediately before the preview and replaces only the block.
 7. **Touching the preset and sync-status prompts (ledger-rules)** affects features 001 and 003. Mitigation: only the `documents` key is added; their tests must pass unchanged apart from that line.

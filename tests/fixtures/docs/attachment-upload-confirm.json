@@ -1,0 +1,23 @@
+{
+  "action": "create",
+  "state": "confirmed",
+  "ready": true,
+  "message": "Attachment uploaded successfully.",
+  "attachment_id": 3,
+  "work_package_id": 113,
+  "validation_errors": {},
+  "result": {
+    "id": 3,
+    "title": "probe.md",
+    "file_name": "probe.md",
+    "file_size_bytes": 30,
+    "description": "",
+    "content_type": "text/plain",
+    "status": "uploaded",
+    "author": "speckit bot",
+    "container_type": "WorkPackage",
+    "container_id": 113,
+    "created_at": "2026-10-06T12:52:43.806Z",
+    "download_url": "/openproject/api/v3/attachments/3/content"
+  }
+}

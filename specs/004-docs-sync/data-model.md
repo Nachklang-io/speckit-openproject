@@ -37,4 +37,4 @@ Per document: absolute path, base name (= attachment name), SHA-256 hex of the b
 
 ## Summary block
 
-Rendered from the ledger only (R4 in `research.md`): header row, one row per ledger document in fixed order, markers around. Same ledger → same text.
+Rendered from the ledger plus the current attachment link paths (R4, R5 in `research.md`): header row, one row per ledger document in fixed order, markers around. Same ledger → same text.
