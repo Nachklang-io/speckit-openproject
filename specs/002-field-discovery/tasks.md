@@ -99,7 +99,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`. `preset/` is t
 
 - [X] T027 [US3] Extend `tests/test_prompt_sync.py`: the extension prompt contains the line `Dry run: nothing was written.` and states that no file is created or changed with `--dry-run` (depends on T013)
 - [X] T028 [US3] Add step 10 to the prompt: with `--dry-run` print the overview, proposals (all defaults assumed accepted for display) and diff, then `Dry run: nothing was written.` and stop; no temporary file is created either (depends on T024, T027)
-- [ ] T029 [US3] Define scenario S12 in `docs/TESTING.md`, then **(maintainer)** run it through the installed skill (config absent and config present; checksum and directory listing before and after); record results (depends on T028)
+- [x] T029 [US3] Define scenario S12 in `docs/TESTING.md`, then **(maintainer)** run it through the installed skill (config absent and config present; checksum and directory listing before and after); record results (depends on T028)
 
 ---
 
