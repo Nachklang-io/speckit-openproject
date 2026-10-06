@@ -129,10 +129,13 @@ def test_no_urls_or_tokens_in_command_and_fixtures(root):
 
 def test_no_delete_capability(root, prompt):
     assert "delete_" not in prompt
-    assert not any(
-        row.split("|")[1].strip().startswith("delete")
+    # ADR-0004: the only delete capability is the replaced attachment this project uploaded itself
+    deletes = [
+        row.split("|")[1].strip()
         for row in table_rows((root / "docs" / "mcp-tool-map.md").read_text())[2:]
-    )
+        if row.split("|")[1].strip().startswith("delete")
+    ]
+    assert deletes == ["delete-attachment"]
 
 
 def test_ledger_is_per_feature_and_label_line_is_labels(prompt):
