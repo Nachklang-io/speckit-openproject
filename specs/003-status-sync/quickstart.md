@@ -20,4 +20,4 @@ Expected: all decision-table rows (including baseline, reverted, closed-not-done
 | S16 | Restricted workflow for the task type (maintainer, admin UI): New may not go to Closed; check T007 | T007 `blocked`, nothing written for it, others processed, result `incomplete`; hook check: finish a `/speckit-implement` run and see the optional offer; decline reads nothing |
 | S17 | Stop conditions: no `statuses.done`; ledger absent; MCP server not started; `tasks.md` edited between plan and write | each stops with a specific message and zero writes; the last case writes nothing and asks for a re-run |
 
-Record date, OpenProject version, MCP server version, spec-kit version and result in `docs/TESTING.md`; label command mode and the transition preview (research R4) untested until run.
+Record date, OpenProject version, MCP server version, spec-kit version and result in `docs/TESTING.md`; label command mode, the hook offer and every path not run untested (see `docs/TESTING.md`, "Untested after feature 003").

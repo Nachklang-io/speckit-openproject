@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-06
 
-**Status**: Draft
+**Status**: Implemented on branch `003-status-sync` (paths not yet run live: see `docs/TESTING.md`, "Untested after feature 003")
 
 **Input**: User description: "docs/briefs/003-status-sync.md" — a command that keeps task progress consistent between a feature's `tasks.md` and the OpenProject work packages created for it: progress made in OpenProject flows back into the task checkboxes and the ledger, completed tasks flow forward as a status change, conflicts are handled by a clear policy, and every run can be previewed with `--dry-run`. It builds on the optional `statuses` section of the config (feature 002) and on the mapping ledger (feature 001).
 

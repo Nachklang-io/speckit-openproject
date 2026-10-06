@@ -35,7 +35,7 @@ Add the extension command `speckit.openproject.sync-status` (`extension/commands
 | I Spec-driven | Pass | specify → clarify → plan; tasks and analyze follow |
 | II MCP-only | Pass | capability ids only, rows embedded from the tool map; no REST |
 | III Idempotent/safe (NON-NEGOTIABLE) | Pass | `--dry-run`, plan table, one confirmation, preview/confirm per write, ledger written after each write, decision table makes a second run a no-op (SC-002), nothing is deleted or reopened |
-| IV Test-first incl. prompts | Pass, with caveat | decision table has a reference implementation and fixtures in pytest; S14–S17 manual; the transition check (R4) is **unverified** and is labelled untested until S14 ran |
+| IV Test-first incl. prompts | Pass, with caveat | decision table has a reference implementation and fixtures in pytest; S14–S17 manual; the forbidden-transition preview was observed live on 2026-10-06 (R4); the paths listed in `docs/TESTING.md` under "Untested after feature 003" stay labelled |
 | V Compatibility | Pass | skills + command mode; schema change additive; hook key follows the bundled spec-kit extensions (R7) |
 | VI Simplicity/transparency | Pass | no scripts; conflicts and blocked tasks are named, never guessed |
 
@@ -92,8 +92,8 @@ No constitution violations.
 
 ## Risks
 
-1. **Transition check is unverified.** `get_project_work_package_context` narrows statuses per type, not per current status. The server may reject a forbidden transition in the update preview (`state: rejected`, readable `validation_errors`) or fail with a generic client error. Mitigation: R4 defines the rule for both outcomes (rejected preview or tool error on the preview → `blocked`, no confirm call); S14 includes a restricted workflow set up in the admin UI by the maintainer.
-2. **`get_work_package` field names for status and assignee are unverified in the tool map.** Mitigation: first task records a live response as a fixture; the prompt reads status by name and id and stops with a specific message if the fields are absent.
+1. **Transition check (verified live 2026-10-06, kept for the record).** `get_project_work_package_context` narrows statuses per type, not per current status. The server may reject a forbidden transition in the update preview (`state: rejected`, readable `validation_errors`) or fail with a generic client error. Mitigation: R4 defines the rule for both outcomes (rejected preview or tool error on the preview → `blocked`, no confirm call); S16 ran with a restricted workflow: the preview was `state: rejected` (research R4). A transition accepted by the preview but refused at the confirm is still untested.
+2. **`get_work_package` fields (verified live 2026-10-06):** `status` is the name, `assignee` the display name or `null`; recorded as fixtures.
 3. **Agent edits of `tasks.md`.** A wrong regex could damage the file. Mitigation: a single edit rule (`- [ ]`/`- [x]` at line start of a line whose task key matches), SHA-256 of the whole file before the read and again before the write, write through a temporary file, S14 compares a diff, the test helper implements the same rule on fixtures.
 4. **Interrupted run between a push and the ledger write.** Mitigation: the ledger is written after each successful push; a repeated run reads the current status, sees done on both sides and records it.
 5. **Touching the preset prompt (ledger-rules) affects feature 001.** Mitigation: only the `assignee` key is added; existing 001 tests must pass unchanged apart from that line.
