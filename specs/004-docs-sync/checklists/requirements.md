@@ -22,4 +22,4 @@
 - [x] User scenarios cover primary flows
 
 ## Notes
-- Open for /speckit-clarify: replace order (delete-then-upload vs upload-then-delete), summary content (links only vs excerpts), behaviour when the attachment capability is missing but a description-only sync might be wanted.
+- Clarified 2026-10-06: replace order, summary content, missing upload capability. Deferred to plan: how file content reaches the upload tool (inline vs upload directory), hash algorithm, ledger schema shape for documents.
