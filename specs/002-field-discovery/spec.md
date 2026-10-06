@@ -14,7 +14,7 @@
 
 - Q: Does this feature add a status mapping to the config, or only display statuses? → A: It adds an optional, additive `statuses` section (open / in progress / done → OpenProject status name); feature 003 consumes it.
 - Q: What happens when the user cannot or will not give a value for a mandatory custom field? → A: The config is still written without that value; the command warns, names the field and type, and reports the result as "incomplete". No placeholder value is invented.
-- Q: Does an approved change edit only the approved keys or rewrite the whole file? → A: Only the approved keys are changed; comments, key order and unknown keys stay as they are. Where that is not possible, the diff says so before anything is written.
+- Q: Does an approved change edit only the approved keys or rewrite the whole file? → A: Only the approved keys are changed; comments, key order and valid keys the command does not manage stay as they are. Keys unknown to the schema make the config invalid (`speckit.taskstoissues` stops on them too); see the invalid-config edge case. Where that is not possible, the diff says so before anything is written.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -102,7 +102,7 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 - A custom field is mandatory for the task type but not for the feature type (or vice versa): the config stores values only for what is required for the types actually used.
 - A mandatory custom field has a type for which no sensible value can be proposed (for example a user or multi-select field): the user is asked, and the command does not invent a value; if no value is given, the config is written without it and the run is reported as "incomplete" (FR-007).
 - The existing config file is invalid (YAML or schema errors): the command reports the problems and offers to rebuild from discovery results, showing the diff; it never discards the file silently.
-- The existing config contains keys unknown to the schema or comments: they are kept as they are and the diff only touches approved keys.
+- The existing config contains comments or valid keys the command does not manage: they are kept as they are and the diff only touches approved keys. Keys unknown to the schema are rule violations: the command lists them and, only after approval of the rebuild shown as a diff, drops them (as with any other invalid config).
 - Names differing only by case or whitespace between config and OpenProject: treated as a mismatch and shown, not auto-corrected.
 - The user interrupts mid-way: the config file is either unchanged or fully written, never half-written.
 - The instance is large (many projects, many versions): the command reads only what is needed for the target project and reports when a list was truncated.
@@ -125,7 +125,7 @@ A user runs discovery with the MCP server unavailable, the project unknown, or a
 - **FR-011**: The command MUST NOT write API tokens, instance URLs or other secrets to any file or output, and MUST NOT modify anything in OpenProject.
 - **FR-012**: Re-running the command with an unchanged project and unchanged config MUST report "no changes" and MUST NOT modify the file (idempotent).
 - **FR-013**: The command MUST work in skills mode and command mode and MUST support a `--dry-run` argument.
-- **FR-014**: The command MUST apply an approved change by editing only the approved keys, leaving comments, key order and keys it does not manage untouched. Where an edit cannot preserve something (for example a comment attached to a replaced value), the diff MUST say so before anything is written.
+- **FR-014**: The command MUST apply an approved change by editing only the approved keys, leaving comments, key order and valid keys it does not manage untouched. Where an edit cannot preserve something (for example a comment attached to a replaced value), the diff MUST say so before anything is written.
 - **FR-015**: The command MUST propose, from the project's statuses, a mapping of spec-kit task states (open, in progress, done) to OpenProject status names and store it in a new optional config section `statuses`. The section is additive: configs without it stay valid, no shipped key is renamed or removed, and the shared config schema is extended accordingly. The mapping is consumed by feature 003 (status sync); this feature only writes it.
 - **FR-016**: The command MUST summarize at the end what was read, what was proposed, what was written or skipped, and the next recommended command. It MUST also list any `SPECKIT_OPENPROJECT_*` environment variable that is set, because write commands resolve those after the config file and a stale value can hide the discovered config.
 
