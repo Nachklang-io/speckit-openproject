@@ -264,3 +264,9 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Elapsed time (SC-001): 1 minute 8 seconds from submitting the command to the written config, measured by the maintainer in this command-mode run, with the answers given at once. A time for a skills-mode run was not taken; the skills-mode runs follow the same steps and questions.
 - Limits: command mode was run in a project initialised with the generic integration, not with the Claude integration (which installs skills only); hook keys remain unverified.
 
+### 2026-10-06 – S13 (e), real rebuild of an invalid config, prompt revision fb63766 plus `<redacted-secret>` line
+- Setup: `tests/fixtures/config/invalid-statuses-key.yml` (sha256 `3734f12c…6d25`) as the config in the scratch project. The maintainer ran `/speckit-openproject-discover-fields`, answered the question dialogs (proposals: accept all; `customField1`: `test`; changes to write: all) and pasted the output.
+- Output: the pasted text shows the questions only as dialog summaries, so the overview, the proposals, the violation list and the diff of this run are **not visible in the paste**; the report says the invalid key `statuses.blocked` was found, the config was rebuilt from the template, the temporary file was read back and validated before the move, result `complete`, nothing skipped, no warnings, next step `/speckit-taskstoissues --dry-run`.
+- Checked afterwards: `config.yml` is byte-identical (`cmp`) to the complete config (sha256 `9d6c9d06…18bb`): `statuses.blocked` and the old header comment are gone, `statuses` has the three keys, `required_custom_fields.customField1` is `"test"`; validates against the schema; no temporary file left.
+- So the end state of an approved rebuild is evidenced; that the diff was shown before the approval is not evidenced by this paste (the dry run of the same case showed it). The case with several violations in one file was not run.
+
