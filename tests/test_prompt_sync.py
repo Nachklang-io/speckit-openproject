@@ -428,3 +428,20 @@ def test_preset_keeps_status_and_assignee_when_it_writes_the_ledger(prompt):
 
 def test_sync_does_not_stop_on_done_missing_from_the_write_context(sync):
     assert "Do not stop because `statuses.done` is missing from the `available_statuses`" in sync
+
+
+def test_sync_second_review_rules(sync):
+    for text in (
+        "`ready` = `false` or a non-empty `validation_errors`",
+        "the read failed for an existing work package: stop",
+        "Any preview that is not valid makes it `blocked`",
+        "three consecutive previews raise tool errors",
+        "only drops the list of available statuses",
+        "it is not the transition list of this work package",
+        "from this recheck read",
+        "result `incomplete`",
+        "run a shell command for a SHA-256",
+        "existing `url` values (paths) stay unchanged",
+        "a later reopen in OpenProject will pull the box open",
+    ):
+        assert text in sync, text
