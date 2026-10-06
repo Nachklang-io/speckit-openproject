@@ -270,3 +270,14 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Checked afterwards: `config.yml` is byte-identical (`cmp`) to the complete config (sha256 `9d6c9d06…18bb`): `statuses.blocked` and the old header comment are gone, `statuses` has the three keys, `required_custom_fields.customField1` is `"test"`; validates against the schema; no temporary file left.
 - So the end state of an approved rebuild is evidenced; that the diff was shown before the approval is not evidenced by this paste (the dry run of the same case showed it). The case with several violations in one file was not run.
 
+### Untested after feature 002 (status 2026-10-06)
+Everything below was **not executed**; do not read the scenario table as covering it.
+- Statuses of a type compared with the web UI (T031): the status administration is not readable for the bot user and the sandbox has no work package; the status lists rest on the MCP response.
+- Command mode in a project set up with the Claude integration (it installs skills only); command mode was run only through the generic integration, as a dry run and as a real bootstrap. Hook keys for extension commands.
+- Skills-mode elapsed time for SC-001 (1 min 8 s was measured in command mode).
+- Custom fields of type list (the chosen title as a string), and of the types user, multi-select, hierarchy and formatted text.
+- An invalid config with several violations or a YAML syntax error; the visibility of the rebuild diff before approval in a real run (the dry run showed it).
+- A project with `can_update` false; a server error that contains a secret (redaction); a session that exposes write tools.
+- The prompt revision with the `<redacted-secret>` line in the Tool error class was not installed in the skills-mode scratch project when most runs of 2026-10-06 happened (the command-mode project had it).
+- Other instances, OpenProject versions, and the work with a second MCP server name.
+

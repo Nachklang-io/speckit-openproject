@@ -30,8 +30,10 @@ Rules: it only reads from OpenProject, it never writes tokens, URLs or `.env` co
 - Interactive only; there is no non-interactive mode.
 - "Read only" is enforced by the prompt, not by the client: spec-kit does not install the `tools` frontmatter of an extension command in skills mode, and Claude Code's `allowed-tools` grants permission without restricting other tools. A session that exposes the server's write tools could call them; the prompt forbids it and the tests check that it names no write tool.
 - Custom fields of type list: the chosen title is stored as a string; whether the server accepts that on creation is **untested**. Custom fields of type user, multi-select, hierarchy or formatted text cannot be stored in `required_custom_fields` and are reported.
-- `available_versions` with real versions and the per-project list of enabled types are not yet verified against a live instance; see `docs/TESTING.md` for what was executed.
-- Command mode (`/speckit.openproject.discover-fields`) is untested unless `docs/TESTING.md` says otherwise.
+- Verified against the sandbox (2026-10-06): versions with data (one open, one closed) and the per-project list of enabled types match the web UI. **Untested:** the statuses of a type compared with the web UI, other instances and OpenProject versions, projects with several hundred versions or types.
+- Command mode (`/speckit.openproject.discover-fields`) was run as a dry run and as a real bootstrap in a project set up with spec-kit's generic integration (the Claude integration installs skills only). **Untested:** command mode in a Claude-integration project, and the elapsed time of a skills-mode run (SC-001 was measured in command mode only: 1 min 8 s).
+- An invalid config with several violations at once, and the YAML-syntax-error case, were not run; only a single unknown key was (dry run and real rebuild).
+- Read-only handling of a project with `can_update` false and the redaction of secrets in server errors are checked by prompt text and string tests only, not by a live run.
 - It was not verified how spec-kit forms hook keys for extension commands, so this command has no hook check.
 - The project must be readable by the server; if it reports `can_update` false the run warns that write commands will fail. The server's own allowlist cannot be inspected.
 - Error text from the server is shown with URLs and host names replaced by `<redacted-host>`, and tokens or Authorization headers by `<redacted-secret>`.
