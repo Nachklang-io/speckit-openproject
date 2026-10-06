@@ -1,0 +1,204 @@
+{
+  "hash_1": "1111111111111111111111111111111111111111111111111111111111111111",
+  "hash_2": "2222222222222222222222222222222222222222222222222222222222222222",
+  "cases": [
+    {
+      "name": "optional document absent, nothing known",
+      "local": null,
+      "entry": null,
+      "attachments": [],
+      "action": "skip",
+      "writes": [],
+      "cleanup": null
+    },
+    {
+      "name": "document deleted locally, entry remains",
+      "local": null,
+      "entry": {
+        "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "attachment_id": 4,
+        "synced": "2026-10-01"
+      },
+      "attachments": [
+        4
+      ],
+      "action": "orphan",
+      "writes": [],
+      "cleanup": null
+    },
+    {
+      "name": "document missing, foreign attachment present",
+      "local": null,
+      "entry": null,
+      "attachments": [
+        9
+      ],
+      "action": "orphan",
+      "writes": [],
+      "cleanup": null
+    },
+    {
+      "name": "first sync",
+      "local": "1111111111111111111111111111111111111111111111111111111111111111",
+      "entry": null,
+      "attachments": [],
+      "action": "new",
+      "writes": [
+        "upload",
+        "ledger"
+      ],
+      "cleanup": null
+    },
+    {
+      "name": "first sync, attachment with the name exists (foreign)",
+      "local": "1111111111111111111111111111111111111111111111111111111111111111",
+      "entry": null,
+      "attachments": [
+        9
+      ],
+      "action": "blocked",
+      "reason": "foreign attachment",
+      "writes": [],
+      "cleanup": null
+    },
+    {
+      "name": "attachment removed in the UI",
+      "local": "1111111111111111111111111111111111111111111111111111111111111111",
+      "entry": {
+        "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "attachment_id": 4,
+        "synced": "2026-10-01"
+      },
+      "attachments": [],
+      "action": "restored",
+      "writes": [
+        "upload",
+        "ledger"
+      ],
+      "cleanup": null
+    },
+    {
+      "name": "unchanged",
+      "local": "1111111111111111111111111111111111111111111111111111111111111111",
+      "entry": {
+        "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "attachment_id": 4,
+        "synced": "2026-10-01"
+      },
+      "attachments": [
+        4
+      ],
+      "action": "unchanged",
+      "writes": [],
+      "cleanup": null
+    },
+    {
+      "name": "changed",
+      "local": "2222222222222222222222222222222222222222222222222222222222222222",
+      "entry": {
+        "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "attachment_id": 4,
+        "synced": "2026-10-01"
+      },
+      "attachments": [
+        4
+      ],
+      "action": "changed",
+      "writes": [
+        "upload",
+        "ledger",
+        "delete",
+        "ledger"
+      ],
+      "cleanup": null
+    },
+    {
+      "name": "ledger attachment gone, a different one with the name exists",
+      "local": "1111111111111111111111111111111111111111111111111111111111111111",
+      "entry": {
+        "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "attachment_id": 4,
+        "synced": "2026-10-01"
+      },
+      "attachments": [
+        9
+      ],
+      "action": "blocked",
+      "reason": "ambiguous",
+      "writes": [],
+      "cleanup": null
+    },
+    {
+      "name": "duplicate with the name beside the ledger attachment",
+      "local": "1111111111111111111111111111111111111111111111111111111111111111",
+      "entry": {
+        "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "attachment_id": 4,
+        "synced": "2026-10-01"
+      },
+      "attachments": [
+        4,
+        9
+      ],
+      "action": "blocked",
+      "reason": "ambiguous",
+      "writes": [],
+      "cleanup": null
+    },
+    {
+      "name": "interrupted after upload: pending_delete still on the work package",
+      "local": "2222222222222222222222222222222222222222222222222222222222222222",
+      "entry": {
+        "hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "attachment_id": 6,
+        "synced": "2026-10-01",
+        "pending_delete": 5
+      },
+      "attachments": [
+        5,
+        6
+      ],
+      "action": "unchanged",
+      "writes": [],
+      "cleanup": "delete"
+    },
+    {
+      "name": "interrupted after delete: pending_delete already gone",
+      "local": "2222222222222222222222222222222222222222222222222222222222222222",
+      "entry": {
+        "hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "attachment_id": 6,
+        "synced": "2026-10-01",
+        "pending_delete": 5
+      },
+      "attachments": [
+        6
+      ],
+      "action": "unchanged",
+      "writes": [],
+      "cleanup": "clear"
+    },
+    {
+      "name": "pending_delete plus a further change",
+      "local": "1111111111111111111111111111111111111111111111111111111111111111",
+      "entry": {
+        "hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "attachment_id": 6,
+        "synced": "2026-10-01",
+        "pending_delete": 5
+      },
+      "attachments": [
+        5,
+        6
+      ],
+      "action": "changed",
+      "writes": [
+        "upload",
+        "ledger",
+        "delete",
+        "ledger"
+      ],
+      "cleanup": "delete"
+    }
+  ]
+}
