@@ -610,3 +610,8 @@ def test_docs_append_rule_and_counts(docs):
     assert "not as `replaced`" in docs
     assert "`Description: update` whenever any document is `new`, `changed` or `restored`" in docs
     assert "stop with an error if it does not increase" in docs
+
+
+def test_docs_does_not_compare_the_project_display_name(docs):
+    assert "display name, not its identifier" in docs
+    assert "must equal `project` of the configuration" not in docs
