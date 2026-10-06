@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "docs/briefs/004-docs-sync.md" — a command that publishes a feature's design documents (`spec.md`, `plan.md`, optionally `research.md` and `data-model.md`) to the feature's parent work package in OpenProject: each file is attached, an outdated attachment is replaced when the file's content changed, and a generated summary with links is kept in the work package description. Wiki pages cannot be created through the API (ADR-0003). It builds on the mapping ledger (feature 001), which knows the feature work package.
+**Input**: User description: "docs/briefs/004-docs-sync.md" — a command that publishes a feature's design documents (`spec.md`, `plan.md`, optionally `research.md` and `data-model.md`) to the feature work package in OpenProject: each file is attached, an outdated attachment is replaced when the file's content changed, and a generated summary with links is kept in the work package description. Wiki pages cannot be created through the API (ADR-0003). It builds on the mapping ledger (feature 001), which knows the feature work package.
 
 ## Clarifications
 
@@ -20,7 +20,7 @@
 
 ### User Story 1 - Publish the design documents (Priority: P1)
 
-After specify and plan, the spec-kit user runs the sync command. Team members who only use OpenProject find `spec.md` and `plan.md` as attachments on the feature's parent work package, and a summary in its description that names each document and links to it.
+After specify and plan, the spec-kit user runs the sync command. Team members who only use OpenProject find `spec.md` and `plan.md` as attachments on the feature work package, and a summary in its description that names each document and links to it.
 
 **Why this priority**: This is the point of the feature: stakeholders read the contract and the plan where they work, without access to the repository.
 
@@ -126,7 +126,7 @@ The attachment upload tool of the MCP server is only available when the server i
 - **SC-001**: After changing one line of `spec.md` and running the command, exactly one attachment differs from before, the summary reflects the change, and every other attachment and every character of the description outside the summary block is identical.
 - **SC-002**: A second run directly after a completed sync produces zero modifications in OpenProject and the ledger.
 - **SC-003**: A `--dry-run` produces zero modifications, and its plan equals the plan of the following real run on the same input.
-- **SC-004**: Interrupting a real run at any point and running again never leaves two attachments with the same document name.
+- **SC-004**: Interrupting a real run at any point after the ledger recorded the upload and running again never leaves two attachments with the same document name. An interruption between an upload and its ledger entry leaves one unknown duplicate; the next run reports it as `blocked` and deletes nothing.
 - **SC-005**: All stop conditions (missing upload capability, missing ledger, missing `spec.md`, server not connected) end with a message naming what to fix and zero changes.
 - **SC-006**: A user needs at most one confirmation and under 2 minutes of their own time from command to final report for four documents.
 
@@ -135,7 +135,7 @@ The attachment upload tool of the MCP server is only available when the server i
 - The feature work package exists in the ledger (feature 001); this feature never creates it.
 - OpenProject does not version attachments: "new version" means the old attachment is replaced by one with the same file name and the new content.
 - The content hash is computed over the file bytes; the hash algorithm and encoding are a plan decision.
-- The upload capability depends on the MCP server being configured with an upload directory (verified for `jtauschl/openproject-ce-mcp` v0.4.1 only from its tool documentation, not yet against a running server); how content is handed to the tool (inline or from the upload directory) is verified in the plan phase.
+- The upload capability depends on the MCP server being configured with an upload directory (`OPENPROJECT_ATTACHMENT_ROOT`); the tool schema of `jtauschl/openproject-ce-mcp` v0.4.1 was read on 2026-10-06: the tool takes a file path under that directory (no inline content, no file name parameter). Upload, attachment name and path rules are verified against a running server in the first task of the plan.
 - Only the documents named in FR-002 are synced; `tasks.md` is out of scope (feature 003 covers its status).
 - ADR-0003 stays valid and is re-verified here: no wiki page creation, attachments plus description.
 - One run covers one feature (current feature directory, or the one given as argument).
