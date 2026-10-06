@@ -63,7 +63,7 @@ Why `blocked` for unknown extras: the command may only delete what it uploaded (
 
 ## R7 Order of writes (P, from clarification 1)
 
-Per document: preview → confirm upload → ledger (new id, `pending_delete` old id) → `delete-attachment` (only with a confirm if the tool has one, else after the plan confirmation) → ledger (clear). After all documents: render the block from the ledger, `get-work-package` description, compare, `update-work-package` description with preview/confirm only if the text differs. A failed upload leaves the old attachment and ledger as they were.
+Per document: preview → confirm upload → ledger (new id, `pending_delete` old id) → `delete-attachment` (only with a confirm if the tool has one, else after the plan confirmation) → ledger (clear). After all documents: render the block from the ledger, `get-work-package` description, compare, `update-work-package` description with preview/confirm only if the text differs. A failed upload leaves the old attachment and ledger as they were. The description write has no ledger entry: its idempotence comes from the text comparison (same block = no write), not from the ledger.
 
 ## R8 Capability check (P)
 
