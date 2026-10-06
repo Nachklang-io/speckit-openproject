@@ -24,6 +24,22 @@
         "additionalProperties": false
       }
     },
+    "documents": {
+      "type": "object",
+      "description": "design documents synced to the feature work package by speckit.openproject.sync-docs; key = file name",
+      "propertyNames": {"enum": ["spec.md", "plan.md", "research.md", "data-model.md"]},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["hash", "attachment_id", "synced"],
+        "properties": {
+          "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "SHA-256 of the file bytes last uploaded"},
+          "attachment_id": {"type": "integer", "minimum": 1, "description": "attachment holding that content"},
+          "synced": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "date of the run that uploaded that content"},
+          "pending_delete": {"type": "integer", "minimum": 1, "description": "superseded attachment id that is still to be deleted"}
+        },
+        "additionalProperties": false
+      }
+    },
     "relations": {
       "type": "array",
       "items": {

@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "project": "speckit-sandbox",
+  "feature": "001-demo",
+  "items": {
+    "feature": {
+      "kind": "feature",
+      "id": 100,
+      "url": "/work_packages/100"
+    }
+  },
+  "documents": {
+    "spec.md": {
+      "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "attachment_id": 4,
+      "synced": "2026-10-06"
+    },
+    "plan.md": {
+      "hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "attachment_id": 6,
+      "synced": "2026-10-06",
+      "pending_delete": 5
+    }
+  }
+}
