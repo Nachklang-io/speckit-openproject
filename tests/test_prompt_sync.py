@@ -424,3 +424,7 @@ def test_sync_closed_not_done_is_a_ledger_refresh(sync):
 def test_preset_keeps_status_and_assignee_when_it_writes_the_ledger(prompt):
     assert "keep every other key of it (`status` and `assignee` are written by" in prompt
     assert "keep `status` and `assignee` of the entry" in prompt
+
+
+def test_sync_does_not_stop_on_done_missing_from_the_write_context(sync):
+    assert "Do not stop because `statuses.done` is missing from the `available_statuses`" in sync

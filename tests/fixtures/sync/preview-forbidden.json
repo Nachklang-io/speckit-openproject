@@ -1,0 +1,20 @@
+{
+  "action": "update",
+  "state": "rejected",
+  "ready": false,
+  "work_package_id": "98",
+  "validation_errors": {
+    "status": "Status is invalid because no valid transition exists from old to new status for the current user's roles."
+  },
+  "payload": {
+    "lockVersion": 2,
+    "percentageDone": 100,
+    "_links": {
+      "status": {
+        "href": "/openproject/api/v3/statuses/12",
+        "title": "Closed"
+      }
+    }
+  },
+  "result": null
+}

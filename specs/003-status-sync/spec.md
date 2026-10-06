@@ -107,7 +107,7 @@ When `/speckit-implement` finishes, the user is offered to run the sync so that 
 ### Edge Cases
 
 - The config has no `statuses` section, or lacks the done status: the command stops before any read or write and tells the user to run `speckit.openproject.discover-fields`.
-- A configured status name does not exist in the project or is not allowed for the task type: the command stops (config problem) and names the status; it does not guess another status.
+- A configured status name does not exist among the instance's statuses: the command stops (config problem) and names the status; it does not guess another status. A status that exists but that the workflow does not allow for a task is not a config problem: that task is reported as `blocked` (FR-005) and the run goes on.
 - A ledger entry points to a work package that no longer exists: reported as stale; never recreated, never removed from the ledger by this command.
 - A task in `tasks.md` has no ledger entry (not yet published): reported as "unpublished" with a pointer to `speckit.taskstoissues`; nothing is created.
 - A ledger entry has no matching task in `tasks.md` (task removed): reported as orphan; nothing is deleted.
