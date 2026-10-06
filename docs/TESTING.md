@@ -209,3 +209,9 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Checked after each case: `.specify/openproject/` unchanged (for (a) empty before and after, config restored from backup, sha256 `9d6c9d06…18bb`).
 - S13 is thus covered for (a) to (e) in skills mode with the limits above; (e) covered the dry run only.
 
+### 2026-10-06 – S10 command mode (dry run only), headless, prompt revision f039927
+- Setup: the Claude integration of spec-kit installs skills only, so command mode was approximated with a second scratch project outside the repo (`specify init --integration generic --integration-options="--commands-dir .claude/commands"`, then `specify extension add --dev extension/`, tracked `.mcp.json` copied). The extension command is installed as `.claude/commands/speckit.openproject.discover-fields.md`. No config existed. A fresh headless session (`claude -p "/speckit.openproject.discover-fields --dry-run"`, `.env` exported, not read) ran it.
+- Output: same structure as in skills mode: overview, 8 proposals (project from the single readable project, types, statuses, `customField1` would be asked), the full new file as a diff, `Dry run: nothing was written.`, result `dry run`, the warning for `customField1`, no `SPECKIT_OPENPROJECT_*` variable set; the next step names both `/speckit-taskstoissues --dry-run` and `/speckit.taskstoissues --dry-run`.
+- Checked afterwards: `.specify/openproject/` does not exist in that project, so nothing was written.
+- Not covered: a real bootstrap in command mode (needs answers; FR-013 asks for one), command mode on a project initialised by the Claude integration (not possible: skills only), hook keys.
+
