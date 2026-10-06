@@ -394,3 +394,9 @@ def test_sync_ledger_is_written_after_each_push_and_tasks_md_is_compared_with_st
     assert "before the next push call" in sync
     assert "do not batch it with step 13" in sync
     assert "the text read at the start of the run" in sync
+
+
+def test_sync_counts_line_and_skipped_result(sync):
+    assert "unpublished N, failed N, skipped N" in sync
+    assert "`failed`, `blocked` or `skipped`" in sync
+    assert "`conflicts` counts conflicts only" in sync

@@ -63,7 +63,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`. `preset/` is t
 - [X] T014 [US1] Add the classification to the prompt (step 6): apply the `decision-table` block row by row with the overrides (closed-not-done is informational and never pushes or changes the box; `unpublished`, `stale`, `orphan`; status not representable in `tasks.md` like "In progress" refreshes the ledger and is shown as "in progress"); untrusted server text rule (strip `<user-content>`, compare only) (depends on T013)
 - [X] T015 [US1] Add the pull path to the prompt (steps 12–13): after confirmation re-read `tasks.md`; apply the checkbox edits of research R5 (regex `^(\s*)- \[( |x|X)\] (T\d{3,})\b`, only the bracket character, via `tasks.md.tmp`, read back, verify that only the planned characters differ, move); then write the ledger (`status` and `assignee` for all processed items) through `mapping-<feature>.json.tmp` and a move; a pull enters the ledger only after the `tasks.md` write succeeded (depends on T014)
 - [X] T016 [US1] Define scenario S14 in `docs/TESTING.md` (pull part first, push part after T020) with a results table, and the intro "Scenarios S14–S17" naming the installed-skill method and the setup of `quickstart.md` (depends on T015)
-- [ ] T017 [US1] **(maintainer)** Run S14 pull part through the installed skill in `.scratch/proj` (`scripts/dev-install.sh` first), `--dry-run` first, then for real; also one dry run in command mode (`/speckit.openproject.sync-status`, FR-017), labelled untested in `docs/TESTING.md` if it could not be run; compare `tasks.md` with `git diff --no-index` (one bracket character per change) and check the ledger; record what was executed in `docs/TESTING.md` (depends on T012, T016)
+- [X] T017 [US1] **(maintainer)** Run S14 pull part through the installed skill in `.scratch/proj` (`scripts/dev-install.sh` first), `--dry-run` first, then for real; also one dry run in command mode (`/speckit.openproject.sync-status`, FR-017), labelled untested in `docs/TESTING.md` if it could not be run; compare `tasks.md` with `git diff --no-index` (one bracket character per change) and check the ledger; record what was executed in `docs/TESTING.md` (depends on T012, T016)
 
 **Checkpoint**: US1 works alone: OpenProject progress reaches `tasks.md` and the ledger.
 
@@ -90,7 +90,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`. `preset/` is t
 
 - [X] T022 [US3] Add the conflict, baseline and reverted handling to the prompt: report format `T012: tasks.md [x] overwritten by OpenProject "In progress" (open)` for every conflict, labels `baseline` and `reverted` in the plan table, no question per conflict, same plan for the same input; check against `tests/fixtures/sync/decision-table.json` that the prompt block lists the same rows (depends on T019, T009)
 - [X] T023 [US3] Define scenario S15 in `docs/TESTING.md` (T004 pushed, T005 pulled, T006 conflict, T001 reverted, second run `no changes`) (depends on T022)
-- [ ] T024 [US3] **(maintainer)** Run S15 through the installed skill after S14; run the second time and confirm `no changes` with checksums of `tasks.md` and the ledger unchanged (SC-002); record the results (depends on T021, T023)
+- [X] T024 [US3] **(maintainer)** Run S15 through the installed skill after S14; run the second time and confirm `no changes` with checksums of `tasks.md` and the ledger unchanged (SC-002); record the results (depends on T021, T023)
 
 ---
 

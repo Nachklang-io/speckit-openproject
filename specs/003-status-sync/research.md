@@ -95,7 +95,7 @@ The statuses allowed "for the task type" are listed from `get-write-context` (pr
 
 ## R9. Report and results
 
-**Decision**: Result values as in FR-013: `complete`, `incomplete` (any failed or blocked), `no changes`, `dry run`, `stopped`. Counts: pulled, pushed, unchanged, refreshed (ledger-only update: status name or assignee differs but done-ness is the same, or "closed, not done" recorded), conflicts, blocked, stale, orphan, unpublished, failed; baseline, reverted and "closed, not done" are labels on items, not counts. `complete` requires at least one applied write (including a ledger-only refresh) and no failed or blocked item; `no changes` means that nothing was written anywhere. A ledger-only refresh is part of the plan, is shown with the action `refresh` and is written after the single confirmation (in `--dry-run` it is shown, not written).
+**Decision**: Result values as in FR-013: `complete`, `incomplete` (any failed, blocked or skipped), `no changes`, `dry run`, `stopped`. Counts: pulled, pushed, unchanged, refreshed (ledger-only update: status name or assignee differs but done-ness is the same, or "closed, not done" recorded), conflicts, blocked, stale, orphan, unpublished, failed, skipped (a pull or conflict not written because `tasks.md` changed during the run); baseline, reverted and "closed, not done" are labels on items, not counts. `complete` requires at least one applied write (including a ledger-only refresh) and no failed, blocked or skipped item; `no changes` means that nothing was written anywhere. A ledger-only refresh is part of the plan, is shown with the action `refresh` and is written after the single confirmation (in `--dry-run` it is shown, not written).
 
 ## Unresolved (to verify live, labelled untested until then)
 

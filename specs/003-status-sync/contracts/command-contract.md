@@ -27,7 +27,7 @@ No other capability may be called, even if the session exposes more tools.
 ## Output contract
 
 - Plan table columns: `Key | WP | tasks.md | OpenProject | Last synced | Action | Reason`.
-- Counts line: `pulled N, pushed N, unchanged N, refreshed N, conflicts N, blocked N, stale N, orphan N, unpublished N, failed N`.
+- Counts line: `pulled N, pushed N, unchanged N, refreshed N, conflicts N, blocked N, stale N, orphan N, unpublished N, failed N, skipped N`.
 - Last line before the result: `Dry run: nothing was written.` only in a dry run.
 - Result: exactly one of `complete`, `incomplete`, `no changes`, `dry run`, `stopped`.
 - Conflicts are printed as `T012: tasks.md [x] overwritten by OpenProject "In progress" (open)`.
