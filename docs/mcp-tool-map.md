@@ -15,7 +15,7 @@ Single place that maps capabilities used by the commands to tool names. Add a co
 | get-relations | `get_work_package_relations` | work_package_id | yes |
 | create-relation | `create_work_package_relation` | work_package_id, related_to_work_package_id, relation_type, confirm | yes |
 | create-attachment | `create_work_package_attachment` | work_package_id, file_path, description, confirm | yes |
-| list-attachments | `list_work_package_attachments` | work_package_id | yes |
+| list-attachments | `list_work_package_attachments` | work_package_id, limit, offset | yes |
 | delete-attachment | `delete_attachment` | attachment_id, confirm | yes |
 
 Rules for this table: one row per capability; commands use the capability id in the first column only. Each command embeds only the rows it uses; `tests/test_prompt_sync.py` checks that the embedded header and rows are identical to the rows here. Writes are two-step: call without `confirm` for a preview, then with `confirm=true`. `create_work_package` has no `status` parameter, so a configured default status cannot be applied at creation. "Verified" = exercised against a real instance (see below).
