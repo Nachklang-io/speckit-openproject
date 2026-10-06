@@ -6,7 +6,7 @@
 
 ## Summary
 
-Add the extension command `speckit.openproject.sync-status` (`extension/commands/sync-status.md`): a numbered prompt that reads config, ledger and `tasks.md` from disk, reads status and assignee of every task work package through the MCP server, classifies each task with a fixed decision table (checkbox, OpenProject status, last synced status), shows a plan, and after one confirmation applies pulls (checkbox edits, ledger) and pushes (`update-work-package` with `status`, preview then confirm). OpenProject wins every conflict; the command never reopens, creates, deletes or re-parents a work package. An optional hook after `implement` offers the command. As in 001 and 002 no runtime code is shipped: correctness rests on the prompt, the schemas, a fixture-driven reference implementation of the decision table in the tests, prompt-sync tests and manual scenarios S14–S16 run through the installed skill.
+Add the extension command `speckit.openproject.sync-status` (`extension/commands/sync-status.md`): a numbered prompt that reads config, ledger and `tasks.md` from disk, reads status and assignee of every task work package through the MCP server, classifies each task with a fixed decision table (checkbox, OpenProject status, last synced status), shows a plan, and after one confirmation applies pulls (checkbox edits, ledger) and pushes (`update-work-package` with `status`, preview then confirm). OpenProject wins every conflict; the command never reopens, creates, deletes or re-parents a work package. An optional hook after `implement` offers the command. As in 001 and 002 no runtime code is shipped: correctness rests on the prompt, the schemas, a fixture-driven reference implementation of the decision table in the tests, prompt-sync tests and manual scenarios S14–S17 run through the installed skill.
 
 ## Technical Context
 
@@ -16,7 +16,7 @@ Add the extension command `speckit.openproject.sync-status` (`extension/commands
 
 **Storage**: reads `.specify/openproject/config.yml`; reads and writes `.specify/openproject/mapping-<feature>.json` (ledger) and the checkbox characters of `specs/<feature>/tasks.md`
 
-**Testing**: pytest (schema, manifest, prompt sync, decision table against fixtures, `tasks.md` edit rule); manual scenarios S14–S16 in `docs/TESTING.md`
+**Testing**: pytest (schema, manifest, prompt sync, decision table against fixtures, `tasks.md` edit rule); manual scenarios S14–S17 in `docs/TESTING.md`
 
 **Target Platform**: any agent supporting spec-kit skills/command mode; OpenProject Community Edition
 
@@ -35,7 +35,7 @@ Add the extension command `speckit.openproject.sync-status` (`extension/commands
 | I Spec-driven | Pass | specify → clarify → plan; tasks and analyze follow |
 | II MCP-only | Pass | capability ids only, rows embedded from the tool map; no REST |
 | III Idempotent/safe (NON-NEGOTIABLE) | Pass | `--dry-run`, plan table, one confirmation, preview/confirm per write, ledger written after each write, decision table makes a second run a no-op (SC-002), nothing is deleted or reopened |
-| IV Test-first incl. prompts | Pass, with caveat | decision table has a reference implementation and fixtures in pytest; S14–S16 manual; the transition check (R4) is **unverified** and is labelled untested until S14 ran |
+| IV Test-first incl. prompts | Pass, with caveat | decision table has a reference implementation and fixtures in pytest; S14–S17 manual; the transition check (R4) is **unverified** and is labelled untested until S14 ran |
 | V Compatibility | Pass | skills + command mode; schema change additive; hook key follows the bundled spec-kit extensions (R7) |
 | VI Simplicity/transparency | Pass | no scripts; conflicts and blocked tasks are named, never guessed |
 
@@ -81,7 +81,7 @@ tests/
 docs/
 ├── mcp-tool-map.md                        # update-work-package row gains `status`; get-work-package stays
 ├── ARCHITECTURE.md                        # sync policy, assignee in the ledger
-└── TESTING.md                             # S14–S16 and run results
+└── TESTING.md                             # S14–S17 and run results
 ```
 
 **Structure Decision**: Existing monorepo layout. The feature adds one command file to `extension/`, one optional ledger key to `schemas/` (and the identical rule line to the preset prompt so that its ledger validation accepts it), tests and docs.
