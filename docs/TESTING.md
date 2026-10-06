@@ -195,3 +195,9 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Checked afterwards: `config.yml` is byte-identical to the fixture (`cmp`), sha256 `3734f12c…6d25`, no other file in `.specify/openproject/`.
 - Not covered: the fixture has only one violation, so "all violations listed" was shown for a single entry; the real run with approval of the rebuild was not run. The report lists "priorities and versions were not requested" as a warning, which is noise rather than a warning (not changed).
 
+### 2026-10-06 – S13 (b), unknown project, dry run, prompt revision f039927
+- Setup: valid config in the scratch project (sha256 `9d6c9d06…18bb`). The maintainer ran `/speckit-openproject-discover-fields --dry-run nonexistent` and pasted the output.
+- Output: result `stopped`; message that the project `nonexistent` was not found (a search, then the unfiltered list of one page without truncation, no exact match on identifier or id), the hint that it may not exist or be outside the server allowlist, the one readable project (`speckit-sandbox`, id 3) as a table, a statement of what was and was not done (two `list_projects` reads, no further read, config not read, nothing written, no environment variable checked), and a next step with a corrected command.
+- Checked afterwards: sha256 of `config.yml` unchanged (`9d6c9d06…18bb`), no other file in `.specify/openproject/`.
+- Not covered: (c) a project that exists but is outside the allowlist; (a), (d).
+
