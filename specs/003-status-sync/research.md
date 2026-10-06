@@ -25,7 +25,7 @@ Facts marked *live* come from earlier sandbox runs recorded in `docs/mcp-tool-ma
 A conflict can only arise when the base is not done, the box was checked and OpenProject moved the work package to another status that is not done (for example New → On hold): the checked box is overwritten and named in the report.
 
 Overrides applied before the table is read:
-1. `O` is a closed status other than done ("closed, not done", FR-003): the action is never a push and never changes the box; the item is informational, the ledger records `O`. It does not count as a change, so a run with only such items ends `no changes`.
+1. `O` is a closed status other than done ("closed, not done", FR-003): the action is never a push and never changes the box; the ledger records `O`: the action is `refresh` if the ledger holds another status (or none) and `none` otherwise, and the label stays so that the report lists the task. A run in which only such tasks are already recorded ends `no changes`.
 2. Task has no ledger entry: `unpublished`. Ledger entry whose work package is gone: `stale`. Ledger task entry without a task line: `orphan`. Items of kind `feature` and `phase`: shown only.
 3. A push that the server will not accept: `blocked` (R4).
 

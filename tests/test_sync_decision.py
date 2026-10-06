@@ -44,7 +44,7 @@ def test_second_run_changes_nothing(case):
     first = run(case)
     op_after = DONE if first["writes_op"] else case["op_status"]
     second = classify(first["checkbox"], op_after, first["status"], case["done"], case["closed"])
-    assert second["action"] in ("none", "info"), (first, second)
+    assert second["action"] == "none", (first, second)
     assert not second["writes_ledger"]
     assert not second["writes_op"]
     assert second["checkbox"] == first["checkbox"]

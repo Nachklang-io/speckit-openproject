@@ -42,7 +42,7 @@ def classify(checked, op_status, base, done, closed=(), in_progress="In progress
 
     if op_status in closed and not od:
         labels.append("closed-not-done")
-        action = "info"
+        action = "refresh" if op_status != base else "none"
     else:
         tc = checked != bd
         oc = od if base is None else op_status != base
@@ -72,7 +72,7 @@ def classify(checked, op_status, base, done, closed=(), in_progress="In progress
     result["action"] = action
     result["labels"] = sorted(labels)
     result["writes_ledger"] = action in ("push", "pull", "conflict") or (
-        action in ("refresh", "info") and result["status"] != base
+        action == "refresh" and result["status"] != base
     )
     return result
 

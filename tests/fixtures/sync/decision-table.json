@@ -239,7 +239,7 @@
         "Rejected"
       ],
       "expect": {
-        "action": "info",
+        "action": "refresh",
         "checkbox": true,
         "status": "Rejected",
         "labels": [
@@ -259,7 +259,7 @@
         "Rejected"
       ],
       "expect": {
-        "action": "info",
+        "action": "none",
         "checkbox": true,
         "status": "Rejected",
         "labels": [

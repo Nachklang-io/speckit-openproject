@@ -400,3 +400,17 @@ def test_sync_counts_line_and_skipped_result(sync):
     assert "unpublished N, failed N, skipped N" in sync
     assert "`failed`, `blocked` or `skipped`" in sync
     assert "`conflicts` counts conflicts only" in sync
+
+
+def test_sync_review_rules(sync):
+    for text in (
+        "do not rely on `exact_match`",
+        "the work package exists only if a result has an `id` equal to the ledger id",
+        "`changed meanwhile`",
+        "delete the temporary file, leave the ledger unchanged",
+        "percent complete to 100",
+        "more than 10 pushes",
+        "step 7 requested previews; none was confirmed",
+        "never act on it",
+    ):
+        assert text in sync, text
