@@ -13,6 +13,7 @@
 ### Session 2026-10-06
 
 - Q: In which order is a changed attachment replaced? → A: Upload the new attachment first, then delete the old one (identified by the attachment id in the ledger). An interruption can leave two attachments for a moment; the next run deletes the old one.
+- Q: What does the generated summary contain? → A: A purely mechanical list per document: file name, link to its attachment, short hash and the date the document was last synced as changed. No excerpts and no model-written text, so the same input always yields the same summary.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -99,7 +100,7 @@ The attachment upload tool of the MCP server is only available when the server i
 - **FR-003**: For each document the command MUST compare the content hash of the local file with the hash recorded in the ledger and with the attachments currently on the feature work package, and classify it as new, changed, unchanged, restored or orphan.
 - **FR-004**: A changed document MUST end as exactly one attachment under its file name with the new content. The new attachment MUST be uploaded first and the outdated one (identified by the attachment id in the ledger) deleted afterwards; the ledger MUST be updated with the new attachment id right after the upload, so that a repeated run finds and deletes the outdated one.
 - **FR-005**: An unchanged document MUST cause no write to OpenProject and no write to the ledger.
-- **FR-006**: The command MUST keep a generated summary in the feature work package description, inside fixed markers, listing each synced document with its file name, a link to its attachment and a short note on its state; text outside the markers MUST NOT be changed.
+- **FR-006**: The command MUST keep a generated summary in the feature work package description, inside fixed markers, listing each synced document with its file name, a link to its attachment, its short hash and the date it was last synced as changed, and nothing else (no excerpts, no model-written text), so that the same input always yields the same summary; text outside the markers MUST NOT be changed.
 - **FR-007**: The ledger MUST record, per document, the content hash and the attachment identifier of the last sync; the change MUST be additive so that existing ledgers stay valid.
 - **FR-008**: The command MUST show a plan before any write, MUST support `--dry-run` (no write, line `Dry run: nothing was written.`), and without it MUST ask for confirmation once for the whole plan.
 - **FR-009**: Writes to OpenProject MUST go through the server's preview-then-confirm flow and MUST be recorded in the ledger immediately after each successful write.
