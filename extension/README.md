@@ -64,13 +64,13 @@ For every task with a ledger entry it compares the checkbox, the work package st
 
 A transition the server does not accept is reported as `blocked` (with the server's reason and the statuses available for the task type) and left alone; no intermediate statuses are tried. The assignee is recorded in the ledger and shown in the report, never written to `tasks.md`.
 
-A run prints a plan table first. `--dry-run` shows it and writes nothing; otherwise you confirm the whole plan once. Writes: the `status` of task work packages (preview, then confirm, ledger updated after each), checkbox characters of `tasks.md` (through a temporary file and one move; nothing is written if the file changed while the command ran), and the ledger. Results: `complete`, `incomplete` (a task failed or is blocked), `no changes`, `dry run`, `stopped`. A second run on unchanged inputs reports `no changes`.
+A run prints a plan table first. `--dry-run` shows it and writes nothing; otherwise you confirm the whole plan once. Writes: the `status` of task work packages (preview, then confirm, ledger updated after each), checkbox characters of `tasks.md` (through a temporary file and one move; nothing is written if the file changed while the command ran), and the ledger. Results: `complete`, `incomplete` (a task failed, is blocked or was skipped because `tasks.md` changed while the command ran), `no changes`, `dry run`, `stopped`. A second run on unchanged inputs reports `no changes`.
 
-Optional hook: after `/speckit-implement` the sync is offered; it never runs unasked.
+Optional hook: the manifest registers an optional `after_implement` hook (`optional: true`), so the host offers the sync after `/speckit-implement` and it never runs unasked. That the offer actually appears was **not** checked (see below).
 
 ### Limitations and untested paths
 
 - Interactive only. Only task work packages are synced; phase and feature work packages are shown in the report only.
 - "Writes only the status" is enforced by the prompt, not by the client (same caveat as `discover-fields`).
 - A closed status sets the percentage done to 100 on the server (observed in the preview); the command does not touch that field itself.
-- **Untested** until the scenarios S14–S17 in `../docs/TESTING.md` were run: the whole command against a real instance, command mode, the hook offer after `implement`, and a forbidden transition (the preview of a rejected transition has not been observed yet).
+- Run so far (2026-10-06, skills mode, headless, sandbox, 7 work packages created by hand, hand-written ledger): pull, push, baseline, conflict, reverted, the stop conditions and the `tasks.md`-changed-during-the-run case (S14, S15, S17; details and defects in `../docs/TESTING.md`). **Untested:** the hook offer after `implement`, command mode, a transition the server rejects (the blocked path), the 14-item run and its timing, a stale work package, a failed single confirm, and a ledger written by `speckit.taskstoissues` followed by a sync.

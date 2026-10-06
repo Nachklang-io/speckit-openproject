@@ -83,6 +83,8 @@ The statuses allowed "for the task type" are listed from `get-write-context` (pr
 
 **Rationale**: constitution III (an automatic write to a shared system must be the user's decision); `optional: true` makes the host ask.
 
+**Verified 2026-10-06**: `specify extension add --dev` accepts the `prompt` key and writes `hooks.after_implement` (`optional: true`, `prompt`, `description`) into `.specify/extensions.yml`.
+
 **Unresolved**: whether the `implement` skill of the installed spec-kit actually prints the hook (it reads `.specify/extensions.yml`, which `specify extension add` writes). S16 checks it in a scratch project after `scripts/dev-install.sh`; until then the hook is labelled untested. The 002 prompt states that hook keys were not verified; this feature verifies the manifest side only.
 
 **Alternatives**: mandatory hook (rejected); hook in the preset (the preset has no sync command).
