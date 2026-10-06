@@ -254,7 +254,11 @@ def test_discover_safety_rules_present(discover):
 
 def test_discover_dry_run_writes_nothing(discover):
     assert "Dry run: nothing was written." in discover
-    assert "no temporary file" in discover
+    assert "no `config.yml.tmp` is created" in discover
+    assert "a scratch file outside the project (step 8) is allowed" in discover
+    assert "step 3 may still ask for the project" in discover
+    assert "<redacted-secret>" in discover
+    assert "even if the session exposes more tools" in discover
     assert "`--dry-run`" in discover
 
 
