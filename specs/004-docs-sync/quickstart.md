@@ -15,7 +15,7 @@ Expected: every row of the decision table passes; a second pass over the result 
 
 | ID | Setup | Expected |
 |---|---|---|
-| T002 (Task 0) | Scratch work package: preview and confirm an upload of a small file, list attachments, delete it; update a description with the marker block and read it back; try a file outside the root | tool contract, attachment name, id source, marker/link survival and the outside-root error recorded in `docs/TESTING.md` and `docs/mcp-tool-map.md` before the prompt is written |
+| T002 (Task 0, done 2026-10-06) | Scratch work package 113: upload, list, replace and delete an attachment, description round trip, file outside the root | recorded in `research.md` R1/R4/R5/R9, `docs/mcp-tool-map.md` and `tests/fixtures/docs/`; repeat only if the server version changes |
 | S18 | First sync with `spec.md` and `plan.md` | dry run plans two `new`; real run: two attachments, summary block in the description, ledger `documents` with both hashes; run again: `no changes` |
 | S19 | Change one line of `spec.md` | one `changed`: one attachment `spec.md` with new content (old one deleted), `plan.md` untouched, summary row updated, text outside the markers identical; run again: `no changes` |
 | S20 | Interruption and drift: stop after the upload of a replaced document (ledger has `pending_delete`); delete `plan.md`'s attachment in the UI | rerun: `cleaned` for the superseded one, `restored` for `plan.md`, no duplicates; a user-added attachment with a document's name → `blocked`, nothing deleted |

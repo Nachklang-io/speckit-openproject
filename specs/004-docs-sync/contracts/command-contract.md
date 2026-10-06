@@ -14,7 +14,7 @@ Invocation: `/speckit-openproject-sync-docs [--dry-run] [feature-dir]` (skills m
 3. Classify (decision table R6) and show the plan table. `--dry-run` ends here with `Dry run: nothing was written.`
 4. One confirmation for the whole plan.
 5. Per document, in fixed order: cleanup of `pending_delete`; upload/replace per R7; ledger after each write.
-6. Render the summary block from the ledger; re-read the description; replace/append the block; preview, confirm; only if the text differs.
+6. Render the summary block from the ledger and the attachment link paths (path of `download_url` without scheme and host; fallback: file name in backticks); re-read the description (`get-work-package`; truncated → stop before this step); strip the `<user-content>` wrapper; replace/append the block; write the description without the wrapper; preview, confirm; only if the text differs. The host part of `download_url` is never written, printed or logged.
 7. Report: counts (attached, replaced, restored, cleaned, unchanged, orphan, blocked, failed, skipped), changed items, warnings, result `complete` | `incomplete` | `no changes` | `dry run` | `stopped`.
 
 ## Stop conditions (zero writes)
