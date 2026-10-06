@@ -13,7 +13,7 @@ Facts marked *live* come from earlier sandbox runs recorded in `docs/mcp-tool-ma
 
 | tc | oc | Condition | Action | Writes |
 |---|---|---|---|---|
-| no | no | | none | ledger: refresh `status` (name) and `assignee` if they differ |
+| no | no | | none, or `refresh` if `status` name or `assignee` differ from the ledger | ledger: refresh `status` (name) and `assignee` |
 | yes | no | C checked, not Od | push | work package → `statuses.done`; ledger |
 | yes | no | C open, Od (reverted) | pull | check the box; ledger; report "reverted" (FR-004b) |
 | no | yes | Od | pull | check the box; ledger |
@@ -90,7 +90,7 @@ The statuses allowed "for the task type" are listed from `get-write-context` (pr
 
 ## R9. Report and results
 
-**Decision**: Result values as in FR-013: `complete`, `incomplete` (any failed or blocked), `no changes`, `dry run`, `stopped`. Counts: pulled, pushed, unchanged, conflicts, blocked, stale, orphan, unpublished, failed; baseline, reverted and "closed, not done" are labels on items, not counts. `complete` requires at least one applied change and no failed or blocked item.
+**Decision**: Result values as in FR-013: `complete`, `incomplete` (any failed or blocked), `no changes`, `dry run`, `stopped`. Counts: pulled, pushed, unchanged, refreshed (ledger-only update: status name or assignee differs but done-ness is the same, or "closed, not done" recorded), conflicts, blocked, stale, orphan, unpublished, failed; baseline, reverted and "closed, not done" are labels on items, not counts. `complete` requires at least one applied write (including a ledger-only refresh) and no failed or blocked item; `no changes` means that nothing was written anywhere. A ledger-only refresh is part of the plan, is shown with the action `refresh` and is written after the single confirmation (in `--dry-run` it is shown, not written).
 
 ## Unresolved (to verify live, labelled untested until then)
 

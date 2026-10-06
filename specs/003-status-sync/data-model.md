@@ -35,7 +35,7 @@ Validation: `additionalProperties` stays `false`; the new key is the only schema
 | `checked` | true / false |
 | `op_status` | status name read now |
 | `base` | ledger `status` or `none` |
-| `action` | `none`, `pull`, `push`, `conflict`, `blocked`, `stale`, `orphan`, `unpublished`, `info` |
+| `action` | `none`, `refresh`, `pull`, `push`, `conflict`, `blocked`, `stale`, `orphan`, `unpublished`, `info` |
 | `labels` | any of `baseline`, `reverted`, `closed-not-done`, `in-progress` |
 | `reason` | one sentence, includes the overwritten `tasks.md` state for a conflict |
 
