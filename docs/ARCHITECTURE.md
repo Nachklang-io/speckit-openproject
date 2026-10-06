@@ -14,6 +14,7 @@ spec-kit project                         OpenProject (CE)
         │ commands (Markdown prompts)
   preset/     speckit.taskstoissues  (override)
   extension/  speckit.openproject.discover-fields | sync-status | sync-docs | versions | log-time
+              (sync-status: implemented in feature 003)
 ```
 
 ## Packages
@@ -22,15 +23,15 @@ spec-kit project                         OpenProject (CE)
 - **Schemas** (`schemas/`): `config.schema.json`, `mapping.schema.json`. Both packages and tests use them.
 
 ## Config and state
-- `.specify/openproject/config.yml` – user config (project, type mapping, optional `statuses` mapping open / in_progress / done, defaults, mandatory custom field values). Created and updated by `speckit.openproject.discover-fields` (read-only towards OpenProject, diff and approval before every change, atomic write); read by the write commands. `speckit.taskstoissues` ignores `statuses`; status sync (feature 003) will read it. Resolution order: argument → file → `SPECKIT_OPENPROJECT_*` env → ask.
-- `.specify/openproject/mapping-<feature>.json` – ledger (one file per feature): task/phase/feature ID → work package ID, URL, content hash, last synced status. Written after every successful write.
+- `.specify/openproject/config.yml` – user config (project, type mapping, optional `statuses` mapping open / in_progress / done, defaults, mandatory custom field values). Created and updated by `speckit.openproject.discover-fields` (read-only towards OpenProject, diff and approval before every change, atomic write); read by the write commands. `speckit.taskstoissues` ignores `statuses`; is read by `sync-status` (feature 003). Resolution order: argument → file → `SPECKIT_OPENPROJECT_*` env → ask.
+- `.specify/openproject/mapping-<feature>.json` – ledger (one file per feature): task/phase/feature ID → work package ID, URL, content hash, last synced status, assignee (optional, display name, written by `sync-status`). Written after every successful write.
 - Hierarchy created by the preset: Feature work package → Phase work packages → Task work packages (subjects start with the feature directory name, `Phase N:` and the task id). The ledger also records `follows` relations (`relations` list).
 - The installed command is self-contained: only the command text reaches a user's project, so each command embeds the capability rows it uses (a subset of `docs/mcp-tool-map.md`) and the config/ledger rules between marker comments; `tests/test_prompt_sync.py` keeps them identical to the tool map and `schemas/*.json`.
 
 ## Data flow principles
 1. Discover before write (types, statuses, custom fields).
 2. Plan table → user confirmation → writes (each preview/confirm) → ledger.
-3. Sync is explicit (command or hook), conflict policy: spec-kit is source of truth for structure/subject, OpenProject is source of truth for status, assignee, time.
+3. Sync is explicit (command or hook), conflict policy: spec-kit is source of truth for structure/subject, OpenProject is source of truth for status, assignee, time. `sync-status` applies it per task: a decision table over checkbox, current status and last synced status (ledger `status`); a conflict goes to OpenProject and is named in the report; the assignee lives in the ledger only; a work package never leaves the done status and is never moved through intermediate statuses.
 4. No deletes. Orphans are reported.
 
 ## Compatibility

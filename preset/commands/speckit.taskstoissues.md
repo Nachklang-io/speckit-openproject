@@ -32,7 +32,7 @@ All OpenProject access goes through an MCP server (never the REST API, never Git
 | search-work-packages | `search_work_packages` | search, project, limit, offset | yes |
 | get-work-package | `get_work_package` | work_package_id | yes |
 | create-work-package | `create_work_package` | project, type, subject, description, parent, custom_fields, priority, assignee, confirm | yes |
-| update-work-package | `update_work_package` | work_package_id, subject, description, confirm | yes |
+| update-work-package | `update_work_package` | work_package_id, subject, description, status, confirm | yes |
 | get-relations | `get_work_package_relations` | work_package_id | yes |
 | create-relation | `create_work_package_relation` | work_package_id, related_to_work_package_id, relation_type, confirm | yes |
 <!-- END capability-map -->
@@ -65,10 +65,11 @@ Validate the configuration and the ledger against these rules. Any violation is 
 - ledger top-level keys: feature, items, project, relations, schema_version
 - ledger required top-level keys: feature, items, project, schema_version
 - ledger schema_version: 1.0
-- ledger item keys: hash, id, kind, status, url
+- ledger item keys: assignee, hash, id, kind, status, url
 - ledger required item keys: id, kind
 - ledger kind values: feature, phase, task
 - ledger id: integer >= 1
+- ledger assignee: non-empty string (never written by this command)
 - ledger relation keys: from, id, to, type
 - ledger required relation keys: from, to, type
 - ledger relation type values: follows
@@ -134,7 +135,7 @@ Every run starts from scratch. Execute steps 1–15 in order, every time, even i
 12. **Create, phase by phase.** Ask the user for confirmation **once per phase** (the feature work package is confirmed together with the first phase): show the items of that phase that will be created or adopted and wait for yes. On "no" or "stop", stop and go to the report. For each confirmed item, in order:
     1. `create-work-package` with project, type (`types.feature` / `types.phase` / `types.task`), subject, description, parent = the work package id of the parent item as a string (none for the feature), `defaults.priority` / `defaults.assignee` if non-empty, `custom_fields` = only those entries of `required_custom_fields` whose key appears in the write context of that item's type (step 5.3).
     2. Preview, check validity, then confirm. Take the new id from the response.
-    3. **Immediately** write the ledger. If the file does not exist, create it first as `{"schema_version": "1.0", "project": <identifier>, "feature": FEATURE, "items": {}}`. Then set `items.<key>` = `kind`, `id`, `url` = `/work_packages/<id>` (path only, no host), `hash`. Adopted items are written the same way without a write call. The `relations` array is created with the first relation (step 13).
+    3. **Immediately** write the ledger. If the file does not exist, create it first as `{"schema_version": "1.0", "project": <identifier>, "feature": FEATURE, "items": {}}`. Then set `items.<key>` = `kind`, `id`, `url` = `/work_packages/<id>` (path only, no host), `hash`; when an entry already exists change only these keys and keep every other key of it (`status` and `assignee` are written by `speckit.openproject.sync-status`). Adopted items are written the same way without a write call. The `relations` array is created with the first relation (step 13).
     4. A rejected preview: the item is `failed` with the server message, its children become `blocked` (failure classes). If the feature fails, stop.
     A tool error or an unconfirmed write stops the run (failure classes); the ledger already reflects every confirmed write and a re-run resumes.
 
@@ -144,7 +145,7 @@ Every run starts from scratch. Execute steps 1–15 in order, every time, even i
     3. Else `create-relation` with work_package_id = successor id, related_to_work_package_id = predecessor id, relation_type = `follows`; preview, confirm; append `{from, to, type: follows, id}` to the ledger `relations` immediately. A rejected preview: report it verbatim, mark the relation `failed`, continue.
     No relation is created between `[P]` tasks without a stated dependency.
 
-14. **Update (only with `--update`).** For each `update` item: show a table (key, old subject, new subject) and ask once for confirmation before the first update; this confirmation is asked even if nothing was created. On "no" skip this step. Then `update-work-package` (subject, description) with preview and confirm, and store the new hash. Never change status, assignee or time. Without `--update` no update capability may be called.
+14. **Update (only with `--update`).** For each `update` item: show a table (key, old subject, new subject) and ask once for confirmation before the first update; this confirmation is asked even if nothing was created. On "no" skip this step. Then `update-work-package` (subject, description) with preview and confirm, and store the new hash (keep `status` and `assignee` of the entry). Never change status, assignee or time. Without `--update` no update capability may be called.
 
 15. **Report.** Counts: created, adopted, skipped (of which "differs, not updated"), updated, blocked, stale, failed; relations created, skipped, failed. A table: key, work package id, subject, parent key, path `/work_packages/<id>`. Below it, one line per blocked, stale or failed item with the reason. If the run stopped early, say where and that a re-run resumes.
 

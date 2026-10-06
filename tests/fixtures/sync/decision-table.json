@@ -1,0 +1,437 @@
+{
+  "cases": [
+    {
+      "name": "none: open on both sides",
+      "checked": false,
+      "op_status": "New",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "none",
+        "checkbox": false,
+        "status": "New",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "none: done on both sides",
+      "checked": true,
+      "op_status": "Closed",
+      "base": "Closed",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "none",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "refresh: in progress, box open",
+      "checked": false,
+      "op_status": "In progress",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "In progress",
+        "labels": [
+          "in-progress"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "push: checked, work package open",
+      "checked": true,
+      "op_status": "New",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "push",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [],
+        "writes_op": true
+      }
+    },
+    {
+      "name": "push: checked, work package in progress (unchanged)",
+      "checked": true,
+      "op_status": "In progress",
+      "base": "In progress",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "push",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [
+          "in-progress"
+        ],
+        "writes_op": true
+      }
+    },
+    {
+      "name": "pull: work package done, box open",
+      "checked": false,
+      "op_status": "Closed",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "pull",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "pull: work package reopened, box checked",
+      "checked": true,
+      "op_status": "In progress",
+      "base": "Closed",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "pull",
+        "checkbox": false,
+        "status": "In progress",
+        "labels": [
+          "in-progress"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "reverted: unchecked, work package still done",
+      "checked": false,
+      "op_status": "Closed",
+      "base": "Closed",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "pull",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [
+          "reverted"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "agree: checked and work package done",
+      "checked": true,
+      "op_status": "Closed",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "refresh",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "agree: box reopened and work package reopened",
+      "checked": false,
+      "op_status": "In progress",
+      "base": "Closed",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "In progress",
+        "labels": [
+          "in-progress"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "conflict: checked, work package on hold",
+      "checked": true,
+      "op_status": "On hold",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "conflict",
+        "checkbox": false,
+        "status": "On hold",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "conflict: checked, work package in progress",
+      "checked": true,
+      "op_status": "In progress",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "conflict",
+        "checkbox": false,
+        "status": "In progress",
+        "labels": [
+          "in-progress"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "closed not done, box checked: never push",
+      "checked": true,
+      "op_status": "Rejected",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "refresh",
+        "checkbox": true,
+        "status": "Rejected",
+        "labels": [
+          "closed-not-done"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "closed not done, already recorded",
+      "checked": true,
+      "op_status": "Rejected",
+      "base": "Rejected",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "none",
+        "checkbox": true,
+        "status": "Rejected",
+        "labels": [
+          "closed-not-done"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "baseline: checked, work package open",
+      "checked": true,
+      "op_status": "New",
+      "base": null,
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "push",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [
+          "baseline"
+        ],
+        "writes_op": true
+      }
+    },
+    {
+      "name": "baseline: open, work package done",
+      "checked": false,
+      "op_status": "Closed",
+      "base": null,
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "pull",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [
+          "baseline"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "baseline: both done",
+      "checked": true,
+      "op_status": "Closed",
+      "base": null,
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "refresh",
+        "checkbox": true,
+        "status": "Closed",
+        "labels": [
+          "baseline"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "baseline: both open",
+      "checked": false,
+      "op_status": "New",
+      "base": null,
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "New",
+        "labels": [
+          "baseline"
+        ],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "refresh: assignee removed in OpenProject",
+      "checked": false,
+      "op_status": "New",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "assignee": null,
+      "base_assignee": "Ada Example",
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "New",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "refresh: assignee added in OpenProject",
+      "checked": false,
+      "op_status": "New",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "assignee": "Ada Example",
+      "base_assignee": null,
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "New",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "closed not done with assignee change",
+      "checked": false,
+      "op_status": "Rejected",
+      "base": "Rejected",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "assignee": null,
+      "base_assignee": "Ada Example",
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "Rejected",
+        "labels": [
+          "closed-not-done"
+        ],
+        "writes_op": false
+      }
+    }
+  ],
+  "items": [
+    {
+      "name": "orphan: ledger task without task line",
+      "task_checked": null,
+      "has_entry": true,
+      "wp_exists": true,
+      "expect": "orphan"
+    },
+    {
+      "name": "unpublished: task without ledger entry",
+      "task_checked": false,
+      "has_entry": false,
+      "wp_exists": true,
+      "expect": "unpublished"
+    },
+    {
+      "name": "stale: work package gone",
+      "task_checked": true,
+      "has_entry": true,
+      "wp_exists": false,
+      "expect": "stale"
+    }
+  ]
+}

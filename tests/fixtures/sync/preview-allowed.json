@@ -1,0 +1,22 @@
+{
+  "action": "update",
+  "state": "preview",
+  "ready": true,
+  "work_package_id": "92",
+  "validation_errors": {},
+  "payload": {
+    "lockVersion": 0,
+    "percentageDone": 100,
+    "_links": {
+      "status": {
+        "href": "/openproject/api/v3/statuses/12",
+        "title": "Closed"
+      },
+      "assignee": {
+        "href": "/openproject/api/v3/users/5",
+        "title": "speckit bot"
+      }
+    }
+  },
+  "result": null
+}

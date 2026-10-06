@@ -33,3 +33,14 @@ def test_extension_manifest(root):
 def test_command_prompt_has_no_secrets(root):
     for p in (root / "preset").rglob("*.md"):
         assert "OPENPROJECT_API_TOKEN=" not in p.read_text()
+
+
+def test_hooks_reference_provided_commands_and_are_optional(root):
+    m = load(root / "extension" / "extension.yml")
+    provided = {c["name"] for c in m["provides"]["commands"]}
+    hooks = m.get("hooks", {})
+    assert "after_implement" in hooks
+    for event, hook in hooks.items():
+        assert hook["command"] in provided, event
+        assert hook["optional"] is True, event
+        assert hook["description"], event

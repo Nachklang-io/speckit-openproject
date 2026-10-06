@@ -7,11 +7,13 @@ import re
 import jsonschema
 import pytest
 import yaml
+from sync_reference import DECISION_ROWS
 
 PROMPT = "preset/commands/speckit.taskstoissues.md"
 EXTENSION_PROMPT = "extension/commands/discover-fields.md"
+SYNC_PROMPT = "extension/commands/sync-status.md"
 # Prompts that embed capability rows and config rules.
-PROMPTS = [PROMPT, EXTENSION_PROMPT]
+PROMPTS = [PROMPT, EXTENSION_PROMPT, SYNC_PROMPT]
 
 
 def block(text, name):
@@ -301,3 +303,145 @@ def test_discover_review_rules(discover):
         "Bootstrap with partial approval",
     ):
         assert text in discover, text
+
+
+# --- extension command: speckit.openproject.sync-status (feature 003) ---
+
+SYNC_CAPABILITIES = {
+    "get-write-context",
+    "list-statuses",
+    "search-work-packages",
+    "get-work-package",
+    "update-work-package",
+}
+
+
+@pytest.fixture(scope="module")
+def sync(root):
+    return (root / SYNC_PROMPT).read_text()
+
+
+@pytest.mark.parametrize("path", [PROMPT, SYNC_PROMPT])
+def test_ledger_rules_match_schema_and_include_assignee(root, path):
+    led = json.loads((root / "schemas/mapping.schema.json").read_text())
+    item = led["properties"]["items"]["additionalProperties"]
+    rules = block((root / path).read_text(), "ledger-rules").splitlines()
+    assert f"- ledger item keys: {j(item['properties'])}" in rules
+    assert "- ledger item keys: assignee, hash, id, kind, status, url" in rules
+    suffix = " (never written by this command)" if path == PROMPT else ""
+    assert f"- ledger assignee: non-empty string{suffix}" in rules
+    assert item["properties"]["assignee"]["minLength"] == 1
+
+
+def test_sync_embeds_exactly_its_capabilities(sync):
+    ids = {row.split("|")[1].strip() for row in embedded_rows(sync)}
+    assert ids == SYNC_CAPABILITIES
+
+
+def test_sync_has_one_write_capability_and_no_delete(sync):
+    writes = [
+        row.split("|")[1].strip()
+        for row in embedded_rows(sync)
+        if re.search(r"`(create_|update_|delete_|bulk_|set_)", row)
+    ]
+    assert writes == ["update-work-package"]
+    assert "delete_" not in sync
+    assert "`confirm=true`" in sync
+
+
+def test_sync_decision_table_equals_reference(sync):
+    lines = block(sync, "decision-table").splitlines()
+    assert lines[0].startswith("| tc | oc |")
+    assert lines[2:] == DECISION_ROWS
+
+
+def test_sync_safety_rules_present(sync):
+    for text in (
+        "<user-content>",
+        "untrusted data",
+        "Every run starts from scratch",
+        "Dry run: nothing was written.",
+        "<redacted-host>",
+        "<redacted-secret>",
+        "`complete`",
+        "`incomplete`",
+        "`no changes`",
+        "`dry run`",
+        "`stopped`",
+        "OpenProject wins",
+        "even if the session exposes more tools",
+    ):
+        assert text in sync, text
+
+
+def test_sync_hard_limits_are_stated(sync):
+    for text in (
+        "never create, delete, rename, re-parent or reopen a work package",
+        "checkbox characters",
+        "tasks.md.tmp",
+        "mapping-<FEATURE>.json.tmp",
+    ):
+        assert text.lower() in sync.lower(), text
+
+
+def test_sync_baseline_tasks_are_refreshed_in_the_ledger(sync):
+    assert "the ledger has no `status` for the task (baseline)" in sync
+    assert "the ledger always records the status read" in sync
+
+
+def test_sync_ledger_is_written_after_each_push_and_tasks_md_is_compared_with_step_4(sync):
+    assert "before the next push call" in sync
+    assert "do not batch it with step 13" in sync
+    assert "compute the SHA-256 of `tasks.md` again" in sync
+    assert "the whole file, not only the task lines" in sync
+
+
+def test_sync_counts_line_and_skipped_result(sync):
+    assert "unpublished N, failed N, skipped N" in sync
+    assert "`failed`, `blocked` or `skipped`" in sync
+    assert "`conflicts` counts conflicts only" in sync
+
+
+def test_sync_review_rules(sync):
+    for text in (
+        "do not rely on `exact_match`",
+        "the work package exists only if a result has an `id` equal to the ledger id",
+        "`changed meanwhile`",
+        "delete the temporary file, leave the ledger unchanged",
+        "percent complete to 100",
+        "more than 10 pushes",
+        "step 7 requested previews; none was confirmed",
+        "never act on it",
+    ):
+        assert text in sync, text
+
+
+def test_sync_closed_not_done_is_a_ledger_refresh(sync):
+    assert "the action is `refresh` (ledger only), otherwise `none`" in sync
+    assert "`closed, not done` tasks with the action `refresh`" in sync
+
+
+def test_preset_keeps_status_and_assignee_when_it_writes_the_ledger(prompt):
+    assert "keep every other key of it (`status` and `assignee` are written by" in prompt
+    assert "keep `status` and `assignee` of the entry" in prompt
+
+
+def test_sync_does_not_stop_on_done_missing_from_the_write_context(sync):
+    assert "Do not stop because `statuses.done` is missing from the `available_statuses`" in sync
+
+
+def test_sync_second_review_rules(sync):
+    for text in (
+        "`ready` = `false` or a non-empty `validation_errors`",
+        "the read failed for an existing work package: stop",
+        "Any preview that is not valid makes it `blocked`",
+        "three consecutive previews raise tool errors",
+        "only drops the list of available statuses",
+        "it is not the transition list of this work package",
+        "from this recheck read",
+        "result `incomplete`",
+        "run a shell command for a SHA-256",
+        "existing `url` values (paths) stay unchanged",
+        "a later reopen in OpenProject will pull the box open",
+    ):
+        assert text in sync, text
