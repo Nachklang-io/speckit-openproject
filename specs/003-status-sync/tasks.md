@@ -126,7 +126,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`. `preset/` is t
 - [X] T034 Run `scripts/dev-install.sh`; confirm `specify preset list` and `specify extension list` show `openproject` in both and that `.claude/skills/speckit-openproject-sync-status` exists in the scratch project (depends on T012, T029)
 - [X] T035 Run `uv run pytest` and `uv run ruff check . && uv run ruff format --check .`; all green (depends on T034)
 - [X] T036 Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings or record the reason for not fixing; rerun once after the last prompt change (depends on T035)
-- [ ] T037 Mark finished tasks in this file, update `specs/003-status-sync/checklists/requirements.md` if scope changed, prepare the PR description (summary, executed scenarios, untested paths); retarget onto `main` after PR #4 (feature 002) is merged (`git rebase --onto main 002-field-discovery 003-status-sync`); opening the PR is the maintainer's call (depends on T033, T036)
+- [X] T037 Mark finished tasks in this file, update `specs/003-status-sync/checklists/requirements.md` if scope changed, prepare the PR description (summary, executed scenarios, untested paths); retarget onto `main` after PR #4 (feature 002) is merged (`git rebase --onto main 002-field-discovery 003-status-sync`); opening the PR is the maintainer's call (depends on T033, T036)
 
 ---
 
