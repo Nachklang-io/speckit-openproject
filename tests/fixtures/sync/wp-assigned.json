@@ -1,0 +1,16 @@
+{
+  "id": 92,
+  "display_id": "92",
+  "subject": "VERIFY-003 T001 assigned",
+  "type": "Task",
+  "status": "New",
+  "priority": "Normal",
+  "assignee": "speckit bot",
+  "project": "spec-kit Sandbox",
+  "parent_id": null,
+  "lock_version": 0,
+  "percentage_done": null,
+  "custom_fields": {
+    "customField1": "<user-content>verify-003</user-content>"
+  }
+}

@@ -41,7 +41,7 @@ Overrides applied before the table is read:
 
 **Decision**: Call `get-work-package` once per ledger task entry (id from the ledger) and read the status (name and id) and the assignee (display name) from the result. Join `list-statuses` for `is_closed`.
 
-**Rationale** (live): `get_work_package` returns the work package with `parent_id`, `ancestors` and `lock_version`; `list_statuses` returns `id`, `name`, `is_default`, `is_closed`. `list_work_packages` supports `select` and `status` filters, but 001 found it has no parent filter and its field coverage for assignee is not verified.
+**Rationale** (live, confirmed 2026-10-06): `get_work_package` returns `status` (name string), `assignee` (display name or `null`), `parent_id`, `ancestors` and `lock_version`; `list_statuses` returns `id`, `name`, `is_default`, `is_closed`. `list_work_packages` supports `select` and `status` filters, but 001 found it has no parent filter and its field coverage for assignee is not verified.
 
 **Alternatives**: one `list-work-packages` call for the whole project (fewer calls, but pagination, `select` fields and assignee are unverified; revisit as an optimisation); `get-project-work-package-context` per task (it is a schema, not the work package).
 
@@ -54,6 +54,8 @@ Overrides applied before the table is read:
 The statuses allowed "for the task type" are listed from `get-write-context` (project, type) `available_statuses`; the message says that this is the set for the type, not necessarily for the current status, unless the preview names allowed statuses.
 
 **Rationale** (live): a rejected preview of `update_work_package` is `state: rejected` with readable `validation_errors` and not a tool error; previews show the payload including `lockVersion`. `get_project_work_package_context` narrows `available_statuses` per type only.
+
+**Live 2026-10-06**: an unknown status name makes the preview call fail with the generic tool error (no `validation_errors`), which the rule above treats as `blocked`; an allowed transition previews as `state: preview`, `ready: true` (fixture `tests/fixtures/sync/preview-allowed.json`); setting a closed status also sets `percentageDone: 100` in the payload.
 
 **Unresolved**: that OpenProject rejects a forbidden transition in the **preview** (and not only on confirm) has not been observed. T-task: with a restricted workflow in the sandbox, run the preview and record the result as a fixture; if the preview accepts a transition that confirm then refuses, the prompt must treat a failed confirm of a single task as `failed` (FR-014), and S14 documents it. No code path depends on guessing: both outcomes end in a named state.
 

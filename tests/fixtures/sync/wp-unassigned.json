@@ -1,0 +1,16 @@
+{
+  "id": 93,
+  "display_id": "93",
+  "subject": "VERIFY-003 T002 unassigned",
+  "type": "Task",
+  "status": "New",
+  "priority": "Normal",
+  "assignee": null,
+  "project": "spec-kit Sandbox",
+  "parent_id": null,
+  "lock_version": 0,
+  "percentage_done": null,
+  "custom_fields": {
+    "customField1": "<user-content>verify-003</user-content>"
+  }
+}
