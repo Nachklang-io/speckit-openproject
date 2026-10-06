@@ -235,3 +235,12 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Output: overview (including both versions), 7 proposals all kept, result `no changes`, `Dry run: nothing was written.`, no warnings. sha256 of `config.yml` unchanged, no other file in `.specify/openproject/`.
 - Not exercised: the changed wording for a dry run that has changes (a bootstrap dry run would show it), the token redaction (needs a server error containing a secret) and the rule about tools outside the capability map. These are covered only by the string tests in `tests/test_prompt_sync.py`.
 
+### 2026-10-06 – S10 overview compared with the web UI (T031), done by the main session in the browser
+- Method: the main session read the project pages of the sandbox in Chrome as the bot user (no admin rights) and compared them with the overview of the headless dry run above. Nothing was saved; the "new work package" form was opened only to read its dropdowns and left without saving (`list_work_packages` still shows 0 work packages afterwards).
+- Types: all seven (Bug, Epic, Feature, Milestone, Summary task, Task, User story) are enabled in the project settings and Milestone is the only milestone type. Same as the overview.
+- Versions: the version settings list `S10 closed version` (closed) and `S10 open version` (open); the target version dropdown of the new Task form offers only `S10 open version`. Same as the overview, including the note that target versions allow only the open one.
+- Custom field: `S6 Test Field` is listed under the project's custom fields for type Task, and the new Task form marks it with `*` (mandatory). Same as the overview.
+- Priorities: the priority dropdown shows Low, Normal, High, Immediate (default Normal). Same as the overview.
+- Not compared: the statuses of type Task (New, In progress, Closed, On hold, Rejected). The status administration page returns 403 for this user, the create form has no status field, and the sandbox has no work package whose status dropdown could be read. The overview's status list therefore rests on the MCP response only.
+- Settles research Unresolved 2 and 3 (versions with data, enabled types per project) for the sandbox. T031 stays open until the statuses are compared (for example by an admin or after a work package exists).
+
