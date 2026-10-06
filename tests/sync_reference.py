@@ -24,7 +24,16 @@ DECISION_ROWS = [
 TASK_LINE = re.compile(r"^(\s*)- \[( |x|X)\] (T\d{3,})\b")
 
 
-def classify(checked, op_status, base, done, closed=(), in_progress="In progress"):
+def classify(
+    checked,
+    op_status,
+    base,
+    done,
+    closed=(),
+    in_progress="In progress",
+    assignee=None,
+    base_assignee=None,
+):
     """Classify one task that has a ledger entry and an existing work package.
 
     checked: box state; op_status: status name read now; base: ledger status or None.
@@ -69,10 +78,12 @@ def classify(checked, op_status, base, done, closed=(), in_progress="In progress
             action = "conflict"
             result["checkbox"] = od
 
+    if action == "none" and assignee != base_assignee:
+        action = "refresh"
     result["action"] = action
     result["labels"] = sorted(labels)
     result["writes_ledger"] = action in ("push", "pull", "conflict") or (
-        action == "refresh" and result["status"] != base
+        action == "refresh" and (result["status"] != base or assignee != base_assignee)
     )
     return result
 

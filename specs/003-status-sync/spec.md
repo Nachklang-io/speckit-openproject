@@ -121,7 +121,7 @@ When `/speckit-implement` finishes, the user is offered to run the sync so that 
 
 ### Functional Requirements
 
-- **FR-001**: The command MUST read the project configuration, the ledger of the current feature and the feature's `tasks.md` from disk on every run, and MUST stop before any other step if a mandatory input (config `statuses` open/done, ledger, `tasks.md`) is missing or invalid, naming what to fix.
+- **FR-001**: The command MUST read the project configuration, the ledger of the current feature and the feature's `tasks.md` from disk on every run, and MUST stop before any other step if a mandatory input (config `project`, `types.task` and `statuses.done`, ledger, `tasks.md`; `statuses.open` and `statuses.in_progress` are optional and only checked when set) is missing or invalid, naming what to fix.
 - **FR-002**: For every task that has a ledger entry, the command MUST read the work package's current status and assignee from OpenProject and classify the task against three values: the `tasks.md` checkbox, the OpenProject status, and the status recorded at the last sync.
 - **FR-003**: A task counts as done in OpenProject only when its status equals the configured done status; any other status counts as not done, and a closed status that is not the done status MUST be reported as "closed, not done" and MUST NOT trigger a push or a checkbox change (the status is only recorded in the ledger).
 - **FR-004**: The command MUST apply changes that exist on one side only: a done work package checks an open task; a reopened work package unchecks a checked task; a checked task whose work package is not done is moved to the configured done status.

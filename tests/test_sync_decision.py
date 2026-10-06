@@ -18,7 +18,15 @@ def pytest_generate_tests(metafunc):
 
 
 def run(case):
-    return classify(case["checked"], case["op_status"], case["base"], case["done"], case["closed"])
+    return classify(
+        case["checked"],
+        case["op_status"],
+        case["base"],
+        case["done"],
+        case["closed"],
+        assignee=case.get("assignee"),
+        base_assignee=case.get("base_assignee"),
+    )
 
 
 def test_every_row_of_the_table(case):
@@ -43,7 +51,15 @@ def test_items_without_a_complete_task(item):
 def test_second_run_changes_nothing(case):
     first = run(case)
     op_after = DONE if first["writes_op"] else case["op_status"]
-    second = classify(first["checkbox"], op_after, first["status"], case["done"], case["closed"])
+    second = classify(
+        first["checkbox"],
+        op_after,
+        first["status"],
+        case["done"],
+        case["closed"],
+        assignee=case.get("assignee"),
+        base_assignee=case.get("assignee"),
+    )
     assert second["action"] == "none", (first, second)
     assert not second["writes_ledger"]
     assert not second["writes_op"]

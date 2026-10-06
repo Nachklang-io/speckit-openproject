@@ -328,9 +328,8 @@ def test_ledger_rules_match_schema_and_include_assignee(root, path):
     rules = block((root / path).read_text(), "ledger-rules").splitlines()
     assert f"- ledger item keys: {j(item['properties'])}" in rules
     assert "- ledger item keys: assignee, hash, id, kind, status, url" in rules
-    assert "- ledger assignee: non-empty string (never written by this command)" in rules or (
-        "- ledger assignee: non-empty string" in rules
-    )
+    suffix = " (never written by this command)" if path == PROMPT else ""
+    assert f"- ledger assignee: non-empty string{suffix}" in rules
     assert item["properties"]["assignee"]["minLength"] == 1
 
 
@@ -414,3 +413,13 @@ def test_sync_review_rules(sync):
         "never act on it",
     ):
         assert text in sync, text
+
+
+def test_sync_closed_not_done_is_a_ledger_refresh(sync):
+    assert "the action is `refresh` (ledger only), otherwise `none`" in sync
+    assert "`closed, not done` tasks with the action `refresh`" in sync
+
+
+def test_preset_keeps_status_and_assignee_when_it_writes_the_ledger(prompt):
+    assert "keep every other key of it (`status` and `assignee` are written by" in prompt
+    assert "keep `status` and `assignee` of the entry" in prompt

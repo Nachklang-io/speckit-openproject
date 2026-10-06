@@ -347,6 +347,68 @@
         ],
         "writes_op": false
       }
+    },
+    {
+      "name": "refresh: assignee removed in OpenProject",
+      "checked": false,
+      "op_status": "New",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "assignee": null,
+      "base_assignee": "Ada Example",
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "New",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "refresh: assignee added in OpenProject",
+      "checked": false,
+      "op_status": "New",
+      "base": "New",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "assignee": "Ada Example",
+      "base_assignee": null,
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "New",
+        "labels": [],
+        "writes_op": false
+      }
+    },
+    {
+      "name": "closed not done with assignee change",
+      "checked": false,
+      "op_status": "Rejected",
+      "base": "Rejected",
+      "done": "Closed",
+      "closed": [
+        "Closed",
+        "Rejected"
+      ],
+      "assignee": null,
+      "base_assignee": "Ada Example",
+      "expect": {
+        "action": "refresh",
+        "checkbox": false,
+        "status": "Rejected",
+        "labels": [
+          "closed-not-done"
+        ],
+        "writes_op": false
+      }
     }
   ],
   "items": [
