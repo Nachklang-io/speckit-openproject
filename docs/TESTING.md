@@ -230,3 +230,8 @@ Feature `004-s6-demo` from `tests/fixtures/tasks/s6-tasks.md` (1 phase, 3 tasks)
 - Spec edge case and FR-014 amended: unknown keys are rule violations and are dropped only through an approved rebuild; the prompt behaviour was not changed (it was run that way in S13 (e)).
 - Frontmatter `tools`: checked in the installed spec-kit and in the scratch projects, not by running a restricted session. In skills mode the field is not installed; in command mode it is copied unchanged (`tools: openproject-ce-mcp/*`). Claude Code uses `allowed-tools` for commands and skills, which grants permission and does not restrict, so a per-tool list would not enforce read-only. Left unchanged; the limitation is documented in `extension/README.md`.
 
+### 2026-10-06 – Prompt revision d0ab35b, headless dry run after reinstall
+- Setup: `scripts/dev-install.sh` rebuilt the scratch project (the installed skill contains the new wording; `config.yml.tmp` occurs in it), the complete config was restored from a backup (sha256 `9d6c9d06…18bb`). A fresh headless session ran `/speckit-openproject-discover-fields --dry-run`.
+- Output: overview (including both versions), 7 proposals all kept, result `no changes`, `Dry run: nothing was written.`, no warnings. sha256 of `config.yml` unchanged, no other file in `.specify/openproject/`.
+- Not exercised: the changed wording for a dry run that has changes (a bootstrap dry run would show it), the token redaction (needs a server error containing a secret) and the rule about tools outside the capability map. These are covered only by the string tests in `tests/test_prompt_sync.py`.
+
