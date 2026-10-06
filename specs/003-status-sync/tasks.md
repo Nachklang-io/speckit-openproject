@@ -114,7 +114,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`. `preset/` is t
 **Independent Test**: S16 hook part.
 
 - [X] T029 [US5] (the `prompt` key was accepted by `specify extension add --dev`, checked 2026-10-06 via `scripts/dev-install.sh`) Add `hooks.after_implement` to `extension/extension.yml`: `command: speckit.openproject.sync-status`, `optional: true`, `description`, `prompt` (text offering the sync and naming `--dry-run`; check that `specify extension add --dev` accepts the `prompt` key, otherwise omit it and rely on `description`); extend `tests/test_manifests.py`: every `hooks.*.command` is a command provided by the extension and `optional` is `true` (depends on T012)
-- [ ] T030 [US5] **(maintainer)** In `.scratch/proj` run `scripts/dev-install.sh`, check that `.specify/extensions.yml` contains the hook, finish a `/speckit-implement` run (or the smallest run that reaches the end) and see whether the optional offer appears; decline it and confirm nothing was read or written; record the result and label the hook untested if it did not appear (research R7) (depends on T029)
+- [X] T030 [US5] (done 2026-10-06 in a throw-away project, headless; the offer was seen, accepting it inside the flow was not run) **(maintainer)** In `.scratch/proj` run `scripts/dev-install.sh`, check that `.specify/extensions.yml` contains the hook, finish a `/speckit-implement` run (or the smallest run that reaches the end) and see whether the optional offer appears; decline it and confirm nothing was read or written; record the result and label the hook untested if it did not appear (research R7) (depends on T029)
 
 ---
 
