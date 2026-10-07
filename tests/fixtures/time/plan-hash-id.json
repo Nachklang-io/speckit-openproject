@@ -1,0 +1,25 @@
+{
+  "ledger_items": {
+    "T001": { "id": 111, "kind": "task" }
+  },
+  "cases": [
+    {
+      "name": "#<id> in the ledger: resolves",
+      "key": "#111",
+      "expect_resolve": 111,
+      "expect_classify": "known"
+    },
+    {
+      "name": "#<id> not in the ledger: unknown",
+      "key": "#999",
+      "expect_resolve": null,
+      "expect_classify": "unknown"
+    },
+    {
+      "name": "#<non-numeric>: unknown",
+      "key": "#abc",
+      "expect_resolve": null,
+      "expect_classify": "unknown"
+    }
+  ]
+}

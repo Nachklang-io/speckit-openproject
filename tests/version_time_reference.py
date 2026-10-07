@@ -231,3 +231,29 @@ def classify_time(item, ledger_time_entries):
     if item["key"] in existing:
         return "unchanged"
     return "create"
+
+
+def resolve_task_key(key, ledger_items):
+    """Resolve one line's task key to a work package id (research R8).
+
+    key: a ledger item key (e.g. "T001"), or "#<id>" referencing a work package id directly -
+        valid only when that id is already in the ledger (R8: a bare id is not enough).
+    ledger_items: the ledger's `items` mapping, {key: {"id": int, ...}}.
+
+    Returns the work package id, or None when the key is unknown.
+    """
+    if key.startswith("#"):
+        try:
+            wp_id = int(key[1:])
+        except ValueError:
+            return None
+        if any(item["id"] == wp_id for item in ledger_items.values()):
+            return wp_id
+        return None
+    item = ledger_items.get(key)
+    return item["id"] if item else None
+
+
+def check_entry_key_ambiguity(item_count, entry_key_given):
+    """`--entry-key` applies only to a single-item run; otherwise stop (research R6)."""
+    return "stop" if entry_key_given and item_count > 1 else "ok"

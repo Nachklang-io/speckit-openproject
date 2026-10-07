@@ -1,0 +1,9 @@
+{
+  "name": "unknown task key: not in the ledger items",
+  "ledger_items": {
+    "T001": { "id": 111, "kind": "task" }
+  },
+  "key": "T999",
+  "expect_resolve": null,
+  "expect_classify": "unknown"
+}

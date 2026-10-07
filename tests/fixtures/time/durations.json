@@ -1,0 +1,42 @@
+{
+  "today": "2026-10-07",
+  "cases": [
+    { "name": "1h30", "line": "T001: 1h30", "expect": { "minutes": 90, "date": "2026-10-07" } },
+    { "name": "1h30m", "line": "T001: 1h30m", "expect": { "minutes": 90, "date": "2026-10-07" } },
+    { "name": "1:30", "line": "T001: 1:30", "expect": { "minutes": 90, "date": "2026-10-07" } },
+    { "name": "90m", "line": "T001: 90m", "expect": { "minutes": 90, "date": "2026-10-07" } },
+    { "name": "45m", "line": "T001: 45m", "expect": { "minutes": 45, "date": "2026-10-07" } },
+    { "name": "1.5h", "line": "T001: 1.5h", "expect": { "minutes": 90, "date": "2026-10-07" } },
+    { "name": "2h", "line": "T001: 2h", "expect": { "minutes": 120, "date": "2026-10-07" } },
+    {
+      "name": "explicit past date",
+      "line": "T001: 45m on 2026-10-05",
+      "expect": { "minutes": 45, "date": "2026-10-05" }
+    },
+    { "name": "zero: 0m", "line": "T001: 0m", "expect": "rejected" },
+    { "name": "negative: -1h", "line": "T001: -1h", "expect": "rejected" },
+    { "name": "over 24h: 25h", "line": "T001: 25h", "expect": "rejected" },
+    {
+      "name": "fraction of a minute: 1.505h",
+      "line": "T001: 1.505h",
+      "expect": "rejected"
+    },
+    { "name": "unparsable: abc", "line": "T001: abc", "expect": "rejected" },
+    { "name": "empty line", "line": "", "expect": "rejected" },
+    {
+      "name": "invalid calendar date",
+      "line": "T001: 1h on 2026-13-01",
+      "expect": "rejected"
+    },
+    {
+      "name": "date in the future",
+      "line": "T001: 1h on 2099-01-01",
+      "expect": "rejected"
+    },
+    {
+      "name": "date not in YYYY-MM-DD format",
+      "line": "T001: 1h on 07.10.2026",
+      "expect": "rejected"
+    }
+  ]
+}

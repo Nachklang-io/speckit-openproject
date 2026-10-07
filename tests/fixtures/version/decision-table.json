@@ -1,0 +1,113 @@
+{
+  "version_cases": [
+    {
+      "name": "none/empty: create",
+      "ledger_version": null,
+      "matches": [],
+      "status": null,
+      "expect": { "action": "create", "writes": ["create_version", "ledger"] }
+    },
+    {
+      "name": "none/one open: reuse",
+      "ledger_version": null,
+      "matches": [{ "id": 1, "name": "001-demo" }],
+      "status": "open",
+      "expect": { "action": "reuse", "writes": ["ledger"], "id": 1, "name": "001-demo" }
+    },
+    {
+      "name": "none/one closed: stop for assignment",
+      "ledger_version": null,
+      "matches": [{ "id": 1, "name": "001-demo" }],
+      "status": "closed",
+      "expect": { "action": "closed", "writes": [], "id": 1, "name": "001-demo" }
+    },
+    {
+      "name": "none/one locked: stop for assignment",
+      "ledger_version": null,
+      "matches": [{ "id": 1, "name": "001-demo" }],
+      "status": "locked",
+      "expect": { "action": "locked", "writes": [], "id": 1, "name": "001-demo" }
+    },
+    {
+      "name": "none/several: blocked (ambiguous name)",
+      "ledger_version": null,
+      "matches": [
+        { "id": 1, "name": "001-demo" },
+        { "id": 2, "name": "001-demo" }
+      ],
+      "status": null,
+      "expect": { "action": "blocked", "writes": [], "reason": "ambiguous name" }
+    },
+    {
+      "name": "id/found open, name matches the ledger: use it",
+      "ledger_version": { "id": 7, "name": "001-demo" },
+      "matches": [{ "id": 7, "name": "001-demo" }],
+      "status": "open",
+      "expect": { "action": "use", "writes": [], "id": 7, "name": "001-demo" }
+    },
+    {
+      "name": "id/found open, name differs from the ledger: warning, id wins",
+      "ledger_version": { "id": 7, "name": "001-demo" },
+      "matches": [{ "id": 7, "name": "001-demo-renamed" }],
+      "status": "open",
+      "expect": {
+        "action": "use",
+        "writes": [],
+        "id": 7,
+        "name": "001-demo-renamed",
+        "warning": "name differs from the ledger entry; id wins"
+      }
+    },
+    {
+      "name": "id/found closed: stop for assignment",
+      "ledger_version": { "id": 8, "name": "001-demo-closed" },
+      "matches": [{ "id": 8, "name": "001-demo-closed" }],
+      "status": "closed",
+      "expect": { "action": "closed", "writes": [], "id": 8, "name": "001-demo-closed" }
+    },
+    {
+      "name": "id/found locked: stop for assignment",
+      "ledger_version": { "id": 9, "name": "001-demo-locked" },
+      "matches": [{ "id": 9, "name": "001-demo-locked" }],
+      "status": "locked",
+      "expect": { "action": "locked", "writes": [], "id": 9, "name": "001-demo-locked" }
+    },
+    {
+      "name": "id/not found: stale, name the ledger entry",
+      "ledger_version": { "id": 99, "name": "001-demo-deleted" },
+      "matches": [],
+      "status": null,
+      "expect": { "action": "stale", "writes": [] }
+    }
+  ],
+  "work_package_cases": [
+    {
+      "name": "= V (by name): unchanged",
+      "wp_version": "001-demo",
+      "version_name": "001-demo",
+      "exists": true,
+      "expect": { "action": "unchanged", "writes": [] }
+    },
+    {
+      "name": "none: assign",
+      "wp_version": null,
+      "version_name": "001-demo",
+      "exists": true,
+      "expect": { "action": "assign", "writes": ["update"] }
+    },
+    {
+      "name": "other: reported, never moved",
+      "wp_version": "000-other",
+      "version_name": "001-demo",
+      "exists": true,
+      "expect": { "action": "other", "writes": [], "current": "000-other" }
+    },
+    {
+      "name": "work package not found: stale, skip",
+      "wp_version": null,
+      "version_name": "001-demo",
+      "exists": false,
+      "expect": { "action": "stale", "writes": [] }
+    }
+  ]
+}
