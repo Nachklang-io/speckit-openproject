@@ -1,0 +1,10 @@
+{
+  "action": "update",
+  "state": "rejected",
+  "ready": false,
+  "work_package_id": "117",
+  "validation_errors": {
+    "targetVersions": "Version is invalid because the chosen version is closed."
+  },
+  "result": null
+}

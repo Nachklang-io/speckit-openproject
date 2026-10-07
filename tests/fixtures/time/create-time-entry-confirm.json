@@ -1,0 +1,11 @@
+{
+  "action": "create",
+  "state": "confirmed",
+  "time_entry_id": 1,
+  "result": {
+    "work_package_id": 115,
+    "activity": "Development",
+    "hours": "PT30M",
+    "spent_on": "2026-10-07"
+  }
+}

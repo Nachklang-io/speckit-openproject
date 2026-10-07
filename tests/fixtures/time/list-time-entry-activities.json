@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Management", "position": 1, "is_default": false, "projects": [] },
+  { "id": 2, "name": "Specification", "position": 2, "is_default": false, "projects": [] },
+  { "id": 3, "name": "Development", "position": 3, "is_default": true, "projects": [] },
+  { "id": 4, "name": "Testing", "position": 4, "is_default": false, "projects": [] },
+  { "id": 5, "name": "Support", "position": 5, "is_default": false, "projects": [] },
+  { "id": 6, "name": "Other", "position": 6, "is_default": false, "projects": [] }
+]
