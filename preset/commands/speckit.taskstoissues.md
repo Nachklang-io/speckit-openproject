@@ -32,7 +32,7 @@ All OpenProject access goes through an MCP server (never the REST API, never Git
 | search-work-packages | `search_work_packages` | search, project, limit, offset | yes |
 | get-work-package | `get_work_package` | work_package_id | yes |
 | create-work-package | `create_work_package` | project, type, subject, description, parent, custom_fields, priority, assignee, confirm | yes |
-| update-work-package | `update_work_package` | work_package_id, subject, description, status, confirm | yes |
+| update-work-package | `update_work_package` | work_package_id, subject, description, status, target_versions, confirm | yes |
 | get-relations | `get_work_package_relations` | work_package_id | yes |
 | create-relation | `create_work_package_relation` | work_package_id, related_to_work_package_id, relation_type, confirm | yes |
 <!-- END capability-map -->
@@ -55,14 +55,14 @@ Validate the configuration and the ledger against these rules. Any violation is 
 - required top-level keys: project, types
 - types keys: feature, phase, subtask, task
 - required types keys: feature, phase, task
-- defaults keys: assignee, priority, status, version
+- defaults keys: activity, assignee, priority, status, version
 - statuses keys: done, in_progress, open
 - value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
 - unknown keys are errors
 <!-- END config-rules -->
 
 <!-- BEGIN ledger-rules -->
-- ledger top-level keys: documents, feature, items, project, relations, schema_version
+- ledger top-level keys: documents, feature, items, project, relations, schema_version, time_entries, version
 - ledger required top-level keys: feature, items, project, schema_version
 - ledger schema_version: 1.0
 - ledger item keys: assignee, hash, id, kind, status, url
@@ -74,10 +74,12 @@ Validate the configuration and the ledger against these rules. Any violation is 
 - ledger relation keys: from, id, to, type
 - ledger required relation keys: from, to, type
 - ledger relation type values: follows
+- ledger version: object {id, name}, written by speckit.openproject.sync-version (never written by this command)
+- ledger time_entries: array of objects written by speckit.openproject.log-time; never written by this command
 - unknown keys are errors
 <!-- END ledger-rules -->
 
-`statuses` (written by `speckit.openproject.discover-fields`) is accepted and ignored by this command. `documents` in the ledger is accepted and left unchanged by this command.
+`statuses` (written by `speckit.openproject.discover-fields`) is accepted and ignored by this command. `documents`, `version` and `time_entries` in the ledger are accepted and left unchanged by this command.
 
 Defaults: `types.feature` = "Feature", `types.phase` = "Summary task", `types.task` = "Task". `defaults.version` is ignored by this command. `defaults.status` cannot be applied on creation (no status parameter); the type's default status applies.
 

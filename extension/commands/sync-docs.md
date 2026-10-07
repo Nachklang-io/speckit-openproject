@@ -22,7 +22,7 @@ All OpenProject access goes through an MCP server (never the REST API). This com
 | Capability | Tool (jtauschl/openproject-ce-mcp v0.4.1) | Parameters | Verified |
 |---|---|---|---|
 | get-work-package | `get_work_package` | work_package_id | yes |
-| update-work-package | `update_work_package` | work_package_id, subject, description, status, confirm | yes |
+| update-work-package | `update_work_package` | work_package_id, subject, description, status, target_versions, confirm | yes |
 | create-attachment | `create_work_package_attachment` | work_package_id, file_path, description, confirm | yes |
 | list-attachments | `list_work_package_attachments` | work_package_id, limit, offset | yes |
 | delete-attachment | `delete_attachment` | attachment_id, confirm | yes |
@@ -48,14 +48,14 @@ Validate the configuration and the ledger against these rules. They are the rule
 - required top-level keys: project, types
 - types keys: feature, phase, subtask, task
 - required types keys: feature, phase, task
-- defaults keys: assignee, priority, status, version
+- defaults keys: activity, assignee, priority, status, version
 - statuses keys: done, in_progress, open
 - value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
 - unknown keys are errors
 <!-- END config-rules -->
 
 <!-- BEGIN ledger-rules -->
-- ledger top-level keys: documents, feature, items, project, relations, schema_version
+- ledger top-level keys: documents, feature, items, project, relations, schema_version, time_entries, version
 - ledger required top-level keys: feature, items, project, schema_version
 - ledger schema_version: 1.0
 - ledger item keys: assignee, hash, id, kind, status, url
@@ -67,10 +67,12 @@ Validate the configuration and the ledger against these rules. They are the rule
 - ledger relation keys: from, id, to, type
 - ledger required relation keys: from, to, type
 - ledger relation type values: follows
+- ledger version: object {id, name}, written by speckit.openproject.sync-version (never written by this command)
+- ledger time_entries: array of objects written by speckit.openproject.log-time; never written by this command
 - unknown keys are errors
 <!-- END ledger-rules -->
 
-Value types of a `documents` entry: `hash` is a lowercase hex SHA-256 of 64 characters, `attachment_id` and `pending_delete` are integers >= 1, `synced` is a date `YYYY-MM-DD`. `pending_delete` must differ from `attachment_id`; equal values are a ledger error (stop). This command writes `documents`; it never changes `items`, `relations` or any other key.
+Value types of a `documents` entry: `hash` is a lowercase hex SHA-256 of 64 characters, `attachment_id` and `pending_delete` are integers >= 1, `synced` is a date `YYYY-MM-DD`. `pending_delete` must differ from `attachment_id`; equal values are a ledger error (stop). This command writes `documents`; it never changes `items`, `relations`, `version`, `time_entries` or any other key.
 
 This command needs `project` from the configuration and `items.feature.id` (kind `feature`) from the ledger.
 

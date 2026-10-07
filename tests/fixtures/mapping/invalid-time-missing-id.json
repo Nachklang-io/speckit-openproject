@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "project": "speckit-sandbox",
+  "feature": "001-demo",
+  "items": {
+    "feature": {
+      "kind": "feature",
+      "id": 100,
+      "url": "/work_packages/100"
+    },
+    "T001": {
+      "kind": "task",
+      "id": 111,
+      "url": "/work_packages/111"
+    }
+  },
+  "time_entries": [
+    {
+      "key": "111|2026-10-07|Development|PT1H30M",
+      "work_package_id": 111,
+      "spent_on": "2026-10-07",
+      "activity": "Development",
+      "hours": "PT1H30M"
+    }
+  ]
+}

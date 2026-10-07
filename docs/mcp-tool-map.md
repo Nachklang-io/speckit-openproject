@@ -11,7 +11,7 @@ Single place that maps capabilities used by the commands to tool names. Add a co
 | search-work-packages | `search_work_packages` | search, project, limit, offset | yes |
 | get-work-package | `get_work_package` | work_package_id | yes |
 | create-work-package | `create_work_package` | project, type, subject, description, parent, custom_fields, priority, assignee, confirm | yes |
-| update-work-package | `update_work_package` | work_package_id, subject, description, status, confirm | yes |
+| update-work-package | `update_work_package` | work_package_id, subject, description, status, target_versions, confirm | yes |
 | get-relations | `get_work_package_relations` | work_package_id | yes |
 | create-relation | `create_work_package_relation` | work_package_id, related_to_work_package_id, relation_type, confirm | yes |
 | create-attachment | `create_work_package_attachment` | work_package_id, file_path, description, confirm | yes |
@@ -20,7 +20,7 @@ Single place that maps capabilities used by the commands to tool names. Add a co
 | list-versions | `list_versions` | project, search, limit, offset, select | yes |
 | get-version | `get_version` | version_id | yes |
 | create-version | `create_version` | project, name, description, start_date, end_date, sharing, status, confirm | yes |
-| assign-version | `bulk_update_work_packages` (fallback: `update_work_package`) | items[{work_package_id, target_versions}] (fallback: work_package_id, target_versions), confirm | yes |
+| bulk-update-work-packages | `bulk_update_work_packages` (fallback per item: `update-work-package` row) | items[{work_package_id, target_versions}], confirm | yes |
 | list-time-activities | `list_time_entry_activities` | (none) | yes |
 | create-time-entry | `create_time_entry` | activity, hours, spent_on, work_package_id, comment, confirm | yes |
 
