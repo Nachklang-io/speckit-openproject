@@ -4,7 +4,7 @@ extension:
   id: "openproject"
   name: "OpenProject Integration"
   version: "0.1.0"
-  description: "Field discovery, status sync, documentation sync, versions and time tracking between spec-kit and OpenProject via MCP"
+  description: "Sync fields, status, docs, versions and time between spec-kit and OpenProject via MCP"
   author: "Daniel Ring"
   repository: "https://github.com/Nachklang-io/speckit-openproject"
   license: "MIT"
