@@ -746,3 +746,11 @@ def test_log_time_safety_rules_present(log_time):
         "`stopped`",
     ):
         assert text in log_time, text
+
+
+def test_log_time_skipped_lines_make_run_incomplete(log_time):
+    assert "first matching rule wins" in log_time
+    assert (
+        "At least one line is `failed`, `stale`, `unknown` or `rejected` "
+        "(even if every attempted write succeeded): `incomplete`."
+    ) in log_time

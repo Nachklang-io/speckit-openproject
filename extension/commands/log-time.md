@@ -248,12 +248,12 @@ Count the classifications:
 - `failed`: lines that failed during confirm.
 - Total hours created (sum of all `created` entries' hours in decimal format, e.g., `1.5h`, `2h`).
 
-Determine the result:
-- If no writes were attempted or all writes succeeded, and nothing failed: `complete`.
-- If some items failed: `incomplete`.
-- If a stop condition was hit before any write: `stopped`.
-- If `--dry-run` was given: `dry run`.
-- If nothing changed (no time entries created, all unchanged or skipped): `no changes`.
+Determine the result (first matching rule wins):
+1. `--dry-run` was given: `dry run`.
+2. A stop condition was hit before any write: `stopped`.
+3. At least one line is `failed`, `stale`, `unknown` or `rejected` (even if every attempted write succeeded): `incomplete`.
+4. No time entry was created (every line `unchanged`): `no changes`.
+5. Otherwise: `complete`.
 
 Output a summary:
 

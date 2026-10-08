@@ -108,7 +108,7 @@ If the ledger, config or the project's write permission for versions or time ent
 - **FR-009**: Both commands MUST show a plan before any write, MUST support `--dry-run` (no write, line `Dry run: nothing was written.`), and without it MUST ask for confirmation once for the whole plan.
 - **FR-010**: Writes MUST go through the server's preview-then-confirm flow and MUST be recorded in the ledger immediately after each successful write.
 - **FR-011**: If the write capability for versions or for time entries is not available on the MCP server, the matching command MUST stop before any write, also in `--dry-run`, naming the capability and the server setting that enables it.
-- **FR-012**: Failure of one item MUST NOT stop the others; the report MUST name the error with URLs and host names redacted, and the run ends as `incomplete`.
+- **FR-012**: Failure of one item MUST NOT stop the others; the report MUST name the error with URLs and host names redacted, and the run ends as `incomplete`. For `log-time`, a run with any `stale`, `unknown` or `rejected` line also ends as `incomplete`, even if every attempted write succeeded (maintainer decision 2026-10-08).
 - **FR-013**: Each final report MUST show counts per outcome (created, assigned, reused, unchanged, skipped, stale, failed), the changed items, warnings, and one result: `complete`, `incomplete`, `no changes`, `dry run` or `stopped`.
 - **FR-014**: Both commands MUST work in skills mode (`/speckit-openproject-<name>`) and command mode (`/speckit.openproject.<name>`) and MUST NOT write tokens, private instance URLs or `.env` content anywhere.
 
