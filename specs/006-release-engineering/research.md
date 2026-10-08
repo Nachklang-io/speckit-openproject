@@ -85,6 +85,18 @@ Findings come from reading the installed `specify-cli` 1.1.1.dev0 source (`speci
   - The monorepo layout question (manifest not at the repository root) is listed as a gap with its options, per US4-2.
 - **Rationale**: The guide changes (PUBLISHING.md), so the checklist is written at implementation time by re-reading upstream; the plan fixes only the shape. Filing is the maintainer's step.
 - **Alternatives**: GitHub issue templates (not ours to define).
+- **Upstream as read on 2026-10-08 (T027)**, from `github/spec-kit` `main`:
+  - Sources:
+    - https://github.com/github/spec-kit/blob/main/presets/PUBLISHING.md
+    - https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-PUBLISHING-GUIDE.md
+    - https://github.com/github/spec-kit/blob/main/.github/ISSUE_TEMPLATE/preset_submission.yml
+    - https://github.com/github/spec-kit/blob/main/.github/ISSUE_TEMPLATE/extension_submission.yml
+    - https://github.com/github/spec-kit/blob/main/.github/ISSUE_TEMPLATE/bundle_submission.yml
+    - https://github.com/github/spec-kit/tree/main/bundles (holds `catalog.community.json`)
+  - **Submissions are issues, not pull requests.** The extension guide says outright not to open a PR against `extensions/catalog.community.json`. Instead, file the "Extension Submission" issue form; a maintainer labels it, and automation drafts the PR. Presets have the same kind of issue form (`preset_submission.yml`, validation starts once the `preset-submission` label is applied), but `presets/PUBLISHING.md` still describes a PR that edits `presets/catalog.community.json` and `docs/community/presets.md`. `submission.md` therefore holds issue-form answers for each package and treats the preset PR text as a fallback. This replaces "PR titles and bodies" above; FR-015's intent (ready to file, filed by the maintainer) stays the same.
+  - **Community bundles are accepted** (`bundle_submission.yml`). The form asks which "non-default catalogs users must add" and wants proof that installation works end to end in a clean project. That gets a third checklist, `bundle-checklist.md`.
+  - **Monorepos are allowed for presets.** PUBLISHING.md: "link the README inside that directory … rather than the repository-root README". The extension guide does not mention monorepos. Our layout is a documented choice, not a blocker.
+  - Both guides show tags as `vX.Y.Z` and use the GitHub source archive (`archive/refs/tags/…`) as the example `download_url`. The forms only ask for "URL to the GitHub release archive". Our `preset-v*`/`extension-v*` tags and release asset URLs are a deviation, which the checklists record.
 
 ## R10 Documentation
 
