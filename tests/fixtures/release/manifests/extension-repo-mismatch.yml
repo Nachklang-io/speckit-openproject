@@ -1,0 +1,11 @@
+schema_version: "1.0"
+extension:
+  id: "openproject"
+  name: "OpenProject Integration"
+  version: "0.1.0"
+  description: "Fixture: repository differs from the publishing repository"
+  author: "Fixture"
+  repository: "https://github.com/example/other-repo"
+  license: "MIT"
+requires:
+  speckit_version: ">=1.1.0"

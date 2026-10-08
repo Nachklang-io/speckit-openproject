@@ -1,0 +1,11 @@
+schema_version: "1.0"
+extension:
+  id: "openproject"
+  name: "OpenProject Integration"
+  version: "0.1.1"
+  description: "Fixture: version differs from the tag"
+  author: "Fixture"
+  repository: "https://github.com/Nachklang-io/speckit-openproject"
+  license: "MIT"
+requires:
+  speckit_version: ">=1.1.0"
