@@ -112,7 +112,7 @@ Before proceeding with any read or write, check all stop conditions. If any fail
 
 1. **Config and ledger must exist and be readable**: Try to read `.specify/openproject/config.yml` (or `.specify/config.yml`). If it does not exist or cannot be read, stop and report: `Configuration file not found. Expected: .specify/openproject/config.yml or .specify/config.yml`.
 
-2. **Ledger file name depends on the feature directory.** If no feature is given as an argument and the current directory name does not match the pattern `NNN-*`, you cannot determine the ledger file name yet. Proceed to step 1 to resolve the feature name first, then return here to check the ledger.
+2. **Ledger file name depends on the feature directory.** Resolve the feature directory name as described in step 1 before checking the ledger.
 
 3. **Ledger must exist**: Try to read the ledger file. If it does not exist, stop and report: `Ledger file not found. Expected: .specify/openproject/mapping-<FEATURE>.json`.
 
@@ -132,9 +132,7 @@ If all checks pass, proceed to step 1.
 
 Parse `$ARGUMENTS`. Accepted: feature directory name (for example `001-tasks-to-work-packages`), `--version <name>`, `--dry-run`, nothing else. Report any unrecognized flag and stop with the supported syntax: `[feature] [--version <name>] [--dry-run]`. Do not guess abbreviations or aliases.
 
-Resolve the feature directory:
-- If an argument is given and it contains a slash or a dash (like `001-tasks` or `./specs/001-tasks`), treat it as the feature directory path (relative to repo root, or absolute). Read the directory name: if it matches the pattern `NNN-*` (three digits, then a dash, then any text), remember it. If no feature name in this pattern: stop and ask for one.
-- If no directory argument is given, use the working directory (or current branch context if available from environment). If the current directory name matches `NNN-*`, use it. Otherwise, stop and ask for the feature directory.
+Resolve the feature directory name: argument → `feature_directory` in `.specify/feature.json` (last path segment) → the current git branch name if `specs/<branch>/` exists. If none resolves, stop and list the directories under `specs/`. Do not pick a directory by guessing.
 
 **Never prompt the user for confirmation at this stage.** You have the feature directory and its name (e.g., `005-versions-and-time`).
 

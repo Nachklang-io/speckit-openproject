@@ -101,7 +101,7 @@ Before proceeding with any read or write, check all stop conditions. If any fail
 
 1. **Config and ledger must exist and be readable**: Try to read `.specify/openproject/config.yml` (or `.specify/config.yml`). If it does not exist or cannot be read, stop and report: `Configuration file not found. Expected: .specify/openproject/config.yml or .specify/config.yml`.
 
-2. **Ledger file name depends on the feature directory.** If no feature is given as an argument and the current directory name does not match the pattern `NNN-*`, you cannot determine the ledger file name yet. Proceed to step 1 to resolve the feature name first, then return here to check the ledger.
+2. **Ledger file name depends on the feature directory.** Resolve the feature directory name as described in step 1 before checking the ledger.
 
 3. **Ledger must exist**: Try to read the ledger file. If it does not exist, stop and report: `Ledger file not found. Expected: .specify/openproject/mapping-<FEATURE>.json`.
 
@@ -121,7 +121,9 @@ If all checks pass, proceed to step 1.
 
 Parse `$ARGUMENTS`. Accepted: feature directory name, `--activity <name>`, `--entry-key <key>`, `--dry-run`, and input lines (separated by newline or `;`). Do not guess abbreviations.
 
-Resolve the feature directory (same as sync-version step 1): Read the config and ledger files (same as sync-version step 2).
+Resolve the feature directory name: argument → `feature_directory` in `.specify/feature.json` (last path segment) → the current git branch name if `specs/<branch>/` exists. If none resolves, stop and list the directories under `specs/`. Do not pick a directory by guessing.
+
+Read the configuration file (`.specify/openproject/config.yml` or `.specify/config.yml`) and the ledger `.specify/openproject/mapping-<FEATURE>.json`. Validate both against the `config-rules` and `ledger-rules` blocks above; on any violation, print it and stop. No writes.
 
 ### Step 2: Resolve input lines
 
