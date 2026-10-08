@@ -33,10 +33,10 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 
 ## Phase 2: Foundational (blocks all stories)
 
-- [ ] T003 Create `scripts/release.py` skeleton: argparse subcommands `check`, `notes`, `build`, `verify-archive`, `bundle-catalog`, `publish-plan`; exit codes 0/1/2; messages prefixed `release: ` (contracts/release-script.md); stdlib + PyYAML only, with PyYAML imported lazily so `publish-plan` runs on a bare `python3`
-- [ ] T004 Implement tag parsing in `scripts/release.py` with the exact grammar from data-model.md (`^(preset|extension|bundle)-v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$`), returning kind, core version, suffix, prerelease flag, archive name `openproject-<kind>-<tagversion>.zip`
-- [ ] T005 Implement the changelog parser in `scripts/release.py` per `contracts/changelog-format.md`: find section + `### X.Y.Z - YYYY-MM-DD` entry, return body verbatim up to next `###`/`##`; reject empty body; require non-empty `#### Migration` when an item starts with `**Breaking**`
-- [ ] T006 Add `tests/test_release.py` tests for T004 and T005: valid, pre-release, `v1.0.0`, `extension-v1.0`, leading zero, missing/empty entry, breaking without migration (uses T001 fixtures)
+- [X] T003 Create `scripts/release.py` skeleton: argparse subcommands `check`, `notes`, `build`, `verify-archive`, `bundle-catalog`, `publish-plan`; exit codes 0/1/2; messages prefixed `release: ` (contracts/release-script.md); stdlib + PyYAML only, with PyYAML imported lazily so `publish-plan` runs on a bare `python3`
+- [X] T004 Implement tag parsing in `scripts/release.py` with the exact grammar from data-model.md (`^(preset|extension|bundle)-v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$`), returning kind, core version, suffix, prerelease flag, archive name `openproject-<kind>-<tagversion>.zip`
+- [X] T005 Implement the changelog parser in `scripts/release.py` per `contracts/changelog-format.md`: find section + `### X.Y.Z - YYYY-MM-DD` entry, return body verbatim up to next `###`/`##`; reject empty body; require non-empty `#### Migration` when an item starts with `**Breaking**`
+- [X] T006 Add `tests/test_release.py` tests for T004 and T005: valid, pre-release, `v1.0.0`, `extension-v1.0`, leading zero, missing/empty entry, breaking without migration (uses T001 fixtures)
 
 **Checkpoint**: tag grammar and changelog parsing are tested.
 

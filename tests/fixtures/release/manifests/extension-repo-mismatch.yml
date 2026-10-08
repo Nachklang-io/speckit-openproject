@@ -1,11 +1,5 @@
-schema_version: "1.0"
+# Override applied by tests/test_release.py to a copy of extension/extension.yml.
+# `repository_slug` is owner/repo; the test turns it into the GitHub URL (fixtures stay URL-free).
 extension:
-  id: "openproject"
-  name: "OpenProject Integration"
   version: "0.1.0"
-  description: "Fixture: repository differs from the publishing repository"
-  author: "Fixture"
-  repository: "https://github.com/example/other-repo"
-  license: "MIT"
-requires:
-  speckit_version: ">=1.1.0"
+  repository_slug: "example/other-repo"

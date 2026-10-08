@@ -1,11 +1,4 @@
-schema_version: "1.0"
+# Override applied by tests/test_release.py to a copy of extension/extension.yml.
+# The tag under test is extension-v0.1.0.
 extension:
-  id: "openproject"
-  name: "OpenProject Integration"
   version: "0.1.1"
-  description: "Fixture: version differs from the tag"
-  author: "Fixture"
-  repository: "https://github.com/Nachklang-io/speckit-openproject"
-  license: "MIT"
-requires:
-  speckit_version: ">=1.1.0"
