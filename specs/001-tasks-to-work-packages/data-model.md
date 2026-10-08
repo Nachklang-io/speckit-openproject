@@ -51,7 +51,7 @@ relations:
 
 ### Subjects and descriptions
 - Feature: `<feature-dir-name> <Feature title>` (e.g. `001-tasks-to-work-packages Tasks → Work Packages`), same string as the ledger field `feature` (research R15).
-- Phase: `Phase N: <title>`; Task: `T### <title>`.
+- Phase: `Phase N: <title>`; Task: `T### <headline>` (headline rule: see FR-007 and step 7 of the prompt).
 - Description: `Labels: US1 · parallel` (only present parts), the task text, `File: \`<hint>\``, repo-relative links to `spec.md`/`plan.md`; each part separated from the next by one blank line.
 
 ## State transitions per plan item

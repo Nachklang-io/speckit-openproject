@@ -8,6 +8,7 @@ import jsonschema
 import pytest
 import yaml
 from docs_reference import DECISION_ROWS as DOCS_DECISION_ROWS
+from headline_reference import headline
 from sync_reference import DECISION_ROWS
 from version_time_reference import (
     ACCEPTED_DURATION_FORMS,
@@ -761,3 +762,38 @@ def test_taskstoissues_caps_subject_length(root):
     assert "at most 255 characters" in text
     assert "first 254 characters and append `…`" in text
     assert "never shortened" in text
+
+
+def test_taskstoissues_states_headline_rule(root):
+    text = (root / PROMPT).read_text()
+    assert "Headline rule" in text
+    for part in (
+        "`**(...)**` group or a `(...)` group",
+        "EARLIEST occurrence of `: `, `; `, ` (` or `. `",
+        "remove backticks",
+        "If the headline is empty",
+        "longer than 70 characters",
+        "The description keeps the full task text and is never shortened.",
+    ):
+        assert part in text, part
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Create database schema", "Create database schema"),
+        ("Write `docs/RELEASING.md` (FR-009): bump version", "Write docs/RELEASING.md"),
+        ("**(maintainer)** Q4: after explicit confirmation push", "Q4"),
+        ("(optional) Add step 7: details", "Add step 7"),
+        ("Run it; then stop", "Run it"),
+        ("(Optional): foo bar", ": foo bar"),
+        ("Do this. Then that", "Do this"),
+        (
+            "Add a test in tests/test_release.py that every checklist item line carries a state",
+            "Add a test in tests/test_release.py that every checklist item line…",
+        ),
+    ],
+)
+def test_headline_reference(text, expected):
+    assert headline(text) == expected
+    assert len(headline(text)) <= 71

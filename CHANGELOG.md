@@ -6,6 +6,9 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 
 ### Unreleased
 
+#### Fixed
+- `speckit.taskstoissues`: task work package subjects are short headlines (`T### <headline>`, at most 70 characters) instead of the full task text; the description keeps the complete text. Existing ledgers report "differs, not updated" for tasks synced with the old full-text subjects; `--update` rewrites them. Feature and phase subjects are still capped at 255 characters.
+
 ### 1.0.0 - 2026-10-08
 
 #### Added
