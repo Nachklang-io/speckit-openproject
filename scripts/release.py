@@ -17,6 +17,7 @@ import re
 import sys
 import zipfile
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -178,6 +179,85 @@ def bundle_pins(data: dict) -> dict[str, str]:
     return pins
 
 
+CATALOG_FILES = {
+    "preset": ("presets", "openproject-presets-catalog.json"),
+    "extension": ("extensions", "openproject-extensions-catalog.json"),
+}
+ENTRY_FIELDS = ("id", "name", "version", "description", "author", "license")
+
+
+def component_tags(bundle_tag: Tag, pins: dict[str, str]) -> dict[str, Tag]:
+    """Map each pin to its component release tag; a bundle pre-release uses the same suffix."""
+    tags = {}
+    for kind, pin in pins.items():
+        suffix = f"-{bundle_tag.suffix}" if bundle_tag.suffix else ""
+        tags[kind] = parse_tag(f"{kind}-v{pin}{suffix}")
+    return tags
+
+
+def _archive_manifest(path: Path, kind: str) -> dict:
+    import yaml  # lazy: publish-plan must run without PyYAML
+
+    with zipfile.ZipFile(path) as archive:
+        try:
+            data = yaml.safe_load(archive.read(f"{kind}.yml"))
+        except KeyError:
+            raise ReleaseError(f"manifest missing in {path.name}: {kind}.yml") from None
+    if not isinstance(data, dict) or not isinstance(data.get(kind), dict):
+        raise ReleaseError(f"invalid manifest in {path.name}: {kind}.yml")
+    return data
+
+
+def bundle_catalog(
+    root: Path,
+    bundle: Path,
+    tag_name: str,
+    archives: Path,
+    repository: str,
+    out: Path,
+    download_base: str | None = None,
+    updated_at: str | None = None,
+) -> list[Path]:
+    import yaml  # lazy: publish-plan must run without PyYAML
+
+    tag = parse_tag(tag_name)
+    if tag.kind != "bundle":
+        raise ReleaseError(f"not a bundle tag: {tag_name}")
+    pins = bundle_pins(yaml.safe_load((root / bundle).read_text()) or {})
+    if updated_at is None:
+        updated_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    written = []
+    out.mkdir(parents=True, exist_ok=True)
+    for kind, component in component_tags(tag, pins).items():
+        path = archives / component.archive
+        if not path.is_file():
+            raise ReleaseError(f"missing release archive: {component.archive}")
+        data = _archive_manifest(path, kind)
+        meta = data[kind]
+        if str(meta.get("version", "")) != pins[kind]:
+            raise ReleaseError(
+                f"pin mismatch: bundle pins {kind} {pins[kind]}, "
+                f"{component.archive} reports {meta.get('version')}"
+            )
+        base = (
+            download_base or f"https://github.com/{repository}/releases/download/{component.name}"
+        )
+        entry = {field: str(meta.get(field, "")) for field in ENTRY_FIELDS}
+        entry["repository"] = f"https://github.com/{repository}"
+        entry["download_url"] = f"{base.rstrip('/')}/{component.archive}"
+        entry["sha256"] = sha256(path)
+        entry["requires"] = {
+            "speckit_version": str((data.get("requires") or {}).get("speckit_version", ""))
+        }
+        key, filename = CATALOG_FILES[kind]
+        catalog = {"schema_version": "1.0", "updated_at": updated_at, key: {entry["id"]: entry}}
+        target = out / filename
+        target.write_text(json.dumps(catalog, indent=2) + "\n")
+        written.append(target)
+    return written
+
+
 def package_files(package_dir: Path) -> list[Path]:
     files = []
     for path in package_dir.rglob("*"):
@@ -284,8 +364,19 @@ def _cmd_publish_plan(args: argparse.Namespace) -> int:
     return 0
 
 
-def _not_implemented(args: argparse.Namespace) -> int:
-    raise ReleaseError(f"{args.command}: not implemented")
+def _cmd_bundle_catalog(args: argparse.Namespace) -> int:
+    written = bundle_catalog(
+        ROOT,
+        Path(args.bundle),
+        args.tag,
+        Path(args.archives),
+        args.repository,
+        Path(args.out),
+        args.download_base,
+    )
+    for path in written:
+        print(path)
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -319,7 +410,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--repository", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--download-base")
-    p.set_defaults(func=_not_implemented)
+    p.set_defaults(func=_cmd_bundle_catalog)
 
     p = sub.add_parser("publish-plan", help="decide the publish action (stdlib only)")
     p.add_argument("--tag", required=True)
