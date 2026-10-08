@@ -62,6 +62,9 @@ class Tag:
 
     @property
     def archive(self) -> str:
+        if self.kind == "bundle":
+            # `specify bundle build` names it <bundle.id>-<bundle.version>.zip, without the suffix.
+            return f"openproject-{self.core}.zip"
         return f"openproject-{self.kind}-{self.version}.zip"
 
 
@@ -166,8 +169,9 @@ def check(root: Path, tag_name: str, repository: str | None = None) -> dict:
 def bundle_pins(data: dict) -> dict[str, str]:
     """Return {"preset": pin, "extension": pin} from a bundle manifest (one entry each)."""
     pins = {}
+    provides = data.get("provides") or {}
     for kind, key in (("preset", "presets"), ("extension", "extensions")):
-        entries = [e for e in data.get(key) or [] if e.get("id") == "openproject"]
+        entries = [e for e in provides.get(key) or [] if e.get("id") == "openproject"]
         if len(entries) != 1:
             raise ReleaseError(f"bundle must pin exactly one openproject {kind}")
         pins[kind] = str(entries[0].get("version", ""))

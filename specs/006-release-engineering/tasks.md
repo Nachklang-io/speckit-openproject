@@ -83,7 +83,7 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 
 **Independent Test**: read `CHANGELOG.md`; compare Q4 release notes with the entry.
 
-- [ ] T020 [US3] Add a test in `tests/test_release.py` that every released version heading in `CHANGELOG.md` parses, each package section starts with `### Unreleased`, and the current manifest versions have entries (guards SC-005 in CI)
+- [X] T020 [US3] Add a test in `tests/test_release.py` that every released version heading in `CHANGELOG.md` parses, each package section starts with `### Unreleased`, and the current manifest versions have entries (guards SC-005 in CI)
 - [ ] T021 [US3] After T032: check that `docs/RELEASING.md` has the changelog section (move `### Unreleased` items into the new `### X.Y.Z - YYYY-MM-DD` entry; every `**Breaking**` item needs a non-empty `#### Migration` group) and that it matches `contracts/changelog-format.md`; fix the section if not
 
 ---
@@ -94,7 +94,7 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 
 **Independent Test**: quickstart Q4 step 5 / Q5.
 
-- [ ] T022 [US5] Create `bundle/bundle.yml` per `contracts/bundle-and-catalog.md` (id `openproject`, version `0.1.0`, preset pin `1.0.0`, extension pin `0.1.0`, `requires.speckit_version: ">=1.1.0"`) and `bundle/README.md` with the install steps; run `specify bundle validate --path bundle` and `specify bundle build --path bundle --output dist` locally and fix keys against the pinned spec-kit
+- [X] T022 [US5] Create `bundle/bundle.yml` per `contracts/bundle-and-catalog.md` (id `openproject`, version `0.1.0`, preset pin `1.0.0`, extension pin `0.1.0`, `requires.speckit_version: ">=1.1.0"`) and `bundle/README.md` with the install steps; run `specify bundle validate --path bundle` and `specify bundle build --path bundle --output dist` locally and fix keys against the pinned spec-kit
 - [ ] T023 [US5] Implement `bundle-catalog` in `scripts/release.py`: resolve component tags from pins and the bundle tag suffix; read the downloaded archives; verify the archive manifest reports the pinned version; write `openproject-presets-catalog.json` and `openproject-extensions-catalog.json` (schema_version `"1.0"`, `download_url`, `sha256`, copied manifest fields; only `updated_at` varies); option `--download-base` for tests only; errors `missing release archive: <name>`, `pin mismatch`
 - [ ] T024 [US5] Extend `tests/test_release.py`: bundle tag resolution (final and `-rc.1`), catalog JSON shape and sha256, pin mismatch, missing archive; validate catalog JSON loads in spec-kit's catalog parser if importable, else skip
 - [ ] T025 [US5] Extend `.github/workflows/release.yml` for `bundle-v*`: resolve and verify component releases with `gh release view`, `gh release download`, `bundle-catalog`, install pinned `specify-cli`, `specify bundle build --path bundle --output dist`, `specify bundle validate`; assets = bundle ZIP + two catalog files; same publish decision table
