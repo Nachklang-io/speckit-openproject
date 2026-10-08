@@ -26,8 +26,8 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 
 ## Phase 1: Setup
 
-- [ ] T001 Create `tests/fixtures/release/` with fixture changelogs (valid; missing entry; empty entry; breaking without Migration) and fixture manifests (version mismatch, repository mismatch)
-- [ ] T002 [P] Create `CHANGELOG.md` per `contracts/changelog-format.md`: `## Preset`, `## Extension`, `## Bundle`, each with `### Unreleased` first; add entries `### 1.0.0 - YYYY-MM-DD` (Preset) and `### 0.1.0 - YYYY-MM-DD` (Extension, Bundle) summarizing features 001–006, dated with the day the entry is written (the date is updated in the release-prep commit if the final tag is set on a later day, as documented in T032); a `#### Migration` group wherever an item starts with `**Breaking**`
+- [X] T001 Create `tests/fixtures/release/` with fixture changelogs (valid; missing entry; empty entry; breaking without Migration) and fixture manifests (version mismatch, repository mismatch)
+- [X] T002 [P] Create `CHANGELOG.md` per `contracts/changelog-format.md`: `## Preset`, `## Extension`, `## Bundle`, each with `### Unreleased` first; add entries `### 1.0.0 - YYYY-MM-DD` (Preset) and `### 0.1.0 - YYYY-MM-DD` (Extension, Bundle) summarizing features 001–006, dated with the day the entry is written (the date is updated in the release-prep commit if the final tag is set on a later day, as documented in T032); a `#### Migration` group wherever an item starts with `**Breaking**`
 
 ---
 
