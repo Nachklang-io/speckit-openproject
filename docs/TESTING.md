@@ -386,3 +386,35 @@ Everything below was **not executed**; do not read the scenario table as coverin
 - Dry run on a1d7224 (ledger checksum equal before and after): `spec.md` `changed`, `plan.md` `unchanged`, `research.md` `new`, `Description: update`. Real run (`yes`): `spec.md` attachment 12 uploaded and 8 deleted after the delete preview matched the ledger (attachment, work package, file name), `research.md` attachment 13, ledger and description updated, result `complete`. Checked afterwards from the main session: attachment list (9, 12, 13), description (block with three rows, path links, text before the markers unchanged), ledger validated against the schema and every `hash` equal to the SHA-256 of the file. Third run: `unchanged` x3, `Description: unchanged`, `no changes`.
 - Deviations: in the headless run the shell refused a `python3` heredoc, so the model wrote the temporary ledger with the file tool and, for the second and third ledger write, edited the ledger in place without a temporary file; it read the result back instead of validating with a script (the main session validated it afterwards). That is weaker than the prompt's rule (temporary file, read-back validation, move) and only happened because of the headless permission set; an interactive run has the shell available. The delete preview ran in parallel with a blocked ledger write; the confirm came after the ledger write with `pending_delete`.
 - Leftovers for the maintainer to delete by hand: work package 114 with attachments 9, 12, 13.
+
+## Scenarios for feature 005 (versions and time tracking)
+
+| ID | Scenario | Expected | Status |
+|---|---|---|---|
+| S22 | `sync-version --dry-run`, then real, then again | dry run: 1 version create, N work packages assign, nothing written; real: version created, work packages assigned (ledger `version`), result `complete`; re-run: `no changes` | not run yet |
+| S22b | One work package manually moved to another version | `sync-version` reports it as `other-version`, does not move it back | not run yet |
+| S23 | Two lines (`T001: 1h30`, `T002: 45m`), pick activity, accept | two entries with `PT1H30M` and `PT45M`, today's date, activity; same input again: `unchanged` | not run yet |
+| S23b | Same input with `--entry-key second` | one more entry (different key) | not run yet |
+| S24 | `sync-version` with dry-run, simulated interruption (ledger without `version`), re-run | dry-run changes nothing; after interruption, one version, all work packages assigned (idempotent) | not run yet |
+| S25 | Server without version write flag (or time-entry write flag), in `--dry-run` and real mode; no ledger; unknown activity | each stops with a specific message naming the fix, zero writes, even with `--dry-run` | not run yet |
+
+### Notes for the scenarios
+
+- S22–S25 (feature 005) are run through the **installed skill** in a fresh session in the scratch project, `--dry-run` first, then for real. Check from the main session: OpenProject (versions, work package assignments, time entries), the ledger file (schema valid, version id and name, time_entries array with ids and keys), and `tasks.md` (unchanged). Record date, OpenProject version, MCP server version, spec-kit version and prompt revision.
+- S22 setup: create a feature from `tests/fixtures/tasks/s1-tasks.md` via `speckit.taskstoissues`, or use an existing feature work package with 3–10 task work packages that do not have versions assigned. Run `sync-version` with no arguments (version name from directory) and accept the confirmation.
+- S23 setup: same feature with assigned work packages. Run `log-time` with two input lines (task keys from the ledger and durations) and pick an activity from the list. Re-run with the same input and check for `unchanged`. Then run again with `--entry-key second` and the same durations to force a second entry (observe the different key).
+- S24 setup: after S22, manually delete the `version` key from the ledger (simulate an interruption). Run `sync-version` again; it should create the same version and assign all work packages.
+- S25 setup: start the MCP server with `OPENPROJECT_ENABLE_VERSION_WRITE=false` (and/or `OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE=false` for time tracking). Run `sync-version` and `log-time` in both `--dry-run` and real mode. Expect stops at the capability check, naming the missing capability and the server configuration flag.
+- Not yet run: command mode, closed or locked versions (S22b edge case), a very large batch of work packages or time entries, an interrupted run with a real signal (not simulated), time entries with dates in the future (should be rejected), activities with special characters or in other languages, and concurrent runs.
+
+### Untested paths after feature 005
+
+- Command mode for both `sync-version` and `log-time`.
+- A crash between a confirmed version create and the ledger write (version created in OpenProject, ledger not updated): re-run still creates one version (idempotent on the ledger).
+- A crash between a confirmed work package assignment and the ledger write: re-run reads the work package's version and skips it as `unchanged`.
+- A crash between a confirmed time entry and the ledger write: re-run of the identical line would create a duplicate (user must check OpenProject and either use `--entry-key` or manually add to the ledger).
+- A closed or locked version (S22b from the table: the command reports it, blocks assignment, but is not tested live).
+- A version shared across multiple projects (the command reads per project; untested whether OpenProject allows this or what happens).
+- An instance with start/end time tracking enabled (affects time entry fields; the command does not set them).
+- A project without the Versions module enabled (unknown behavior; would be caught by a lack of the `create-version` capability on the server).
+- A project without the Time tracking module enabled (unknown behavior; would be caught by a lack of the `create-time-entry` capability on the server).
