@@ -84,7 +84,7 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 **Independent Test**: read `CHANGELOG.md`; compare Q4 release notes with the entry.
 
 - [X] T020 [US3] Add a test in `tests/test_release.py` that every released version heading in `CHANGELOG.md` parses, each package section starts with `### Unreleased`, and the current manifest versions have entries (guards SC-005 in CI)
-- [ ] T021 [US3] After T032: check that `docs/RELEASING.md` has the changelog section (move `### Unreleased` items into the new `### X.Y.Z - YYYY-MM-DD` entry; every `**Breaking**` item needs a non-empty `#### Migration` group) and that it matches `contracts/changelog-format.md`; fix the section if not
+- [X] T021 [US3] After T032: check that `docs/RELEASING.md` has the changelog section (move `### Unreleased` items into the new `### X.Y.Z - YYYY-MM-DD` entry; every `**Breaking**` item needs a non-empty `#### Migration` group) and that it matches `contracts/changelog-format.md`; fix the section if not
 
 ---
 
@@ -118,9 +118,9 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T032 [P] Write `docs/RELEASING.md` (FR-009): bump version, move changelog (set the entry date in the release-prep commit), push tag **(maintainer)**, check workflow, verify install from URL, run `docs/TESTING.md` scenarios including the parity scenario; include rc procedure, bundle procedure and the re-run/conflict outcomes
-- [ ] T033 [P] Rewrite `docs/PUBLISHING.md` for the public `Nachklang-io/speckit-openproject` repo (remove `ringind` private-repo steps); point to RELEASING.md and `docs/catalog/`
-- [ ] T034 Add release scenarios to `docs/TESTING.md` (local build + localhost install, rc run, final-tag check, bundle install); mark GitHub-side paths untested until T035/T038
+- [X] T032 [P] Write `docs/RELEASING.md` (FR-009): bump version, move changelog (set the entry date in the release-prep commit), push tag **(maintainer)**, check workflow, verify install from URL, run `docs/TESTING.md` scenarios including the parity scenario; include rc procedure, bundle procedure and the re-run/conflict outcomes
+- [X] T033 [P] Rewrite `docs/PUBLISHING.md` for the public `Nachklang-io/speckit-openproject` repo (remove `ringind` private-repo steps); point to RELEASING.md and `docs/catalog/`
+- [X] T034 Add release scenarios to `docs/TESTING.md` (local build + localhost install, rc run, final-tag check, bundle install); mark GitHub-side paths untested until T035/T038
 - [ ] T035 **(maintainer)** Q4: after explicit confirmation push `preset-v1.0.0-rc.1` and `extension-v0.1.0-rc.1` on the branch head; verify pre-release flag, not-latest, archive, notes + marker; anonymous install from the URL; parity scenario (Q7, US2-3, read-only via MCP); re-run for idempotency; push `bundle-v0.1.0-rc.1` and run the bundle install path; record executed results in `docs/TESTING.md`
 - [ ] T036 Run `uv run pytest`, `uv run ruff check . && uv run ruff format --check .`, `scripts/dev-install.sh` with `specify preset list` / `specify extension list`; run the `spec-conformance-reviewer` and the `openproject-api-reviewer` subagents on the diff (the latter confirms that no release step accesses OpenProject, FR-013)
 - [ ] T037 Update `README.md` (install from release URL and bundle) and `docs/ROADMAP.md` (M1/M2 release state, catalog submission prepared); open the PR (Conventional Commits, one feature = one PR)
