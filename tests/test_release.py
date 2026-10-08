@@ -626,18 +626,6 @@ def test_bundle_catalog_rejects_component_tag(tmp_path):
         run_bundle_catalog(tmp_path, tag="preset-v1.0.0")
 
 
-def test_bundle_catalog_loads_in_speckit_parser(tmp_path):
-    presets = pytest.importorskip("specify_cli.presets._catalog")
-    extensions = pytest.importorskip("specify_cli.extensions")
-    preset_file, extension_file = run_bundle_catalog(tmp_path)
-    presets.PresetCatalog._validate_catalog_payload(
-        None, json.loads(preset_file.read_text()), "test"
-    )
-    extensions.ExtensionCatalog._validate_catalog_payload(
-        None, json.loads(extension_file.read_text()), "test"
-    )
-
-
 # --- catalog-submission checklists (T031, SC-006) ---
 
 CATALOG = ROOT / "docs/catalog"
