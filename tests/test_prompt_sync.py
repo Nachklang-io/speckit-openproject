@@ -93,7 +93,9 @@ def test_prompt_uses_no_tool_name_outside_capability_block(root, any_prompt):
     rows = table_rows((root / "docs" / "mcp-tool-map.md").read_text())[2:]
     for row in rows:
         tool = re.search(r"`([a-z_]+)`", row).group(1)
-        assert tool not in outside, f"tool name {tool} used outside the capability block"
+        # whole identifiers only: `get_version` must not match inside `target_versions`
+        found = re.search(rf"(?<![a-z_]){tool}(?![a-z_])", outside)
+        assert not found, f"tool name {tool} used outside the capability block"
 
 
 def test_config_rules_match_schema(root, any_prompt):
@@ -488,9 +490,16 @@ DOCS_CAPABILITIES = {
 def test_docs_ledger_rules_are_identical_in_all_ledger_prompts(root):
     blocks = [block((root / p).read_text(), "ledger-rules") for p in LEDGER_PROMPTS]
 
-    # the assignee line carries a per-prompt suffix; every other line is identical
+    # the assignee, version and time_entries lines each carry a suffix only in the
+    # prompts that do *not* write that key; every other line is identical.
     def strip(b):
-        return [x.replace(" (never written by this command)", "") for x in b.splitlines()]
+        text = b
+        for suffix in (
+            " (never written by this command)",
+            "; never written by this command",
+        ):
+            text = text.replace(suffix, "")
+        return text.splitlines()
 
     base = strip(blocks[0])
     for other in blocks[1:]:

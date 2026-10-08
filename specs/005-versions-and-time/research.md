@@ -28,7 +28,7 @@ Inputs: `L` ledger `version` (none, or id and name), `M` = versions of the proje
 
 | L | M | Action | Writes |
 |---|---|---|---|
-| none | empty | create | create_version, ledger |
+| none | empty | create | create-version, ledger |
 | none | one | reuse | ledger |
 | none | several | blocked (ambiguous name) | none |
 | id | version with that id exists | use it; if its name differs from the intended name: warning, id wins | none |

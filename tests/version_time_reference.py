@@ -15,7 +15,7 @@ from datetime import date
 # version, M = matching project versions), then the per-work-package table (W = the work
 # package's current version, read back from get_work_package as a NAME, never an id - R1).
 VERSION_DECISION_ROWS = [
-    "| none | empty | create | create_version, ledger |",
+    "| none | empty | create | create-version, ledger |",
     "| none | one (open) | reuse | ledger |",
     "| none | one (closed or locked) | closed / locked (stop for assignment) | none |",
     "| none | several | blocked (ambiguous name) | none |",
