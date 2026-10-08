@@ -6,7 +6,7 @@ preset:
   version: "0.3.3"
   description: "Overrides speckit.taskstoissues to create OpenProject work packages (phases, tasks, sub-tasks, relations) via an OpenProject MCP server instead of GitHub Issues"
   author: "Daniel Ring"
-  repository: "https://github.com/ringind/spec-kit-preset-openproject"
+  repository: "https://github.com/Nachklang-io/speckit-openproject"
   license: "MIT"
 
 requires:

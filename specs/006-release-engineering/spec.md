@@ -109,7 +109,7 @@ A user wants to install preset and extension together in one step.
 - A tag is deleted and re-pushed on a different commit: the existing release is not silently overwritten; the run stops and names the conflict.
 - The archive must not contain secrets, `.env`, `.scratch/`, private instance URLs, tests, specs or docs outside the package directory.
 - The extension requires a spec-kit version range; installing into an unsupported spec-kit version gives spec-kit's own error, not a broken install.
-- The preset manifest's repository field points to a repository that does not exist (`ringind/spec-kit-preset-openproject`); the released manifests must point to the repository the release lives in.
+- A manifest's repository field points to a different repository than the one the release is published from (the repository moved from `ringind` to `Nachklang-io` on 2026-10-08); the release stops and names both.
 
 ## Requirements *(mandatory)*
 
@@ -151,11 +151,11 @@ A user wants to install preset and extension together in one step.
 
 ## Assumptions
 
-- Releases are published on the GitHub repository `ringind/speckit-openproject` (the monorepo, ADR-0001); no split into per-package repositories in this feature.
+- Releases are published on the public GitHub repository `Nachklang-io/speckit-openproject` (the monorepo, ADR-0001); no split into per-package repositories in this feature. Both manifests already point there (changed 2026-10-08).
 - The release archives are ZIP files, which both `specify preset add --from` and `specify extension add --from` accept.
 - The changelog lives in one file at the repository root with per-package sections (or one file per package); the plan decides, the requirement is per-package entries.
 - The existing CI workflow is extended; releasing runs on GitHub Actions in this repository.
 - The spec-kit contribution guide for catalogs is re-read at implementation time because the process changes (`docs/PUBLISHING.md`).
-- The repository is private today. Making it public is a maintainer step on the release checklist, not part of this feature's implementation. Until then the install from the release URL (User Story 2) is verified with the release archive downloaded by an authenticated maintainer and installed with `--from` from that local copy; the anonymous install from the public URL is verified once the repository is public and recorded as untested until then.
+- The repository is public, so the install from the release URL (User Story 2) is verified anonymously, without GitHub authentication.
 - The bundle has its own tag series `bundle-vX.Y.Z`, independent of the package tags, because one bundle version pins one version of each package.
 - Tagging, publishing a release and filing catalog submissions are outward-facing and done by the maintainer or only after the maintainer's explicit confirmation.

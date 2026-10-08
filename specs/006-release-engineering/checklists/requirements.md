@@ -33,4 +33,4 @@
 
 - Release engineering is about tags, archives and the `specify` CLI, so these names appear in the spec as domain terms (as the brief does), not as implementation choices. Workflow structure, archive layout and changelog format are left to the plan.
 - The three open decisions (first versions, catalog submission scope, bundle) were answered by the maintainer on 2026-10-08 and are recorded under Clarifications.
-- Repository visibility (private today) is handled as an assumption: making it public is a maintainer step; the anonymous install from the URL stays untested until then.
+- The repository moved to the public `Nachklang-io/speckit-openproject` on 2026-10-08; the anonymous install from the release URL is testable.

@@ -6,7 +6,7 @@ extension:
   version: "0.0.5"
   description: "Field discovery, status sync, documentation sync, versions and time tracking between spec-kit and OpenProject via MCP"
   author: "Daniel Ring"
-  repository: "https://github.com/ringind/speckit-openproject"
+  repository: "https://github.com/Nachklang-io/speckit-openproject"
   license: "MIT"
 
 requires:
