@@ -15,5 +15,5 @@ The repository is public at https://github.com/Nachklang-io/speckit-openproject.
 
 - No secrets in the repository or its history: no tokens, no private instance URLs, no `.env` content. The only secret the release workflow uses is the built-in `GITHUB_TOKEN`.
 - Every package keeps its `LICENSE` (MIT) and a complete `README.md`. `scripts/release.py verify-archive` checks each archive for a root manifest, unsafe or hidden paths, `.env` files, token patterns and URL hosts outside the allowlist.
-- Tags are pushed by the maintainer. Catalog submissions to `github/spec-kit` are filed by the maintainer, after re-reading the current upstream rules (`docs/catalog/submission.md`).
+- Tags are pushed by the maintainer. Catalog submissions to `github/spec-kit` are filed by the maintainer, or on the maintainer's explicit instruction, after re-reading the current upstream rules (`docs/catalog/submission.md`, which also records the filed issues).
 - Releasing never touches OpenProject.

@@ -4,6 +4,16 @@ Prepared text for submitting the packages to the spec-kit community catalogs. Th
 
 Upstream rules as read on 2026-10-08 (research R9): extensions are submitted **only** through the "Extension Submission" issue form, not as a PR. Presets have an issue form and a PR path described in `presets/PUBLISHING.md`. Bundles have their own issue form.
 
+## Status
+
+| Package | Issue | Filed |
+|---------|-------|-------|
+| Preset `openproject` 1.0.0 | https://github.com/github/spec-kit/issues/4886 | 2026-10-08 |
+| Extension `openproject` 0.1.0 | https://github.com/github/spec-kit/issues/4887 | 2026-10-08 |
+| Bundle `openproject` 0.1.0 | not filed; waits until both are listed | |
+
+The forms read on 2026-10-08 at filing time also ask for key features, a testing checklist, testing details and example usage; the filed issues answer them. The preset form has no catalog-entry field, so the preset issue links `preset-entry.json` instead.
+
 ## Before filing
 
 1. The final tags are published (T038): `preset-v1.0.0`, `extension-v0.1.0`, then `bundle-v0.1.0`.
