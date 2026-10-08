@@ -435,3 +435,141 @@ def test_changelog_has_entry_for_manifest_version(kind):
     version = str(release.load_manifest(ROOT, kind)[kind]["version"])
     entry = release.changelog_entry((ROOT / "CHANGELOG.md").read_text(), kind, version)
     assert entry.strip()
+
+
+# --- bundle catalogs (T024) ---
+
+BUNDLE = ROOT / "bundle/bundle.yml"
+
+
+def bundle_pin_map() -> dict[str, str]:
+    return release.bundle_pins(yaml.safe_load(BUNDLE.read_text()))
+
+
+@pytest.mark.parametrize(
+    "tag, expected",
+    [
+        ("bundle-v0.1.0", {"preset": "preset-v{p}", "extension": "extension-v{e}"}),
+        (
+            "bundle-v0.1.0-rc.1",
+            {"preset": "preset-v{p}-rc.1", "extension": "extension-v{e}-rc.1"},
+        ),
+    ],
+)
+def test_component_tags(tag, expected):
+    pins = {"preset": "1.0.0", "extension": "0.1.0"}
+    tags = release.component_tags(release.parse_tag(tag), pins)
+    names = {kind: t.name for kind, t in tags.items()}
+    assert names == {k: v.format(p="1.0.0", e="0.1.0") for k, v in expected.items()}
+
+
+def test_bundle_pins_read_provides():
+    assert release.bundle_pins(yaml.safe_load(BUNDLE.read_text())) == {
+        "preset": "1.0.0",
+        "extension": "0.1.0",
+    }
+
+
+@pytest.mark.parametrize(
+    "provides",
+    [{}, {"presets": [{"id": "openproject", "version": "1.0.0"}]}],
+)
+def test_bundle_pins_need_one_entry_each(provides):
+    with pytest.raises(release.ReleaseError, match="exactly one openproject"):
+        release.bundle_pins({"provides": provides})
+
+
+def build_components(tmp_path, suffix: str = ""):
+    archives = tmp_path / "archives"
+    for kind, pin in bundle_pin_map().items():
+        release.build(ROOT, kind, archives, f"{pin}{suffix}")
+    return archives
+
+
+def run_bundle_catalog(tmp_path, tag="bundle-v0.1.0", archives=None, base=None):
+    archives = archives or build_components(tmp_path)
+    return release.bundle_catalog(
+        ROOT, BUNDLE, tag, archives, REPO, tmp_path / "out", base, "2026-10-08T00:00:00Z"
+    )
+
+
+@pytest.mark.parametrize("suffix", ["", "-rc.1"])
+def test_bundle_catalog_shape(tmp_path, suffix):
+    archives = build_components(tmp_path, suffix)
+    written = run_bundle_catalog(tmp_path, f"bundle-v0.1.0{suffix}", archives)
+    assert [p.name for p in written] == [
+        "openproject-presets-catalog.json",
+        "openproject-extensions-catalog.json",
+    ]
+    pins = bundle_pin_map()
+    for path, (kind, key) in zip(written, (("preset", "presets"), ("extension", "extensions"))):
+        catalog = json.loads(path.read_text())
+        assert set(catalog) == {"schema_version", "updated_at", key}
+        assert catalog["schema_version"] == "1.0"
+        entry = catalog[key]["openproject"]
+        manifest = release.load_manifest(ROOT, kind)
+        archive = f"openproject-{kind}-{pins[kind]}{suffix}.zip"
+        assert entry == {
+            "id": "openproject",
+            "name": manifest[kind]["name"],
+            "version": pins[kind],
+            "description": manifest[kind]["description"],
+            "author": manifest[kind]["author"],
+            "license": manifest[kind]["license"],
+            "repository": f"https://github.com/{REPO}",
+            "download_url": (
+                f"https://github.com/{REPO}/releases/download/{kind}-v{pins[kind]}{suffix}/{archive}"
+            ),
+            "sha256": hashlib.sha256((archives / archive).read_bytes()).hexdigest(),
+            "requires": {"speckit_version": manifest["requires"]["speckit_version"]},
+        }
+
+
+def test_bundle_catalog_is_deterministic_except_updated_at(tmp_path):
+    first = [p.read_text() for p in run_bundle_catalog(tmp_path)]
+    second = [p.read_text() for p in run_bundle_catalog(tmp_path)]
+    assert first == second
+
+
+def test_bundle_catalog_download_base(tmp_path):
+    written = run_bundle_catalog(tmp_path, base="http://127.0.0.1:8123/")
+    entry = json.loads(written[0].read_text())["presets"]["openproject"]
+    assert entry["download_url"] == "http://127.0.0.1:8123/openproject-preset-1.0.0.zip"
+
+
+def test_bundle_catalog_missing_archive(tmp_path):
+    archives = build_components(tmp_path)
+    (archives / "openproject-extension-0.1.0.zip").unlink()
+    with pytest.raises(release.ReleaseError, match=r"missing release archive: openproject-ext"):
+        run_bundle_catalog(tmp_path, archives=archives)
+
+
+def test_bundle_catalog_rc_needs_rc_archives(tmp_path):
+    with pytest.raises(release.ReleaseError, match=r"missing release archive: .*-1\.0\.0-rc\.1"):
+        run_bundle_catalog(tmp_path, tag="bundle-v0.1.0-rc.1")
+
+
+def test_bundle_catalog_pin_mismatch(tmp_path):
+    archives = build_components(tmp_path)
+    write_zip(
+        archives / "openproject-preset-1.0.0.zip", {"preset.yml": "preset:\n  version: 9.9.9\n"}
+    )
+    with pytest.raises(release.ReleaseError, match="pin mismatch"):
+        run_bundle_catalog(tmp_path, archives=archives)
+
+
+def test_bundle_catalog_rejects_component_tag(tmp_path):
+    with pytest.raises(release.ReleaseError, match="not a bundle tag"):
+        run_bundle_catalog(tmp_path, tag="preset-v1.0.0")
+
+
+def test_bundle_catalog_loads_in_speckit_parser(tmp_path):
+    presets = pytest.importorskip("specify_cli.presets._catalog")
+    extensions = pytest.importorskip("specify_cli.extensions")
+    preset_file, extension_file = run_bundle_catalog(tmp_path)
+    presets.PresetCatalog._validate_catalog_payload(
+        None, json.loads(preset_file.read_text()), "test"
+    )
+    extensions.ExtensionCatalog._validate_catalog_payload(
+        None, json.loads(extension_file.read_text()), "test"
+    )
