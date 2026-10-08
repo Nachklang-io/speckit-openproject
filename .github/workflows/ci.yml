@@ -3,6 +3,9 @@ on:
   push:
     branches: [main]
   pull_request:
+env:
+  # spec-kit pin; raised deliberately (research R5). Also the newest version in install-smoke.
+  SPECKIT_REF: v1.1.2
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -10,9 +13,41 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
-      - run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+      - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${SPECKIT_REF}"
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run pytest -v
       - name: No secrets committed
         run: "! git grep -nE 'OPENPROJECT_API_TOKEN=[A-Za-z0-9_-]{16,}'"
+
+  # Builds both archives, serves them on 127.0.0.1 and installs them with --from
+  # (tests/test_install_archive.py), plus the --dev install, per supported spec-kit version.
+  install-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        speckit: [v1.1.0, v1.1.2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${{ matrix.speckit }}"
+      - run: specify --version
+      - run: uv run pytest -v tests/test_install_archive.py tests/test_install.py
+        env:
+          SPECKIT_REQUIRE_CLI: "1"
+
+  # Early warning for upcoming spec-kit changes; never blocks a merge.
+  install-smoke-latest:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@main"
+      - run: specify --version
+      - run: uv run pytest -v tests/test_install_archive.py tests/test_install.py
+        env:
+          SPECKIT_REQUIRE_CLI: "1"
