@@ -108,7 +108,7 @@ A user wants to install preset and extension together in one step.
 
 ### Edge Cases
 
-- A tag that does not match `preset-vX.Y.Z` or `extension-vX.Y.Z` (for example `v1.0.0` or `extension-v1.0`) does not trigger a release.
+- A tag that does not match `preset-vX.Y.Z`, `extension-vX.Y.Z` or `bundle-vX.Y.Z` (for example `v1.0.0` or `extension-v1.0`) does not trigger a release.
 - A pre-release version (for example `extension-v0.2.0-rc.1`) is published as a pre-release, not as the latest release; the manifest carries the core version (`0.2.0`), so an installed pre-release reports the core version.
 - Both tags are pushed on the same commit: two independent releases, each with only its own package.
 - A tag is deleted and re-pushed on a different commit: the existing release is not silently overwritten; the run stops and names the conflict.
@@ -153,7 +153,7 @@ A user wants to install preset and extension together in one step.
 - **SC-004**: Each released archive contains only files of its package; a check of the archive contents finds zero files from tests, specs, docs or `.scratch/`.
 - **SC-005**: Every released version of each package has a changelog entry, and the release notes match it.
 - **SC-006**: Each catalog-submission checklist has zero items without a state.
-- **SC-007**: Before the pull request is merged, one pre-release per package (tag with a pre-release suffix, pushed after the maintainer's confirmation) has been published by the workflow and installed anonymously from its URL into a fresh spec-kit project. After the merge, the final tags `preset-v1.0.0` and `extension-v0.1.0` are set on main by the maintainer and the same install check passes.
+- **SC-007**: Before the pull request is merged, one pre-release per package (tag with a pre-release suffix, pushed after the maintainer's confirmation) has been published by the workflow and installed anonymously from its URL into a fresh spec-kit project. The same holds for the bundle (`bundle-v0.1.0-rc.1`). After the merge, the final tags `preset-v1.0.0`, `extension-v0.1.0` and `bundle-v0.1.0` are set on main by the maintainer and the same install checks pass.
 
 ## Assumptions
 

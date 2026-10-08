@@ -72,7 +72,7 @@ The feature also delivers:
 | II. MCP-only OpenProject access | No release step touches OpenProject; workflows carry no MCP config or OpenProject secret (FR-013). | Pass |
 | III. Idempotent, safe | The publish step is create-or-fill-missing with a commit marker; it never overwrites or deletes (R5). There is no `--dry-run` flag: the `verify` job is the plan step, and `release.py` subcommands are read-only except `build`, which writes to `dist/` only. | Pass |
 | IV. Test-first | All logic sits in `scripts/release.py` with pytest coverage; release scenarios are added to `docs/TESTING.md`; untested paths (e.g. the bundle install via the catalog redirect) stay labeled until the rc run. | Pass |
-| V. Compatibility | Blocking smoke test against the declared minimum `v1.1.0` and the current `v1.1.2`, plus non-blocking `main`. **Note**: "previous minor" (1.0.x) is excluded by the manifests' `>=1.1.0`; flagged to the maintainer, not changed here. Shipped config keys untouched. | Pass (with note) |
+| V. Compatibility | Blocking smoke test against the declared minimum `v1.1.0` and the current `v1.1.2`, plus non-blocking `main`. "Previous minor" (1.0.x) is not supported: documented exception, see Complexity Tracking. Shipped config keys untouched. | Pass (documented exception) |
 | VI. Simplicity | One script, two workflows, plain Markdown changelog; no release framework. | Pass |
 | Tech constraints | Independent tags as the constitution prescribes; `bundle-v*` is an additional series (spec clarification). MIT/English. No runtime dependencies. No secrets. | Pass |
 | Workflow | CI gains the install smoke test the constitution already requires. | Pass |
@@ -103,7 +103,7 @@ specs/006-release-engineering/
 ```text
 scripts/
 ├── dev-install.sh            # existing
-└── release.py                # NEW: check | notes | build | verify-archive | bundle-catalog
+└── release.py                # NEW: check | notes | build | verify-archive | bundle-catalog | publish-plan
 
 bundle/                       # NEW: bundle definition for `specify bundle build`
 ├── bundle.yml
@@ -114,6 +114,7 @@ bundle/                       # NEW: bundle definition for `specify bundle build
 └── release.yml               # NEW: verify → publish on preset-v*/extension-v*/bundle-v*
 
 CHANGELOG.md                  # NEW: ## Preset / ## Extension / ## Bundle
+README.md                     # CHANGED: install-from-release instructions
 
 preset/preset.yml             # CHANGED: version 1.0.0 (first final tag after merge)
 extension/extension.yml       # CHANGED: version 0.1.0
@@ -122,6 +123,7 @@ docs/
 ├── RELEASING.md              # NEW: maintainer procedure (FR-009)
 ├── PUBLISHING.md             # CHANGED: public Nachklang-io flow, points to RELEASING/catalog
 ├── TESTING.md                # CHANGED: release scenarios
+├── ROADMAP.md                # CHANGED: release state of M1/M2
 └── catalog/                  # NEW (FR-010, FR-015)
     ├── preset-checklist.md
     ├── extension-checklist.md
@@ -131,6 +133,7 @@ docs/
 
 tests/
 ├── test_release.py           # NEW
+├── test_install_archive.py   # NEW: local runner of the install smoke test (skips without `specify`)
 └── fixtures/release/         # NEW: changelog and manifest fixtures, bad-archive cases
 ```
 
@@ -142,4 +145,6 @@ FR-014 and US5 scenario 1 were worded as if the bundle embedded package content.
 
 ## Complexity Tracking
 
-No violations to justify.
+| Violation | Why needed | Simpler alternative rejected because |
+|-----------|------------|--------------------------------------|
+| Constitution V ("support the current and previous minor spec-kit release"): spec-kit 1.0.x is not supported; manifests keep `speckit_version: ">=1.1.0"` and CI tests `v1.1.0` (declared minimum) and `v1.1.2` (current). | Maintainer decision 2026-10-08: the packages were built and verified only against 1.1.x; claiming 1.0.x support would ship an untested range. | Lowering the range to `>=1.0.0` and adding a 1.0.x CI leg would need verification of every command against 1.0.x first, out of scope for 006. Amending the constitution was considered and rejected in favor of this documented exception. Revisit when spec-kit 1.2 ships (then 1.1 is the previous minor and the exception lapses). |

@@ -28,7 +28,7 @@ There is no `workflow_dispatch`. A re-run is a GitHub "Re-run jobs" on the same 
 
 ### `publish` (needs: `verify`; permissions: `contents: write`)
 
-The publish job runs no repository code beyond reading artifacts. It uses `gh` with `GITHUB_TOKEN`.
+The publish job installs no dependencies and runs no repository code except `python3 scripts/release.py publish-plan` (stdlib only, from the tagged commit), which turns the existing release state into the action of the table below. It uses `gh` with `GITHUB_TOKEN`.
 
 | Existing release for `$TAG` | Marker in its notes | Action | Outcome message |
 |---|---|---|---|
