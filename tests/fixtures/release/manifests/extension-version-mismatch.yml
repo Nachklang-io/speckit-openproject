@@ -1,0 +1,4 @@
+# Override applied by tests/test_release.py to a copy of extension/extension.yml.
+# The tag under test is extension-v0.1.0.
+extension:
+  version: "0.1.1"

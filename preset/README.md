@@ -1,4 +1,4 @@
-# spec-kit-preset-openproject
+# spec-kit preset: openproject
 
 A [spec-kit](https://github.com/github/spec-kit) preset that overrides `speckit.taskstoissues` so that `tasks.md` becomes **OpenProject work packages** (phase → task hierarchy, dependency relations) instead of GitHub Issues. It talks to OpenProject through an MCP server; it does not call the REST API itself.
 
@@ -17,12 +17,19 @@ Restrict write access in the MCP server environment: `OPENPROJECT_WRITE_PROJECTS
 
 ## Install
 
+From a release (replace the version as needed):
+
 ```bash
-# local development
-specify preset add --dev ./spec-kit-preset-openproject
-# afterwards, from a release
-specify preset add openproject
+specify preset add --from https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.0/openproject-preset-1.0.0.zip
 ```
+
+For local development, from a clone of https://github.com/Nachklang-io/speckit-openproject:
+
+```bash
+specify preset add --dev ./preset
+```
+
+The `openproject` extension adds field discovery, status sync, docs sync, versions and time tracking. It lives in the same repository (`extension/`), and the bundle installs both together (`bundle/README.md`). Changes are listed in the repository's `CHANGELOG.md` under "Preset".
 
 Then copy `openproject-config.template.yml` to `.specify/openproject/config.yml` and set at least `project`. The three work package types (`feature`, `phase`, `task`) must be enabled in the target project; a default OpenProject instance has no type "Phase", so the template uses "Summary task".
 
@@ -68,10 +75,6 @@ Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 - Types, statuses, workflows and mandatory custom fields differ per project. The command reports problems instead of guessing.
 - LLM execution is not fully deterministic; the mapping file is what guarantees idempotency.
 - Installs and overrides the command with spec-kit 1.1.1 (skills mode); re-verify on each spec-kit upgrade.
-
-## Roadmap
-
-A companion extension (`discover-fields`, `sync-status`, mapping management) is planned.
 
 ## License
 

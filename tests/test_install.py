@@ -1,11 +1,15 @@
-"""Install smoke test: needs the `specify` CLI, skipped otherwise."""
+"""Install smoke test: needs the `specify` CLI, skipped otherwise unless SPECKIT_REQUIRE_CLI=1."""
 
+import os
 import shutil
 import subprocess
 
 import pytest
 
-pytestmark = pytest.mark.skipif(shutil.which("specify") is None, reason="specify CLI not installed")
+if os.environ.get("SPECKIT_REQUIRE_CLI") != "1":
+    pytestmark = pytest.mark.skipif(
+        shutil.which("specify") is None, reason="specify CLI not installed"
+    )
 
 
 def run(cmd, cwd):

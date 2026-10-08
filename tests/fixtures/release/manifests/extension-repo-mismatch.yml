@@ -1,0 +1,5 @@
+# Override applied by tests/test_release.py to a copy of extension/extension.yml.
+# `repository_slug` is owner/repo; the test turns it into the GitHub URL (fixtures stay URL-free).
+extension:
+  version: "0.1.0"
+  repository_slug: "example/other-repo"

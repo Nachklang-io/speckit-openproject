@@ -1,6 +1,22 @@
 # spec-kit extension: openproject
 
-Version 0.0.5. Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`, `speckit.openproject.sync-docs`, `speckit.openproject.sync-version`, `speckit.openproject.log-time`. Requires the `openproject` preset for `speckit.taskstoissues`.
+Version 0.1.0. Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`, `speckit.openproject.sync-docs`, `speckit.openproject.sync-version`, `speckit.openproject.log-time`. Requires the `openproject` preset for `speckit.taskstoissues`.
+
+## Install
+
+From a release (replace the version as needed). spec-kit asks you to confirm the download source; answer `y`:
+
+```bash
+specify extension add openproject --from https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.1.0/openproject-extension-0.1.0.zip
+```
+
+For local development, from a clone of https://github.com/Nachklang-io/speckit-openproject:
+
+```bash
+specify extension add --dev ./extension
+```
+
+Install the preset in the same way (see `preset/README.md`), or install both with the bundle (`bundle/README.md`). Configure the OpenProject MCP server in your agent's MCP client config, as the preset README describes. Changes are listed in the repository's `CHANGELOG.md` under "Extension".
 
 ## `discover-fields`
 

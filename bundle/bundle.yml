@@ -1,0 +1,21 @@
+schema_version: "1.0"
+bundle:
+  id: openproject
+  name: "OpenProject for spec-kit"
+  version: "0.1.0"
+  role: developer
+  description: "Preset and extension for running a spec-kit project with OpenProject via MCP"
+  author: "Daniel Ring"
+  license: MIT
+requires:
+  speckit_version: ">=1.1.0"
+provides:
+  presets:
+    - id: openproject
+      version: "1.0.0"
+      priority: 10
+      strategy: replace
+  extensions:
+    - id: openproject
+      version: "0.1.0"
+tags: [openproject, project-management, mcp]

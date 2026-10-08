@@ -1,0 +1,27 @@
+{
+  "openproject": {
+    "name": "OpenProject Integration",
+    "id": "openproject",
+    "description": "Sync fields, status, docs, versions and time between spec-kit and OpenProject via MCP",
+    "author": "Daniel Ring",
+    "version": "0.1.0",
+    "download_url": "https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.1.0/openproject-extension-0.1.0.zip",
+    "sha256": "PENDING",
+    "repository": "https://github.com/Nachklang-io/speckit-openproject",
+    "homepage": "https://github.com/Nachklang-io/speckit-openproject",
+    "documentation": "https://github.com/Nachklang-io/speckit-openproject/blob/extension-v0.1.0/extension/README.md",
+    "changelog": "https://github.com/Nachklang-io/speckit-openproject/blob/main/CHANGELOG.md",
+    "license": "MIT",
+    "requires": {
+      "speckit_version": ">=1.1.0",
+      "tools": [
+        {"name": "openproject-ce-mcp", "version": ">=0.4.1", "required": true}
+      ]
+    },
+    "provides": {
+      "commands": 5,
+      "hooks": 1
+    },
+    "tags": ["openproject", "project-management", "mcp"]
+  }
+}
