@@ -1,0 +1,131 @@
+name: Release
+# Contract: specs/006-release-engineering/contracts/release-workflow.md
+# No OpenProject secrets and no MCP configuration in any job (FR-013). Only GITHUB_TOKEN is used.
+on:
+  push:
+    tags: ["preset-v*", "extension-v*", "bundle-v*"]
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.ref_name }}
+  # spec-kit pin; raised deliberately (research R5).
+  SPECKIT_REF: v1.1.2
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      kind: ${{ steps.meta.outputs.kind }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - name: Gate the tag
+        id: meta
+        run: |
+          uv run python scripts/release.py check "$TAG" --repository "$GITHUB_REPOSITORY" > meta.json
+          cat meta.json
+          {
+            echo "kind=$(jq -r .kind meta.json)"
+            echo "version=$(jq -r .version meta.json)"
+            echo "prerelease=$(jq -r .prerelease meta.json)"
+            echo "archive=$(jq -r .archive meta.json)"
+          } >> "$GITHUB_OUTPUT"
+      - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${SPECKIT_REF}"
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -v
+      - name: Build and verify the package archive
+        if: steps.meta.outputs.kind != 'bundle'
+        env:
+          KIND: ${{ steps.meta.outputs.kind }}
+        run: |
+          uv run python scripts/release.py build "$KIND" --out dist --version "${TAG#"$KIND"-v}"
+          uv run python scripts/release.py verify-archive "dist/${{ steps.meta.outputs.archive }}"
+      - name: Bundle
+        if: steps.meta.outputs.kind == 'bundle'
+        run: |
+          echo "release: bundle releases are not supported by this workflow yet" >&2
+          exit 1
+      - name: Release notes
+        env:
+          KIND: ${{ steps.meta.outputs.kind }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          mkdir -p notes
+          uv run python scripts/release.py notes "$KIND" "$VERSION" > notes/notes.md
+          printf '\n<!-- release-commit: %s -->\n' "$GITHUB_SHA" >> notes/notes.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assets
+          path: dist/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notes
+          path: notes/notes.md
+          if-no-files-found: error
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PRERELEASE: ${{ needs.verify.outputs.prerelease }}
+    steps:
+      # Only for scripts/release.py publish-plan (stdlib); no dependencies are installed.
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: assets
+          path: assets
+      - uses: actions/download-artifact@v4
+        with:
+          name: notes
+          path: notes
+      - name: Decide
+        id: plan
+        run: |
+          mapfile -t expected < <(cd assets && ls -1)
+          if gh release view "$TAG" --json body,assets > release.json 2> view.err; then
+            marker=$(jq -r .body release.json \
+              | sed -n 's/.*<!-- release-commit: \([0-9a-f]\{40\}\) -->.*/\1/p' | head -n 1)
+            mapfile -t present < <(jq -r '.assets[].name' release.json)
+            python3 scripts/release.py publish-plan --tag "$TAG" --sha "$GITHUB_SHA" \
+              --marker "$marker" --expected "${expected[@]}" --present "${present[@]}" > plan.json
+          elif grep -q "release not found" view.err; then
+            python3 scripts/release.py publish-plan --tag "$TAG" --sha "$GITHUB_SHA" \
+              --expected "${expected[@]}" > plan.json
+          else
+            cat view.err >&2
+            exit 1
+          fi
+          cat plan.json
+          echo "action=$(jq -r .action plan.json)" >> "$GITHUB_OUTPUT"
+      - name: Create release
+        if: steps.plan.outputs.action == 'create'
+        run: |
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then flags=(--prerelease --latest=false); fi
+          mapfile -t files < <(jq -r '.upload[] | "assets/" + .' plan.json)
+          gh release create "$TAG" "${files[@]}" --verify-tag --title "$TAG" \
+            --notes-file notes/notes.md "${flags[@]}"
+          echo "created $TAG"
+      - name: Upload missing assets
+        if: steps.plan.outputs.action == 'upload'
+        run: |
+          mapfile -t files < <(jq -r '.upload[] | "assets/" + .' plan.json)
+          gh release upload "$TAG" "${files[@]}"
+          echo "completed $TAG: uploaded $(jq -r '.upload | join(", ")' plan.json)"
+      - name: Nothing to do
+        if: steps.plan.outputs.action == 'noop'
+        run: |
+          echo "release exists, complete: $TAG"
