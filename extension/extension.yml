@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "openproject"
   name: "OpenProject Integration"
-  version: "0.0.4"
+  version: "0.0.5"
   description: "Field discovery, status sync, documentation sync, versions and time tracking between spec-kit and OpenProject via MCP"
   author: "Daniel Ring"
   repository: "https://github.com/ringind/speckit-openproject"
@@ -23,6 +23,12 @@ provides:
     - name: "speckit.openproject.sync-docs"
       file: "commands/sync-docs.md"
       description: "Attach the feature's design documents (spec.md, plan.md, optionally research.md and data-model.md) to the feature work package, replace changed ones by content hash and keep a generated summary in its description; needs the MCP server's upload directory (OPENPROJECT_ATTACHMENT_ROOT); supports --dry-run"
+    - name: "speckit.openproject.sync-version"
+      file: "commands/sync-version.md"
+      description: "Create or reuse the feature's OpenProject version (from --version, defaults.version or the feature directory name), record it in the ledger and assign it to the feature's work packages that have no version yet; never moves or deletes; supports --dry-run"
+    - name: "speckit.openproject.log-time"
+      file: "commands/log-time.md"
+      description: "Log time entries from lines of '<task key>: <duration> [on <YYYY-MM-DD>]' against the feature's work packages, one per line, idempotent through the ledger; never updates or deletes time entries; supports --dry-run"
 
 hooks:
   after_implement:

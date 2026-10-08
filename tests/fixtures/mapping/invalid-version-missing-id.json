@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "project": "speckit-sandbox",
+  "feature": "001-demo",
+  "items": {
+    "feature": {
+      "kind": "feature",
+      "id": 100,
+      "url": "/work_packages/100"
+    }
+  },
+  "version": {
+    "name": "001-demo"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_comment": "BUG: the singular 'version' parameter is silently ineffective on this server build. targetVersions stays empty despite version=\"VERIFY-005\" being passed. Use target_versions (a list) instead — see assign-version-preview.json.",
+  "action": "update",
+  "state": "preview",
+  "ready": true,
+  "work_package_id": "117",
+  "payload": {
+    "lockVersion": 0,
+    "subject": "VERIFY-005 scratch work package 3 (closed version test)",
+    "_links": {
+      "targetVersions": []
+    }
+  },
+  "validation_errors": {},
+  "result": null
+}

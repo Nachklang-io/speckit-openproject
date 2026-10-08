@@ -1,0 +1,26 @@
+{
+  "cases": [
+    {
+      "name": "--entry-key given for one item: ok, creates with the overridden key",
+      "item_count": 1,
+      "entry_key_given": true,
+      "expect_ambiguity": "ok",
+      "entry_key_value": "second",
+      "item": {
+        "work_package_id": 112,
+        "spent_on": "2026-10-07",
+        "activity": "Development",
+        "iso": "PT45M"
+      },
+      "ledger_time_entries": [],
+      "expect_classify": "create",
+      "expect_key": "entry:second"
+    },
+    {
+      "name": "--entry-key with two items: stop (ambiguous)",
+      "item_count": 2,
+      "entry_key_given": true,
+      "expect_ambiguity": "stop"
+    }
+  ]
+}

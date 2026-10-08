@@ -25,7 +25,7 @@ All OpenProject access goes through an MCP server (never the REST API). This com
 | list-statuses | `list_statuses` | (none) | yes |
 | search-work-packages | `search_work_packages` | search, project, limit, offset | yes |
 | get-work-package | `get_work_package` | work_package_id | yes |
-| update-work-package | `update_work_package` | work_package_id, subject, description, status, confirm | yes |
+| update-work-package | `update_work_package` | work_package_id, subject, description, status, target_versions, confirm | yes |
 <!-- END capability-map -->
 
 Do not call any capability that is not in this table, even if the session exposes more tools. Never create, delete, rename, re-parent or reopen a work package, and never change subject, description, type, assignee, time or anything except `status`.
@@ -50,14 +50,14 @@ Validate the configuration and the ledger against these rules. They are the rule
 - required top-level keys: project, types
 - types keys: feature, phase, subtask, task
 - required types keys: feature, phase, task
-- defaults keys: assignee, priority, status, version
+- defaults keys: activity, assignee, priority, status, version
 - statuses keys: done, in_progress, open
 - value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
 - unknown keys are errors
 <!-- END config-rules -->
 
 <!-- BEGIN ledger-rules -->
-- ledger top-level keys: documents, feature, items, project, relations, schema_version
+- ledger top-level keys: documents, feature, items, project, relations, schema_version, time_entries, version
 - ledger required top-level keys: feature, items, project, schema_version
 - ledger schema_version: 1.0
 - ledger item keys: assignee, hash, id, kind, status, url
@@ -69,10 +69,12 @@ Validate the configuration and the ledger against these rules. They are the rule
 - ledger relation keys: from, id, to, type
 - ledger required relation keys: from, to, type
 - ledger relation type values: follows
+- ledger version: object {id, name}, written by speckit.openproject.sync-version (never written by this command)
+- ledger time_entries: array of objects written by speckit.openproject.log-time; never written by this command
 - unknown keys are errors
 <!-- END ledger-rules -->
 
-`documents` (written by `speckit.openproject.sync-docs`) is accepted and left unchanged by this command, like every other key it does not write. This command needs `project`, `types.task` and `statuses.done` from the configuration. It reads `statuses.open` and `statuses.in_progress` only to show "in progress" and to check that the names exist.
+`documents`, `version` and `time_entries` (written by `speckit.openproject.sync-docs`, `sync-version` and `log-time` respectively) are accepted and left unchanged by this command, like every other key it does not write. This command needs `project`, `types.task` and `statuses.done` from the configuration. It reads `statuses.open` and `statuses.in_progress` only to show "in progress" and to check that the names exist.
 
 ## Decision table
 

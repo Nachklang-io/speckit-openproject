@@ -43,7 +43,7 @@ Validate the configuration against these rules. They are the rules of the shared
 - required top-level keys: project, types
 - types keys: feature, phase, subtask, task
 - required types keys: feature, phase, task
-- defaults keys: assignee, priority, status, version
+- defaults keys: activity, assignee, priority, status, version
 - statuses keys: done, in_progress, open
 - value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
 - unknown keys are errors

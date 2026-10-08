@@ -1,6 +1,6 @@
 # spec-kit extension: openproject
 
-Work in progress (version 0.0.4). Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`, `speckit.openproject.sync-docs`. Planned: `log-time` (see `../docs/ROADMAP.md`). Requires the `openproject` preset for `speckit.taskstoissues`.
+Version 0.0.5. Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`, `speckit.openproject.sync-docs`, `speckit.openproject.sync-version`, `speckit.openproject.log-time`. Requires the `openproject` preset for `speckit.taskstoissues`.
 
 ## `discover-fields`
 
@@ -114,3 +114,50 @@ A run prints a plan table first. `--dry-run` shows it and writes nothing; otherw
 - Links are paths without a host (`/…/api/v3/attachments/<id>/content`); they break if the instance's path prefix changes and are rewritten the next time a document changes.
 - Run so far (2026-10-06, skills mode, headless, sandbox, scratch ledger written by hand for one feature work package; the last runs on prompt revision a1d7224 after the review, the earlier ones on 42ddf12): first sync, no-change run, replacement of a changed document, `restored`, `cleaned`, `blocked` (foreign and ambiguous), stops for a missing `spec.md` and a missing ledger; a stale work package was observed once by accident (an earlier scratch work package had been deleted). The interrupted run was simulated by writing the ledger state by hand.
 - Not run: the stop for an MCP server that is not connected (two runs ended with `CONNECT_TIMEOUT` under host load and stopped at the capability check, which is not a planned scenario), the equality of the dry-run plan and the real-run plan (only the unchanged ledger checksum was compared), command mode, a ledger written by `taskstoissues` in the same run, the stop for a missing upload capability (server without `OPENPROJECT_ATTACHMENT_ROOT`), inconsistent markers in a real description, a truncated description, files above the server's size limit or outside the upload directory through the command, a real interruption, other instances and servers. See `../docs/TESTING.md`.
+
+## `sync-version`
+
+Maps a feature to an OpenProject version (creating if needed) and assigns it to the feature's work packages.
+
+```text
+/speckit-openproject-sync-version [feature] [--version <name>] [--dry-run]    # skills mode
+/speckit.openproject.sync-version [feature] [--version <name>] [--dry-run]    # command mode
+```
+
+Needs the config written by `discover-fields` (`project`, `defaults.version`) and the ledger `.specify/openproject/mapping-<feature>.json` (created by `speckit.taskstoissues`) with work packages to assign.
+
+The version name is resolved by priority: `--version` argument, `defaults.version` from config, or the feature directory name. A version is created if it does not exist; if an existing version with that name is found, it is reused. Work packages without a version are assigned; those already in another version are reported but never moved.
+
+A run prints a plan table first. `--dry-run` shows it and writes nothing; otherwise you confirm the whole plan once. Writes: the version (via `create-version` if new), work package `target_versions` (via `bulk-update-work-packages` with per-item fallback), and the ledger `version` key. Results: `complete`, `incomplete`, `no changes`, `dry run`, `stopped`.
+
+### Limitations and untested paths
+
+- Interactive only.
+- Server configuration: the MCP server must be configured with `OPENPROJECT_ENABLE_VERSION_WRITE=true` (same flag as `ENABLE_WORK_PACKAGE_WRITE`). Without it the command stops at its pre-flight check.
+- Versions with status closed or locked are reported and block assignment of any work package.
+- Re-runs are idempotent: a second run reports `no changes` if the version exists and all work packages are assigned.
+- The ledger records only the active version id and name; no version history is kept.
+- Not run: command mode, a version shared across projects, an instance with start/end date tracking enabled, a project without the "versions" module, an interrupted run (version created but ledger not written), closed or locked versions (not tested live), and very large work package batches. See `../docs/TESTING.md`.
+
+## `log-time`
+
+Logs time entries on work packages from lines of the form `<task key>: <duration> [on <YYYY-MM-DD>]`.
+
+```text
+/speckit-openproject-log-time [feature] [--activity <name>] [--entry-key <key>] [--dry-run] [lines]    # skills mode
+/speckit.openproject.log-time [feature] [--activity <name>] [--entry-key <key>] [--dry-run] [lines]    # command mode
+```
+
+Needs the config written by `discover-fields` (`project`, `defaults.activity`) and the ledger `.specify/openproject/mapping-<feature>.json` with work packages. Input lines are taken from the arguments or asked for interactively.
+
+The duration is parsed from formats like `1h30`, `1h30m`, `1:30`, `90m`, `45m`, `1.5h`, `2h`. The date defaults to today (`date +%F`); dates in the future are rejected. The activity is resolved by priority: `--activity` argument, `defaults.activity` from config, or a choice from the server's activity list. Each line creates one time entry; the ledger records an entry key (work package id, date, activity and hours) to prevent duplicates on re-run. The `--entry-key` flag forces a deliberate second entry when all other parameters are identical.
+
+A run prints a plan table first. `--dry-run` shows it and writes nothing; otherwise you confirm the whole plan once. Writes: time entries (via `create-time-entry`, preview then confirm) and the ledger `time_entries` array. Results: `complete`, `incomplete`, `no changes`, `dry run`, `stopped`.
+
+### Limitations and untested paths
+
+- Interactive only.
+- Server configuration: the MCP server must be configured with `OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE=true` (same flag as version write). The `list-time-activities` call uses the read flag; it does not check whether time tracking is enabled on the project.
+- The ledger is the sole source of truth for entry identity: no re-verification against OpenProject. A re-run of an identical line is idempotent (reports `unchanged`); deliberate duplicates use `--entry-key`.
+- A crash between a confirmed time entry and the ledger write leaves an entry the ledger does not know. A re-run of that line would create a duplicate; use `--entry-key` to force it with a different key, or check OpenProject and add the entry to the ledger manually.
+- Not run: command mode, a project without the time-tracking module, an instance with start/end time tracking enabled, an interrupted run (entry created but ledger not written), and large batches. See `../docs/TESTING.md`.

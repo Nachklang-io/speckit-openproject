@@ -1,0 +1,4 @@
+{
+  "_comment": "create_time_entry(activity='NotARealActivity', ...) fails at the tool level, not with a structured validation_errors rejection like the closed-version case. Commands must validate the activity name against list_time_entry_activities themselves before calling create_time_entry.",
+  "error": "Error executing tool create_time_entry"
+}

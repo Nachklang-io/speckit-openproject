@@ -1,0 +1,16 @@
+{
+  "action": "update",
+  "state": "confirmed",
+  "total": 1,
+  "succeeded": 1,
+  "failed": 0,
+  "results": [
+    {
+      "work_package_id": "116",
+      "success": true,
+      "result": {
+        "lock_version": 1
+      }
+    }
+  ]
+}

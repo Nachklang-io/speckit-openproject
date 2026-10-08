@@ -1,0 +1,20 @@
+{
+  "action": "update",
+  "state": "preview",
+  "ready": true,
+  "work_package_id": "117",
+  "payload": {
+    "lockVersion": 0,
+    "subject": "VERIFY-005 scratch work package 3 (closed version test)",
+    "_links": {
+      "targetVersions": [
+        {
+          "href": "/api/v3/versions/7",
+          "title": "VERIFY-005"
+        }
+      ]
+    }
+  },
+  "validation_errors": {},
+  "result": null
+}

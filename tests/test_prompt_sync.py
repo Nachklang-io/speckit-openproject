@@ -9,13 +9,32 @@ import pytest
 import yaml
 from docs_reference import DECISION_ROWS as DOCS_DECISION_ROWS
 from sync_reference import DECISION_ROWS
+from version_time_reference import (
+    ACCEPTED_DURATION_FORMS,
+    REJECTED_DURATION_FORMS,
+    VERSION_DECISION_ROWS,
+    WORK_PACKAGE_DECISION_ROWS,
+)
 
 PROMPT = "preset/commands/speckit.taskstoissues.md"
 EXTENSION_PROMPT = "extension/commands/discover-fields.md"
 SYNC_PROMPT = "extension/commands/sync-status.md"
 DOCS_PROMPT = "extension/commands/sync-docs.md"
+SYNC_VERSION_PROMPT = "extension/commands/sync-version.md"
+LOG_TIME_PROMPT = "extension/commands/log-time.md"
 # Prompts that embed capability rows and config rules.
-PROMPTS = [PROMPT, EXTENSION_PROMPT, SYNC_PROMPT, DOCS_PROMPT]
+PROMPTS = [
+    PROMPT,
+    EXTENSION_PROMPT,
+    SYNC_PROMPT,
+    DOCS_PROMPT,
+    SYNC_VERSION_PROMPT,
+    LOG_TIME_PROMPT,
+]
+# Prompts that embed the ledger-rules block (identical content in every one of them).
+LEDGER_PROMPTS = [PROMPT, SYNC_PROMPT, DOCS_PROMPT, SYNC_VERSION_PROMPT, LOG_TIME_PROMPT]
+# Prompts whose command writes the ledger `assignee` field back from OpenProject.
+WRITES_ASSIGNEE = {SYNC_PROMPT, DOCS_PROMPT}
 
 
 def block(text, name):
@@ -74,7 +93,9 @@ def test_prompt_uses_no_tool_name_outside_capability_block(root, any_prompt):
     rows = table_rows((root / "docs" / "mcp-tool-map.md").read_text())[2:]
     for row in rows:
         tool = re.search(r"`([a-z_]+)`", row).group(1)
-        assert tool not in outside, f"tool name {tool} used outside the capability block"
+        # whole identifiers only: `get_version` must not match inside `target_versions`
+        found = re.search(rf"(?<![a-z_]){tool}(?![a-z_])", outside)
+        assert not found, f"tool name {tool} used outside the capability block"
 
 
 def test_config_rules_match_schema(root, any_prompt):
@@ -326,16 +347,14 @@ def sync(root):
     return (root / SYNC_PROMPT).read_text()
 
 
-@pytest.mark.parametrize("path", [PROMPT, SYNC_PROMPT, DOCS_PROMPT])
+@pytest.mark.parametrize("path", LEDGER_PROMPTS)
 def test_ledger_rules_match_schema_and_include_assignee(root, path):
     led = json.loads((root / "schemas/mapping.schema.json").read_text())
     item = led["properties"]["items"]["additionalProperties"]
     rules = block((root / path).read_text(), "ledger-rules").splitlines()
     assert f"- ledger item keys: {j(item['properties'])}" in rules
     assert "- ledger item keys: assignee, hash, id, kind, status, url" in rules
-    suffix = " (never written by this command)" if path == PROMPT else ""
-    if path == DOCS_PROMPT:
-        suffix = ""
+    suffix = "" if path in WRITES_ASSIGNEE else " (never written by this command)"
     assert f"- ledger assignee: non-empty string{suffix}" in rules
     assert item["properties"]["assignee"]["minLength"] == 1
 
@@ -469,15 +488,22 @@ DOCS_CAPABILITIES = {
 
 
 def test_docs_ledger_rules_are_identical_in_all_ledger_prompts(root):
-    blocks = [
-        block((root / p).read_text(), "ledger-rules") for p in (PROMPT, SYNC_PROMPT, DOCS_PROMPT)
-    ]
+    blocks = [block((root / p).read_text(), "ledger-rules") for p in LEDGER_PROMPTS]
 
-    # the assignee line carries a per-prompt suffix; every other line is identical
+    # the assignee, version and time_entries lines each carry a suffix only in the
+    # prompts that do *not* write that key; every other line is identical.
     def strip(b):
-        return [x.replace(" (never written by this command)", "") for x in b.splitlines()]
+        text = b
+        for suffix in (
+            " (never written by this command)",
+            "; never written by this command",
+        ):
+            text = text.replace(suffix, "")
+        return text.splitlines()
 
-    assert strip(blocks[0]) == strip(blocks[1]) == strip(blocks[2])
+    base = strip(blocks[0])
+    for other in blocks[1:]:
+        assert strip(other) == base
 
 
 def test_ledger_rules_describe_documents(root):
@@ -488,7 +514,7 @@ def test_ledger_rules_describe_documents(root):
         f"- ledger documents keys: {', '.join(docs['propertyNames']['enum'])}; "
         f"entry keys: {j(entry['properties'])}; required entry keys: {j(entry['required'])}"
     )
-    for path in (PROMPT, SYNC_PROMPT, DOCS_PROMPT):
+    for path in LEDGER_PROMPTS:
         assert expected in block((root / path).read_text(), "ledger-rules").splitlines(), path
 
 
@@ -615,3 +641,116 @@ def test_docs_append_rule_and_counts(docs):
 def test_docs_does_not_compare_the_project_display_name(docs):
     assert "display name, not its identifier" in docs
     assert "must equal `project` of the configuration" not in docs
+
+
+# --- extension command: speckit.openproject.sync-version (feature 005) -----------------
+# These tests are expected to fail (file missing / assertions red) until T012 creates
+# extension/commands/sync-version.md. Test first, by design (tasks.md T011).
+
+SYNC_VERSION_CAPABILITIES = {
+    "list-versions",
+    "get-version",
+    "create-version",
+    "get-work-package",
+    "bulk-update-work-packages",
+    "update-work-package",
+}
+
+
+@pytest.fixture(scope="module")
+def sync_version(root):
+    return (root / SYNC_VERSION_PROMPT).read_text()
+
+
+def test_sync_version_embeds_exactly_its_capabilities(sync_version):
+    ids = {row.split("|")[1].strip() for row in embedded_rows(sync_version)}
+    assert ids == SYNC_VERSION_CAPABILITIES
+
+
+def test_sync_version_has_no_delete_or_forbidden_rows(sync_version):
+    assert "delete_" not in sync_version
+    for forbidden in ("create-work-package", "delete-version", "update-version"):
+        assert forbidden not in sync_version
+
+
+def test_sync_version_decision_table_equals_reference(sync_version):
+    lines = block(sync_version, "decision-table").splitlines()
+    assert lines[0] == "| L | M | Action | Writes |"
+    wp_header = next(i for i, line in enumerate(lines) if line.startswith("| W |"))
+    version_rows = [line for line in lines[2:wp_header] if line.startswith("|")]
+    wp_rows = [line for line in lines[wp_header + 2 :] if line.startswith("|")]
+    assert version_rows == VERSION_DECISION_ROWS
+    assert wp_rows == WORK_PACKAGE_DECISION_ROWS
+
+
+def test_sync_version_safety_rules_present(sync_version):
+    for text in (
+        "untrusted data",
+        "Dry run: nothing was written.",
+        "<redacted-host>",
+        "<redacted-secret>",
+        "`complete`",
+        "`incomplete`",
+        "`no changes`",
+        "`dry run`",
+        "`stopped`",
+    ):
+        assert text in sync_version, text
+
+
+# --- extension command: speckit.openproject.log-time (feature 005) ---------------------
+# Same note as above: red until T012 creates extension/commands/log-time.md.
+
+LOG_TIME_CAPABILITIES = {"list-time-activities", "create-time-entry", "get-work-package"}
+
+
+@pytest.fixture(scope="module")
+def log_time(root):
+    return (root / LOG_TIME_PROMPT).read_text()
+
+
+def test_log_time_embeds_exactly_its_capabilities(log_time):
+    ids = {row.split("|")[1].strip() for row in embedded_rows(log_time)}
+    assert ids == LOG_TIME_CAPABILITIES
+
+
+def test_log_time_has_no_delete_or_forbidden_rows(log_time):
+    assert "delete_" not in log_time
+    for forbidden in ("create-work-package", "delete-version", "update-version"):
+        assert forbidden not in log_time
+
+
+def test_log_time_duration_grammar_lists_every_form(log_time):
+    grammar = block(log_time, "duration-grammar")
+    for form in ACCEPTED_DURATION_FORMS:
+        assert f"`{form}`" in grammar, form
+    for form in REJECTED_DURATION_FORMS:
+        if form == "":
+            assert "empty line" in grammar
+        elif form == "<date in the future>":
+            assert "date in the future" in grammar
+        else:
+            assert f"`{form}`" in grammar, form
+
+
+def test_log_time_safety_rules_present(log_time):
+    for text in (
+        "untrusted data",
+        "Dry run: nothing was written.",
+        "<redacted-host>",
+        "<redacted-secret>",
+        "`complete`",
+        "`incomplete`",
+        "`no changes`",
+        "`dry run`",
+        "`stopped`",
+    ):
+        assert text in log_time, text
+
+
+def test_log_time_skipped_lines_make_run_incomplete(log_time):
+    assert "first matching rule wins" in log_time
+    assert (
+        "At least one line is `failed`, `stale`, `unknown` or `rejected` "
+        "(even if every attempted write succeeded): `incomplete`."
+    ) in log_time

@@ -1,0 +1,12 @@
+{
+  "action": "create",
+  "state": "confirmed",
+  "version_id": 7,
+  "project": "spec-kit Sandbox",
+  "result": {
+    "id": 7,
+    "name": "VERIFY-005",
+    "status": "open",
+    "sharing": "none"
+  }
+}

@@ -148,3 +148,57 @@ def test_documents_fixtures(root):
         bad = json.loads((root / f"tests/fixtures/mapping/{name}.json").read_text())
         with pytest.raises(jsonschema.ValidationError):
             jsonschema.validate(bad, s)
+
+
+def test_version_and_time_entries_are_optional_and_additive(root):
+    led = schema(root, "mapping.schema.json")
+    assert "version" not in led["required"]
+    assert "time_entries" not in led["required"]
+    version = led["properties"]["version"]
+    assert version["required"] == ["id", "name"]
+    assert version["additionalProperties"] is False
+    entry = led["properties"]["time_entries"]["items"]
+    assert entry["required"] == ["key", "work_package_id", "spent_on", "activity", "hours", "id"]
+    assert entry["additionalProperties"] is False
+
+
+def test_version_and_time_entries_fixtures(root):
+    s = schema(root, "mapping.schema.json")
+    ok = json.loads((root / "tests/fixtures/mapping/valid-with-version-and-time.json").read_text())
+    jsonschema.validate(ok, s)
+    assert ok["version"] == {"id": 7, "name": "001-demo"}
+    assert len(ok["time_entries"]) == 2
+    assert ok["time_entries"][1]["entry_key"] == "second"
+    for name in (
+        "invalid-version-missing-id",
+        "invalid-time-hours",
+        "invalid-time-missing-id",
+        "invalid-time-date",
+    ):
+        bad = json.loads((root / f"tests/fixtures/mapping/{name}.json").read_text())
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(bad, s)
+
+
+def test_previously_valid_mapping_fixtures_still_validate(root):
+    s = schema(root, "mapping.schema.json")
+    for name in ("valid-s1", "valid-with-assignee", "valid-with-documents", "valid-with-relations"):
+        data = json.loads((root / f"tests/fixtures/mapping/{name}.json").read_text())
+        jsonschema.validate(data, s)
+
+
+def test_defaults_activity_is_additive_and_non_empty(root):
+    s = schema(root, "config.schema.json")
+    defaults = s["properties"]["defaults"]["properties"]
+    assert "activity" not in s["properties"]["defaults"].get("required", [])
+    assert defaults["activity"]["type"] == "string"
+    assert defaults["activity"]["minLength"] == 1
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate({**BASE_CONFIG, "defaults": {"activity": ""}}, s)
+
+
+def test_activity_fixture_validates(root):
+    s = schema(root, "config.schema.json")
+    cfg = yaml.safe_load((root / "tests/fixtures/config/valid-with-activity.yml").read_text())
+    jsonschema.validate(cfg, s)
+    assert cfg["defaults"]["activity"] == "Development"

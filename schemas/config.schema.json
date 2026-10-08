@@ -24,7 +24,8 @@
         "status": {"type": "string"},
         "priority": {"type": "string"},
         "assignee": {"type": "string"},
-        "version": {"type": "string", "$comment": "ignored by speckit.taskstoissues"}
+        "version": {"type": "string", "$comment": "ignored by speckit.taskstoissues; also the version name for sync-version"},
+        "activity": {"type": "string", "minLength": 1, "$comment": "read by log-time, ignored by the other commands"}
       },
       "additionalProperties": false
     },

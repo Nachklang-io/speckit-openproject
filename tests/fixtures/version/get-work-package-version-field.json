@@ -1,0 +1,6 @@
+{
+  "_comment": "get_work_package(select=['id','version','target_versions']) after assignment via target_versions. 'version' reads back as the version's NAME (string), not its id.",
+  "id": 115,
+  "version": "VERIFY-005",
+  "target_versions": ["VERIFY-005"]
+}

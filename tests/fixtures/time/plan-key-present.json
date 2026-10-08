@@ -1,0 +1,20 @@
+{
+  "name": "key present in the ledger: unchanged",
+  "ledger_time_entries": [
+    {
+      "key": "111|2026-10-07|Development|PT1H30M",
+      "work_package_id": 111,
+      "spent_on": "2026-10-07",
+      "activity": "Development",
+      "hours": "PT1H30M",
+      "id": 42
+    }
+  ],
+  "item": {
+    "work_package_id": 111,
+    "spent_on": "2026-10-07",
+    "activity": "Development",
+    "iso": "PT1H30M"
+  },
+  "expect": "unchanged"
+}
