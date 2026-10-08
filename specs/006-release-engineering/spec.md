@@ -100,8 +100,8 @@ A user wants to install preset and extension together in one step.
 
 **Acceptance Scenarios**:
 
-1. **Given** released versions of the preset and the extension, **When** the tag `bundle-vX.Y.Z` is pushed, **Then** a release with one bundle archive (built with `specify bundle build`) is published that references exactly those package versions, and its package content equals the content of their published release archives.
-2. **Given** the bundle archive, **When** a user installs it into a fresh spec-kit project, **Then** `specify preset list` and `specify extension list` show both packages with the versions the bundle names.
+1. **Given** released versions of the preset and the extension, **When** the tag `bundle-vX.Y.Z` is pushed, **Then** a release with one bundle archive (built with `specify bundle build`) is published that references exactly those package versions, and the bundle release points to their published release archives (with checksums), so installing the bundle installs exactly those archives.
+2. **Given** the bundle release, **When** a user installs it into a fresh spec-kit project following the documented bundle install steps, **Then** `specify preset list` and `specify extension list` show both packages with the versions the bundle names.
 3. **Given** the bundle names a package version that has no release, **When** the bundle tag is pushed, **Then** nothing is published and the message names the missing release.
 
 ---
@@ -127,7 +127,7 @@ A user wants to install preset and extension together in one step.
 - **FR-005**: The release notes MUST be the changelog entry for that package and version.
 - **FR-006**: The repository MUST have a changelog with separate entries per package and version, an "Unreleased" section per package, and a migration note for every breaking change.
 - **FR-007**: The first released versions MUST be preset `1.0.0` and extension `0.1.0` (roadmap milestones M1 and M2); the manifests are set to these versions before the first tags. Final release tags are set on main after the feature is merged, never on the feature branch.
-- **FR-014**: The repository MUST release a bundle of both packages (`specify bundle build`) triggered by tags `bundle-vX.Y.Z`, with the same stop rules as FR-003 (version, changelog entry, tests) plus a check that every package version the bundle names has a release. The bundle content for each package MUST be taken from that package's published release archive, not rebuilt from the source tree at the bundle tag.
+- **FR-014**: The repository MUST release a bundle of both packages (`specify bundle build`) triggered by tags `bundle-vX.Y.Z`, with the same stop rules as FR-003 (version, changelog entry, tests) plus a check that every package version the bundle names has a release. Installing the bundle MUST install each package from that package's published release archive (pinned by version and checksum), never from an archive rebuilt from the source tree at the bundle tag. spec-kit bundles reference packages instead of embedding them, so the bundle release also provides what spec-kit needs to resolve the pinned versions to those archives.
 - **FR-015**: For each package (and the bundle, if the catalog accepts bundles), the catalog submission for github/spec-kit MUST be prepared in this repo (catalog entry and pull request text); the feature does not file it.
 - **FR-008**: The `repository` field of both manifests MUST point to the repository the releases are published from.
 - **FR-009**: A documented release procedure MUST list the maintainer's steps (bump version, write changelog, tag, verify install from URL) and the verification to run before announcing a release, including the scenarios in `docs/TESTING.md` against the test instance.
