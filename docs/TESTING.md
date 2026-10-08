@@ -391,12 +391,12 @@ Everything below was **not executed**; do not read the scenario table as coverin
 
 | ID | Scenario | Expected | Status |
 |---|---|---|---|
-| S22 | `sync-version --dry-run`, then real, then again | dry run: 1 version create, N work packages assign, nothing written; real: version created, work packages assigned (ledger `version`), result `complete`; re-run: `no changes` | not run yet |
-| S22b | One work package manually moved to another version | `sync-version` reports it as `other-version`, does not move it back | not run yet |
-| S23 | Two lines (`T001: 1h30`, `T002: 45m`), pick activity, accept | two entries with `PT1H30M` and `PT45M`, today's date, activity; same input again: `unchanged` | not run yet |
-| S23b | Same input with `--entry-key second` | one more entry (different key) | not run yet |
-| S24 | `sync-version` with dry-run, simulated interruption (ledger without `version`), re-run | dry-run changes nothing; after interruption, one version, all work packages assigned (idempotent) | not run yet |
-| S25 | Server without version write flag (or time-entry write flag), in `--dry-run` and real mode; no ledger; unknown activity | each stops with a specific message naming the fix, zero writes, even with `--dry-run` | not run yet |
+| S22 | `sync-version --dry-run`, then real, then again | dry run: 1 version create, N work packages assign, nothing written; real: version created, work packages assigned (ledger `version`), result `complete`; re-run: `no changes` | pass (2026-10-08, b0ddd07) |
+| S22b | One work package manually moved to another version | `sync-version` reports it as `other-version`, does not move it back | pass (2026-10-08, b0ddd07) |
+| S23 | Two lines (`T001: 1h30`, `T002: 45m`), pick activity, accept | two entries with `PT1H30M` and `PT45M`, today's date, activity; same input again: `unchanged` | pass (2026-10-08, b0ddd07) |
+| S23b | Same input with `--entry-key second` | one more entry (different key) | pass (2026-10-08, b0ddd07) |
+| S24 | `sync-version` with dry-run, simulated interruption (ledger without `version`), re-run | dry-run changes nothing; after interruption, one version, all work packages assigned (idempotent) | pass (2026-10-08, b0ddd07) |
+| S25 | Server without version write flag (or time-entry write flag), in `--dry-run` and real mode; no ledger; unknown activity | each stops with a specific message naming the fix, zero writes, even with `--dry-run` | pass (2026-10-08, b0ddd07) |
 
 ### Notes for the scenarios
 
@@ -406,6 +406,21 @@ Everything below was **not executed**; do not read the scenario table as coverin
 - S24 setup: after S22, manually delete the `version` key from the ledger (simulate an interruption). Run `sync-version` again; it should create the same version and assign all work packages.
 - S25 setup: start the MCP server with `OPENPROJECT_ENABLE_VERSION_WRITE=false` (and/or `OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE=false` for time tracking). Run `sync-version` and `log-time` in both `--dry-run` and real mode. Expect stops at the capability check, naming the missing capability and the server configuration flag.
 - Not yet run: command mode, closed or locked versions (S22b edge case), a very large batch of work packages or time entries, an interrupted run with a real signal (not simulated), time entries with dates in the future (should be rejected), activities with special characters or in other languages, and concurrent runs.
+
+### Results for feature 005 (run 2026-10-08)
+
+Setup: OpenProject 17.9.1, MCP server `openproject-ce-mcp` 0.4.1, spec-kit CLI 1.1.1.dev0, skills mode, prompt revision b0ddd07. Feature `005-s22-demo` (3 tasks in 2 phases) created by `speckit.taskstoissues` in `speckit-sandbox`: work packages 118 (feature), 119 and 122 (phases), 120, 121, 123 (tasks). Each command ran headless (`claude -p`, `--continue` for the answers) through the installed skill in the scratch project; results checked from the main session against the ledger file and through a separate read-only MCP session against OpenProject.
+
+- **Defect found and fixed during the run**: on revision 0d0c75f the real S22 run without an argument stopped because step 1 only accepted a `NNN-*` working directory. Both prompts now resolve the feature like `sync-docs` (argument → `.specify/feature.json` → git branch → stop and list `specs/`), fixed in b0ddd07; all runs below are on b0ddd07.
+- **S22**: dry run planned `create version` and 6 `assign`, nothing written. Real run: version `005-s22-demo` created (id 9, preview → confirm), ledger `version` = `{id: 9, name: "005-s22-demo"}`, bulk update preview 6/6 ready, confirm 6/6 `confirmed`, result `complete`. Re-run read every work package back: 6 `unchanged`, `0 created, 1 reused`, `no changes`. The ledger contains no host and no token.
+- **S22b**: work package 123 moved by hand to the open version `VERIFY-005` (id 7). Re-run: 5 `unchanged`, 1 `in another version` (123, not moved), `no changes`; ledger checksum equal before and after.
+- **S23**: `T001: 1h30; T002: 45m`, activity picked from the list (`Development`, number 3). Entries 2 (`PT1H30M`, WP 120) and 3 (`PT45M`, WP 121), date 2026-10-08, result `complete`, ledger keys `120|2026-10-08|Development|PT1H30M` and `121|2026-10-08|Development|PT45M`. Same input again (with `--activity Development`): 2 `unchanged`, no `create-time-entry` call, `no changes`.
+- **S23b**: `--entry-key second T001: 1h30`: entry 4, ledger key `entry:second`, `complete`. Mixed input `T999: 1h; T002: abc; T003: 30m`: `T999` `unknown`, `T002` `rejected` (unparsable), `T003` created as entry 5. Read back from OpenProject: entries 2, 3, 4, 5 with the expected work package, date, activity and hours.
+- **S24**: dry run of both commands, ledger checksum equal before and after. Ledger `version` key removed by hand (version 9 still exists): re-run planned `reuse version`, wrote only the ledger key, no second version, `complete`. A ledger item `T099` pointing to a missing work package (999999) next to `T002: 20m`: `T099` `stale` at read time, `T002` created (entry 6), result `incomplete`; the fake item was removed from the ledger afterwards.
+- **S25**: MCP server started from a copy of the client config with both write flags `false` (`--mcp-config`, `--strict-mcp-config`). `sync-version` with and without `--dry-run`: stop at the capability check with `Capability 'create-version' is not available on the server.` and the flag `OPENPROJECT_ENABLE_VERSION_WRITE=true`, `stopped`. `log-time` with and without `--dry-run`: stop at `create-time-entry`, naming `OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE=true`, `stopped`. With writes enabled: feature `005-versions-and-time` (directory without a ledger) stops for both commands; `--activity Kaffeetrinken` stops as an unknown activity, `stopped`. Ledger checksum equal before and after all S25 runs. Only one flag at a time (version write off, time-entry write on) was not run.
+- **Deviations**: as in feature 004, the headless permission set refused some compound shell commands, so several ledger writes were done with the file tool in place instead of temporary file and move (not atomic); the content was correct each time (checked from the main session). The run of S23 confirmed the first entry before its ledger write was refused, then wrote both entries together; no duplicate resulted. The bulk confirmation in S22 asked a second time after the bulk preview (step 9.5), which the prompt prescribes but the rule "single confirmation" contradicts.
+- **Open question for the maintainer**: the prompt does not say which result a run gets when lines are `stale`, `unknown` or `rejected` and every write succeeded (the model chose `incomplete` for a stale line). `sync-version` reports `no changes` with an `other version` work package.
+- Leftovers for the maintainer to delete by hand: version 9 `005-s22-demo`, time entries 2–6, work packages 118–123; work package 123 now carries `VERIFY-005`.
 
 ### Untested paths after feature 005
 
