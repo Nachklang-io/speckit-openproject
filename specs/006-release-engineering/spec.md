@@ -13,6 +13,11 @@
 - Q: Which versions are tagged first? → A: preset `1.0.0`, extension `0.1.0` (roadmap M1/M2).
 - Q: Catalog submission: checklists only, or also the pull requests against github/spec-kit? → A: Prepare the submissions in this repo, ready to file; the maintainer files them.
 - Q: Is the bundle in scope? → A: Yes.
+- Q: What does a re-run for a tag that already has a release do? → A: Complete release: nothing. Missing archive: upload it, only if the tag still points to the same commit; never overwrite.
+- Q: Against which spec-kit version does the CI install smoke test run? → A: A pinned version (blocking) plus a non-blocking run against the latest spec-kit.
+- Q: Is the bundle built from the published package archives or rebuilt from source at the bundle tag? → A: From the published archives of the named versions; no rebuild from source.
+- Q: Does feature 006 include the first real releases? → A: Before merge, a real run with pre-release tags (for example `extension-v0.1.0-rc.1`) including the install from the URL; after merge, the maintainer sets the final tags on main and the install is verified again.
+- Q: How does the tag-vs-manifest version check treat a pre-release tag? → A: Only the core `X.Y.Z` is compared with the manifest; the release notes come from the changelog entry for `X.Y.Z`.
 
 **Input**: User description: "docs/briefs/006-release-engineering.md" — independent tags `preset-v*` / `extension-v*`, a GitHub release workflow producing archives, a changelog, catalog-submission checklists for the preset and the extension, an optional bundle via `specify bundle build`. Acceptance: a tagged release installs via `specify preset add` / `specify extension add` from the release URL.
 
@@ -33,7 +38,7 @@ The maintainer decides that the extension is ready for a release. They set the v
 3. **Given** the tag version and the manifest version differ, **When** the tag is pushed, **Then** the release fails with a message naming both versions, and no release or archive is published.
 4. **Given** there is no changelog entry for the tagged version, **When** the tag is pushed, **Then** the release fails with a message naming the missing entry, and nothing is published.
 5. **Given** the test suite or the lint fails on the tagged commit, **When** the tag is pushed, **Then** no release is published.
-6. **Given** a release for a tag already exists, **When** the workflow runs again for the same tag, **Then** no second release and no duplicate archive is created (re-runs are idempotent).
+6. **Given** a release for a tag already exists, **When** the workflow runs again for the same tag, **Then** no second release and no duplicate archive is created (re-runs are idempotent); a missing archive is uploaded if the tag still points to the same commit.
 
 ---
 
@@ -95,7 +100,7 @@ A user wants to install preset and extension together in one step.
 
 **Acceptance Scenarios**:
 
-1. **Given** released versions of the preset and the extension, **When** the tag `bundle-vX.Y.Z` is pushed, **Then** a release with one bundle archive (built with `specify bundle build`) is published that references exactly those package versions.
+1. **Given** released versions of the preset and the extension, **When** the tag `bundle-vX.Y.Z` is pushed, **Then** a release with one bundle archive (built with `specify bundle build`) is published that references exactly those package versions, and its package content equals the content of their published release archives.
 2. **Given** the bundle archive, **When** a user installs it into a fresh spec-kit project, **Then** `specify preset list` and `specify extension list` show both packages with the versions the bundle names.
 3. **Given** the bundle names a package version that has no release, **When** the bundle tag is pushed, **Then** nothing is published and the message names the missing release.
 
@@ -104,7 +109,7 @@ A user wants to install preset and extension together in one step.
 ### Edge Cases
 
 - A tag that does not match `preset-vX.Y.Z` or `extension-vX.Y.Z` (for example `v1.0.0` or `extension-v1.0`) does not trigger a release.
-- A pre-release version (for example `extension-v0.2.0-rc.1`) is published as a pre-release, not as the latest release.
+- A pre-release version (for example `extension-v0.2.0-rc.1`) is published as a pre-release, not as the latest release; the manifest carries the core version (`0.2.0`), so an installed pre-release reports the core version.
 - Both tags are pushed on the same commit: two independent releases, each with only its own package.
 - A tag is deleted and re-pushed on a different commit: the existing release is not silently overwritten; the run stops and names the conflict.
 - The archive must not contain secrets, `.env`, `.scratch/`, private instance URLs, tests, specs or docs outside the package directory.
@@ -117,17 +122,17 @@ A user wants to install preset and extension together in one step.
 
 - **FR-001**: The repository MUST release the preset and the extension independently, triggered only by tags of the form `preset-vX.Y.Z` and `extension-vX.Y.Z` (semantic versions, optional pre-release suffix).
 - **FR-002**: Each release MUST contain one archive per package in a format accepted by `specify preset add --from` / `specify extension add --from`, built only from that package's directory.
-- **FR-003**: The release MUST stop without publishing anything when the tag version differs from the version in the package manifest, when the changelog has no entry for that package and version, or when tests or lint fail on the tagged commit.
-- **FR-004**: Re-running the release for an existing tag MUST NOT create a second release or a duplicate archive.
+- **FR-003**: The release MUST stop without publishing anything when the tag version differs from the version in the package manifest, when the changelog has no entry for that package and version, or when tests or lint fail on the tagged commit. For a pre-release tag (`X.Y.Z-<suffix>`), only the core version `X.Y.Z` is compared with the manifest, and the changelog entry for `X.Y.Z` is required and used as release notes.
+- **FR-004**: Re-running the release for an existing tag MUST NOT create a second release or a duplicate archive. If the existing release is complete, the run changes nothing and reports that the release exists. If its archive is missing, the run uploads it only when the tag still points to the commit the release was created from. Existing archives and release notes are never overwritten.
 - **FR-005**: The release notes MUST be the changelog entry for that package and version.
 - **FR-006**: The repository MUST have a changelog with separate entries per package and version, an "Unreleased" section per package, and a migration note for every breaking change.
-- **FR-007**: The first released versions MUST be preset `1.0.0` and extension `0.1.0` (roadmap milestones M1 and M2); the manifests are set to these versions before the first tags.
-- **FR-014**: The repository MUST release a bundle of both packages (`specify bundle build`) triggered by tags `bundle-vX.Y.Z`, with the same stop rules as FR-003 (version, changelog entry, tests) plus a check that every package version the bundle names has a release.
+- **FR-007**: The first released versions MUST be preset `1.0.0` and extension `0.1.0` (roadmap milestones M1 and M2); the manifests are set to these versions before the first tags. Final release tags are set on main after the feature is merged, never on the feature branch.
+- **FR-014**: The repository MUST release a bundle of both packages (`specify bundle build`) triggered by tags `bundle-vX.Y.Z`, with the same stop rules as FR-003 (version, changelog entry, tests) plus a check that every package version the bundle names has a release. The bundle content for each package MUST be taken from that package's published release archive, not rebuilt from the source tree at the bundle tag.
 - **FR-015**: For each package (and the bundle, if the catalog accepts bundles), the catalog submission for github/spec-kit MUST be prepared in this repo (catalog entry and pull request text); the feature does not file it.
 - **FR-008**: The `repository` field of both manifests MUST point to the repository the releases are published from.
 - **FR-009**: A documented release procedure MUST list the maintainer's steps (bump version, write changelog, tag, verify install from URL) and the verification to run before announcing a release, including the scenarios in `docs/TESTING.md` against the test instance.
 - **FR-010**: For each package, a catalog-submission checklist MUST map the current spec-kit contribution requirements to this repo, with state and evidence per item.
-- **FR-011**: CI MUST verify on every pull request that each package can be built into an archive and that the archive installs into a fresh spec-kit project (install smoke test, constitution development workflow).
+- **FR-011**: CI MUST verify on every pull request that each package can be built into an archive and that the archive installs into a fresh spec-kit project (install smoke test, constitution development workflow). The test that blocks a pull request runs against a pinned spec-kit version, which the maintainer raises deliberately; a second, non-blocking run against the latest spec-kit reports breaking changes early.
 - **FR-012**: Archives and release notes MUST NOT contain secrets, `.env` content, private instance URLs or files outside the package directory except shared files the package needs (for example the LICENSE).
 - **FR-013**: No release step MUST access OpenProject; releasing is independent of any OpenProject instance.
 
@@ -148,6 +153,7 @@ A user wants to install preset and extension together in one step.
 - **SC-004**: Each released archive contains only files of its package; a check of the archive contents finds zero files from tests, specs, docs or `.scratch/`.
 - **SC-005**: Every released version of each package has a changelog entry, and the release notes match it.
 - **SC-006**: Each catalog-submission checklist has zero items without a state.
+- **SC-007**: Before the pull request is merged, one pre-release per package (tag with a pre-release suffix, pushed after the maintainer's confirmation) has been published by the workflow and installed anonymously from its URL into a fresh spec-kit project. After the merge, the final tags `preset-v1.0.0` and `extension-v0.1.0` are set on main by the maintainer and the same install check passes.
 
 ## Assumptions
 
