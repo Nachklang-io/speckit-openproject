@@ -54,7 +54,7 @@ Findings come from reading the installed `specify-cli` 1.1.1.dev0 source (`speci
   2. builds both archives with `release.py build`
   3. serves them with `python -m http.server --bind 127.0.0.1`
   4. creates a fresh project with `specify init --non-interactive --integration claude --ignore-agent-tools`
-  5. runs `specify preset add --from http://127.0.0.1:<port>/...zip` and `specify extension add --from ...`
+  5. runs `specify preset add --from http://127.0.0.1:<port>/...zip` and `specify extension add openproject --from ...` (answers the source confirmation with `y`)
   6. asserts that `specify preset list` and `specify extension list` show the versions, and that the skills exist.
 
   A second job `install-smoke-latest` does the same against the `main` branch with `continue-on-error: true`. `tests/test_install.py` keeps covering the `--dev` path.

@@ -434,3 +434,20 @@ Setup: OpenProject 17.9.1, MCP server `openproject-ce-mcp` 0.4.1, spec-kit CLI 1
 - An instance with start/end time tracking enabled (affects time entry fields; the command does not set them).
 - A project without the Versions module enabled (unknown behavior; would be caught by a lack of the `create-version` capability on the server).
 - A project without the Time tracking module enabled (unknown behavior; would be caught by a lack of the `create-time-entry` capability on the server).
+
+## Scenarios for feature 006 (release engineering)
+
+The release itself never touches OpenProject (FR-013). These scenarios check that a package installed from a release archive behaves like the `--dev` install.
+
+| ID | Scenario | Expected | Status |
+|---|---|---|---|
+| S26 | Archive install (quickstart Q2): build both archives with rc versions, serve them on `127.0.0.1`, `specify preset add --from <url>` and `specify extension add openproject --from <url>` (answer `y` to the source prompt) into a fresh `specify init` project | both installs succeed; `preset list` shows `v1.0.0`, `extension list` shows `v0.1.0`; `speckit-taskstoissues` carries `preset:openproject` and all five `speckit-openproject-*` skills exist | pass (2026-10-08, spec-kit 1.1.1.dev0, local; automated in `tests/test_install_archive.py`) |
+| S27 | Parity with the `--dev` install (quickstart Q7, US2-3): install both packages from the GitHub release URL of the rc tag, configure the MCP server, run `/speckit-openproject-discover-fields --dry-run` against the test instance; repeat in a project with the `--dev` install | same overview, proposals and `Dry run: nothing was written.` line in both projects; no file written | untested until the rc release (T035) |
+
+### Notes for the scenarios
+
+- S26 runs in CI for every pull request (`install-smoke`, spec-kit v1.1.0 and v1.1.2, blocking; spec-kit `main` non-blocking) through `uv run pytest tests/test_install_archive.py tests/test_install.py` with `SPECKIT_REQUIRE_CLI=1`, so a missing CLI fails instead of skipping.
+- `specify extension add` needs the extension id before `--from` and asks `Continue with installation? [y/N]` for a URL source; spec-kit 1.1.x has no flag to skip the question. `specify preset add --from` needs neither.
+- The lists show the manifest (core) version, not the rc suffix of the archive name.
+- S27 setup: two scratch projects, one from `scripts/dev-install.sh`, one from the release URLs (`https://github.com/Nachklang-io/speckit-openproject/releases/download/<tag>/<archive>`), both with the same `.specify/openproject/config.yml` and the same MCP client config. Compare the dry-run output line by line; differences in wording from the model are fine, differences in the plan are not.
+- Not yet run: the GitHub redirect and anonymous download of a release asset, the bundle archive, spec-kit v1.1.0 locally (CI only).

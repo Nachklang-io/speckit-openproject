@@ -44,7 +44,7 @@ The maintainer decides that the extension is ready for a release. They set the v
 
 ### User Story 2 - Install a released package from its URL (Priority: P1)
 
-A user of spec-kit, outside this repo, installs the preset and the extension from the release archives with `specify preset add --from <url>` and `specify extension add --from <url>`, and the commands are available in their project.
+A user of spec-kit, outside this repo, installs the preset and the extension from the release archives with `specify preset add --from <url>` and `specify extension add openproject --from <url>`, and the commands are available in their project.
 
 **Why this priority**: This is the acceptance criterion of the brief and the point of releasing at all.
 
@@ -53,7 +53,7 @@ A user of spec-kit, outside this repo, installs the preset and the extension fro
 **Acceptance Scenarios**:
 
 1. **Given** a published preset release, **When** a user runs `specify preset add --from <release archive URL>` in a fresh spec-kit project, **Then** the preset installs without errors and `specify preset list` shows the released version.
-2. **Given** a published extension release, **When** a user runs `specify extension add --from <release archive URL>`, **Then** the extension installs without errors, `specify extension list` shows the released version, and all five commands are available.
+2. **Given** a published extension release, **When** a user runs `specify extension add openproject --from <release archive URL>`, **Then** the extension installs without errors, `specify extension list` shows the released version, and all five commands are available.
 3. **Given** the installed released packages, **When** the user runs a read-only command (for example `discover-fields --dry-run`) against a test instance, **Then** it behaves the same as the development install.
 
 ---
@@ -121,7 +121,7 @@ A user wants to install preset and extension together in one step.
 ### Functional Requirements
 
 - **FR-001**: The repository MUST release the preset and the extension independently, triggered only by tags of the form `preset-vX.Y.Z` and `extension-vX.Y.Z` (semantic versions, optional pre-release suffix).
-- **FR-002**: Each release MUST contain one archive per package in a format accepted by `specify preset add --from` / `specify extension add --from`, built only from that package's directory.
+- **FR-002**: Each release MUST contain one archive per package in a format accepted by `specify preset add --from` / `specify extension add <id> --from`, built only from that package's directory.
 - **FR-003**: The release MUST stop without publishing anything when the tag version differs from the version in the package manifest, when the changelog has no entry for that package and version, or when tests or lint fail on the tagged commit. For a pre-release tag (`X.Y.Z-<suffix>`), only the core version `X.Y.Z` is compared with the manifest, and the changelog entry for `X.Y.Z` is required and used as release notes.
 - **FR-004**: Re-running the release for an existing tag MUST NOT create a second release or a duplicate archive. If the existing release is complete, the run changes nothing and reports that the release exists. If its archive is missing, the run uploads it only when the tag still points to the commit the release was created from. Existing archives and release notes are never overwritten.
 - **FR-005**: The release notes MUST be the changelog entry for that package and version.
@@ -158,7 +158,7 @@ A user wants to install preset and extension together in one step.
 ## Assumptions
 
 - Releases are published on the public GitHub repository `Nachklang-io/speckit-openproject` (the monorepo, ADR-0001); no split into per-package repositories in this feature. Both manifests already point there (changed 2026-10-08).
-- The release archives are ZIP files, which both `specify preset add --from` and `specify extension add --from` accept.
+- The release archives are ZIP files, which both `specify preset add --from` and `specify extension add <id> --from` accept.
 - The changelog lives in one file at the repository root with per-package sections (or one file per package); the plan decides, the requirement is per-package entries.
 - The existing CI workflow is extended; releasing runs on GitHub Actions in this repository.
 - The spec-kit contribution guide for catalogs is re-read at implementation time because the process changes (`docs/PUBLISHING.md`).

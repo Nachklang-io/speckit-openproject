@@ -36,13 +36,14 @@ uv run python scripts/release.py verify-archive dist/openproject-extension-0.1.0
 specify init .scratch/rel --non-interactive --integration claude --ignore-agent-tools
 cd .scratch/rel
 specify preset add --from http://127.0.0.1:8765/openproject-preset-1.0.0-rc.1.zip
-specify extension add --from http://127.0.0.1:8765/openproject-extension-0.1.0-rc.1.zip
+specify extension add openproject --from http://127.0.0.1:8765/openproject-extension-0.1.0-rc.1.zip  # asks to confirm the untrusted source: y
 specify preset list; specify extension list
 ```
 
 Expected result:
 - `check` prints JSON with `"prerelease": true`.
 - Both installs succeed, and the lists show `1.0.0` and `0.1.0` (core versions).
+- `extension add` needs the extension id (`openproject`) before `--from` and asks to confirm the source (no `--yes` flag in spec-kit 1.1.x); `preset add --from` needs neither.
 - `.claude/skills/speckit-taskstoissues/SKILL.md` and `speckit-openproject-*` skills exist.
 
 ## Q3 – Negative gates (local)
