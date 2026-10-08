@@ -24,7 +24,7 @@ jobs:
       archive: ${{ steps.meta.outputs.archive }}
       prerelease: ${{ steps.meta.outputs.prerelease }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
       - name: Gate the tag
@@ -111,7 +111,7 @@ jobs:
       ARCHIVE: ${{ needs.verify.outputs.archive }}
     steps:
       # Only for scripts/release.py publish-plan (stdlib); no dependencies are installed.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v4
         with:
           name: assets

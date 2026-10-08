@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${SPECKIT_REF}"
@@ -30,7 +30,7 @@ jobs:
       matrix:
         speckit: [v1.1.0, v1.1.2]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${{ matrix.speckit }}"
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@main"
