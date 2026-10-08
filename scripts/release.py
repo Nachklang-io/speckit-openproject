@@ -36,7 +36,7 @@ CORE_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
 ZIP_EPOCH = (1980, 1, 1, 0, 0, 0)
 FORBIDDEN_COMPONENTS = {".scratch", "tests", "specs", "docs"}
-TOKEN_RE = re.compile(r"OPENPROJECT_API_TOKEN\s*[=:]\s*['\"]?[A-Za-z0-9_-]{16,}")
+TOKEN_RE = re.compile(r"OPENPROJECT_API_(?:TOKEN|KEY)['\"]?\s*[=:]\s*['\"]?[A-Za-z0-9_-]{16,}")
 URL_HOST_RE = re.compile(r"https?://(?:[^/\s@\"'<>]*@)?([A-Za-z0-9.-]+)")
 # Extending this allowlist is a reviewed code change (contracts/archive-layout.md).
 ALLOWED_HOSTS = ("github.com", "raw.githubusercontent.com", "www.openproject.org", "example.com")
@@ -300,7 +300,7 @@ def archive_violations(path: Path) -> list[str]:
     violations = []
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
-        if not any(name in names for name in ("preset.yml", "extension.yml")):
+        if not any(name in names for name in ("preset.yml", "extension.yml", "bundle.yml")):
             violations.append("manifest missing at archive root")
         for name in names:
             parts = name.split("/")

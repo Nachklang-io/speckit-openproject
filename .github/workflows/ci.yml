@@ -18,7 +18,7 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run pytest -v
       - name: No secrets committed
-        run: "! git grep -nE 'OPENPROJECT_API_TOKEN=[A-Za-z0-9_-]{16,}'"
+        run: "! git grep -nE \"OPENPROJECT_API_(TOKEN|KEY)['\\\"]?[[:space:]]*[=:][[:space:]]*['\\\"]?[A-Za-z0-9_-]{16,}\""
 
   # Builds both archives, serves them on 127.0.0.1 and installs them with --from and as a bundle
   # through the generated catalogs (tests/test_install_archive.py), plus the --dev install,

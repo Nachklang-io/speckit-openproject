@@ -83,6 +83,7 @@ def test_bundle_steps_resolve_components_and_build():
         "release.py bundle-catalog",
         "specify bundle validate --offline --path bundle",
         "specify bundle build --path bundle --output dist",
+        'release.py verify-archive "dist/$ARCHIVE"',
     ):
         assert command in run, command
     assert "--download-base" not in run

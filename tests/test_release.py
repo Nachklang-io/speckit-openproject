@@ -317,6 +317,7 @@ def _url(host: str) -> str:
         ({"preset.yml": "x", "../evil.md": "x"}, "unsafe path: ../evil.md"),
         ({"preset.yml": "x", "/abs.md": "x"}, "unsafe path: /abs.md"),
         ({"preset.yml": "TOKEN"}, "token-like string in preset.yml"),
+        ({"bundle.yml": "x", "README.md": "TOKEN"}, "token-like string in README.md"),
         ({"preset.yml": "URL"}, "host not allowed in preset.yml: op.internal.test"),
     ],
 )
@@ -340,6 +341,26 @@ def test_verify_allowed_hosts_and_subdomains(tmp_path):
     assert release.archive_violations(zip_path) == [
         "host not allowed in extension.yml: notgithub.com"
     ]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        '"OPENPROJECT_API_TOKEN": "' + "a1B2" * 5 + '"',
+        "OPENPROJECT_API_KEY: " + "a1B2" * 5,
+    ],
+)
+def test_verify_token_json_and_key_forms(text, tmp_path):
+    zip_path = write_zip(tmp_path / "a.zip", {"extension.yml": text})
+    assert release.archive_violations(zip_path) == ["token-like string in extension.yml"]
+
+
+def test_verify_bundle_archive_passes(tmp_path):
+    zip_path = write_zip(
+        tmp_path / "a.zip",
+        {"bundle.yml": BUNDLE.read_text(), "README.md": (ROOT / "bundle/README.md").read_text()},
+    )
+    assert release.archive_violations(zip_path) == []
 
 
 def test_verify_cli_reports_all_violations(capsys, tmp_path):

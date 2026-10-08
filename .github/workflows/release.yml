@@ -75,6 +75,7 @@ jobs:
           specify bundle validate --offline --path bundle
           specify bundle build --path bundle --output dist
           test -f "dist/$ARCHIVE"
+          uv run python scripts/release.py verify-archive "dist/$ARCHIVE"
       - name: Release notes
         env:
           KIND: ${{ steps.meta.outputs.kind }}
