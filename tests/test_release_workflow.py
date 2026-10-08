@@ -67,3 +67,23 @@ def test_only_github_token_is_used():
     assert set(re.findall(r"secrets\.(\w+)", text)) <= {"GITHUB_TOKEN"}
     assert "OPENPROJECT" not in text.upper().replace("NO OPENPROJECT", "")
     assert "mcp" not in text.lower().replace("no mcp", "")
+
+
+def test_bundle_steps_resolve_components_and_build():
+    data, _ = _load()
+    steps = data["jobs"]["verify"]["steps"]
+    bundle = [s for s in steps if s.get("if") == "steps.meta.outputs.kind == 'bundle'"]
+    assert len(bundle) == 1
+    run = bundle[0]["run"]
+    for command in (
+        "release.component_tags",
+        "gh release view",
+        "missing release: $tag",
+        "gh release download",
+        "release.py bundle-catalog",
+        "specify bundle validate --offline --path bundle",
+        "specify bundle build --path bundle --output dist",
+    ):
+        assert command in run, command
+    assert "--download-base" not in run
+    assert "not supported" not in run

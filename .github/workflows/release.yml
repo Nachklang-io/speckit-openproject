@@ -48,11 +48,33 @@ jobs:
         run: |
           uv run python scripts/release.py build "$KIND" --out dist --version "${TAG#"$KIND"-v}"
           uv run python scripts/release.py verify-archive "dist/${{ steps.meta.outputs.archive }}"
-      - name: Bundle
+      - name: Build the bundle and its catalogs
         if: steps.meta.outputs.kind == 'bundle'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ steps.meta.outputs.archive }}
         run: |
-          echo "release: bundle releases are not supported by this workflow yet" >&2
-          exit 1
+          uv run python - > components.txt <<'PY'
+          import os, sys
+          sys.path.insert(0, "scripts")
+          import release, yaml
+          pins = release.bundle_pins(yaml.safe_load(open("bundle/bundle.yml")))
+          for tag in release.component_tags(release.parse_tag(os.environ["TAG"]), pins).values():
+              print(tag.name, tag.archive)
+          PY
+          while read -r tag archive; do
+            if ! gh release view "$tag" --json assets --jq '.assets[].name' > names.txt \
+              || ! grep -qxF "$archive" names.txt; then
+              echo "release: missing release: $tag" >&2
+              exit 1
+            fi
+            gh release download "$tag" --pattern "$archive" --dir components
+          done < components.txt
+          uv run python scripts/release.py bundle-catalog --tag "$TAG" --archives components \
+            --repository "$GITHUB_REPOSITORY" --out dist
+          specify bundle validate --offline --path bundle
+          specify bundle build --path bundle --output dist
+          test -f "dist/$ARCHIVE"
       - name: Release notes
         env:
           KIND: ${{ steps.meta.outputs.kind }}
