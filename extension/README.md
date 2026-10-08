@@ -18,6 +18,16 @@ specify extension add --dev ./extension
 
 Install the preset in the same way (see `preset/README.md`), or install both with the bundle (`bundle/README.md`). Configure the OpenProject MCP server in your agent's MCP client config, as the preset README describes. Changes are listed in the repository's `CHANGELOG.md` under "Extension".
 
+Step-by-step setup for new and existing spec-kit projects, which command to run when, and the options for automatic sync: [setup guide](../README.md#setup-guide). Typical order: `discover-fields` once, `speckit.taskstoissues` after `/speckit-tasks`, `sync-version` and `sync-docs` when planning, `sync-status` after implementing, `log-time` when time was spent.
+
+### Automation
+
+Every command shows a plan and asks once before it writes; there is no unattended write mode.
+
+- The manifest registers an optional `after_implement` hook for `sync-status` (see [`sync-status`](#sync-status)). The host offers the command after `/speckit-implement`.
+- More hooks can be added by hand to `.specify/extensions.yml` in the project, for example `after_tasks` → `speckit.taskstoissues`. **Untested**, and `specify extension update` or `remove` may rewrite the file.
+- A scheduled `claude -p "/speckit-openproject-sync-status --dry-run"` reports drift without writing. Headless runs were tested (`discover-fields`, and `sync-status` on earlier prompt revisions); running them from a scheduler was not.
+
 ## `discover-fields`
 
 Reads the target project's types, statuses, priorities, versions and mandatory custom fields through an OpenProject MCP server and creates or updates `.specify/openproject/config.yml`, so that `speckit.taskstoissues` works without hand-editing.

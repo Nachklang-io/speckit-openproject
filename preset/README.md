@@ -8,12 +8,11 @@ A [spec-kit](https://github.com/github/spec-kit) preset that overrides `speckit.
 - An OpenProject instance and an API token
 - An OpenProject MCP server. Tested target: [`jtauschl/openproject-ce-mcp`](https://github.com/jtauschl/openproject-ce-mcp) (MIT, works with Community Edition). The official OpenProject MCP server is an Enterprise add-on; other community servers use different tool names and may need adjustments.
 
-```bash
-pipx install openproject-ce-mcp
-openproject-ce-mcp configure     # writes the client config (.mcp.json etc.) incl. API token
-```
+The tested setup runs the server with `uvx openproject-ce-mcp` from a `.mcp.json` that only references environment variables; step 2 of the [setup guide](../README.md#2-configure-the-mcp-server-once-per-machine-or-repository) lists every variable. The server's own installer (`pipx install openproject-ce-mcp`, then `openproject-ce-mcp configure`) was not tested here, and it writes the token into the client config.
 
 Restrict write access in the MCP server environment: `OPENPROJECT_WRITE_PROJECTS=<your-project>`.
+
+Step-by-step setup for new and existing spec-kit projects, and how to keep OpenProject in sync: [setup guide](../README.md#setup-guide).
 
 ## Install
 
