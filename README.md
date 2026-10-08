@@ -23,6 +23,97 @@ specify extension add openproject --from https://github.com/Nachklang-io/speckit
 
 For development, from a clone: `scripts/dev-install.sh` (installs both packages with `--dev` into `.scratch/`).
 
+## Setup guide
+
+The examples use Claude Code in skills mode (`/speckit-<name>`). In command mode the same commands are called `/speckit.<name>`, for example `/speckit.openproject.sync-status`.
+
+### 1. Prepare OpenProject (once per project)
+
+1. Create the OpenProject project, or pick an existing one, and note its identifier (for example `my-project`).
+2. Under *Project settings → Work package types*, enable three types: one for features, one for phases and one for tasks. A default instance has no "Phase" type; `Feature`, `Summary task` and `Task` work.
+3. Under *Project settings → Modules*, enable *Work packages*. Also enable *Versions* (for `sync-version`) and *Time and costs* (for `log-time`) if you want to use them.
+4. Create an API token (*My account → Access tokens*) for the user the agent acts as. That user needs a role in the project that can create and edit work packages, and if you use those commands, also manage versions, log time and add attachments.
+
+### 2. Configure the MCP server (once per machine or repository)
+
+The commands talk to OpenProject only through an MCP server. The tested server is [`openproject-ce-mcp`](https://github.com/jtauschl/openproject-ce-mcp) (v0.4.1). Add it to the MCP client config of your agent. For Claude Code, put a `.mcp.json` in the project root that only references environment variables, so that no token or URL ends up in the repository:
+
+```json
+{
+  "mcpServers": {
+    "openproject": {
+      "command": "uvx",
+      "args": ["openproject-ce-mcp"],
+      "env": {
+        "OPENPROJECT_BASE_URL": "${OPENPROJECT_BASE_URL}",
+        "OPENPROJECT_API_TOKEN": "${OPENPROJECT_API_TOKEN}",
+        "OPENPROJECT_READ_PROJECTS": "${OPENPROJECT_READ_PROJECTS}",
+        "OPENPROJECT_WRITE_PROJECTS": "${OPENPROJECT_WRITE_PROJECTS}",
+        "OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE": "true",
+        "OPENPROJECT_ENABLE_VERSION_WRITE": "true",
+        "OPENPROJECT_ATTACHMENT_ROOT": "${OPENPROJECT_ATTACHMENT_ROOT}"
+      }
+    }
+  }
+}
+```
+
+| Variable | Value | Needed for |
+|---|---|---|
+| `OPENPROJECT_BASE_URL`, `OPENPROJECT_API_TOKEN` | your instance and the token from step 1 | everything |
+| `OPENPROJECT_READ_PROJECTS`, `OPENPROJECT_WRITE_PROJECTS` | the project identifier; the server only sees and writes these projects | everything |
+| `OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE=true` | | `taskstoissues`, `sync-status`, `sync-docs`, `log-time` |
+| `OPENPROJECT_ENABLE_VERSION_WRITE=true` | | `sync-version` |
+| `OPENPROJECT_ATTACHMENT_ROOT` | absolute path of a directory that contains the project, for example the project root | `sync-docs` (without it the upload tool is missing and the command stops) |
+
+Export the variables in your shell (for example from a git-ignored `.env`) and start the agent from that shell: `set -a; source .env; set +a; claude`. Started without them, the server does not connect. In Claude Code, `/mcp` shows whether `openproject` is connected. Keep `.env` out of git.
+
+### 3a. New project
+
+1. Install spec-kit: `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git`.
+2. Create the project: `specify init my-project --integration claude`, then `cd my-project`.
+3. Install the preset and the extension with the two commands under [Install](#install), or with the [bundle](bundle/README.md). Check with `specify preset list` and `specify extension list`.
+4. Add `.mcp.json` from step 2 and start the agent from a shell with the variables exported.
+5. Create the config: `/speckit-openproject-discover-fields my-project --dry-run` shows what it would write. Run it again without `--dry-run`, accept or change the proposals by number and approve the diff. This writes `.specify/openproject/config.yml` (types, status names, mandatory custom fields). Commit it.
+6. Work through spec-kit as usual: `/speckit-constitution`, `/speckit-specify`, `/speckit-clarify`, `/speckit-plan`, `/speckit-tasks`.
+7. Create the work packages: `/speckit-taskstoissues --dry-run`, then `/speckit-taskstoissues`. You confirm once per phase. The result is Feature → Phase → Task in OpenProject, plus `follows` relations for task dependencies (asked separately; off with `create_relations: false`). The ledger `.specify/openproject/mapping-<feature>.json` records the ids; commit it.
+8. Optional: `/speckit-openproject-sync-version` assigns the feature's work packages to a version, and `/speckit-openproject-sync-docs` attaches `spec.md` and `plan.md` to the feature work package.
+9. Implement with `/speckit-implement`, then keep both sides in sync as described in [Keeping OpenProject in sync](#4-keeping-openproject-in-sync).
+
+### 3b. Existing spec-kit project
+
+1. Update spec-kit to ≥ 1.1.0 (`uv tool upgrade specify-cli`, or reinstall it with the command in step 3a).
+2. In the project root (the directory with `.specify/`), install the preset and the extension as in step 3a.3. Your specs, plans and `tasks.md` files stay as they are. The preset only replaces `speckit.taskstoissues`.
+3. Add `.mcp.json` and run `discover-fields` as in steps 3a.4–3a.5.
+4. Bring each feature that already has a `tasks.md` into OpenProject. `/speckit-taskstoissues` works on the active feature, like `/speckit-implement`. spec-kit reads it from `.specify/feature.json` (`{"feature_directory": "specs/<feature>"}`) or from the environment variable `SPECIFY_FEATURE_DIRECTORY`, not from the git branch. Point one of them at the feature, then run `/speckit-taskstoissues --dry-run` and `/speckit-taskstoissues`. The extension commands also take the feature directory name as an argument (`/speckit-openproject-sync-status 001-my-feature`).
+   - Work packages that already exist are adopted instead of created, if their subject starts with the task id followed by a space (`T012 …`) and they sit below the feature work package. If several work packages match, the task is reported as `blocked` (ambiguous) and left alone.
+   - Work packages are created with the default status of their type. Checked boxes are not copied at creation.
+5. Transfer the progress you already made: `/speckit-openproject-sync-status --dry-run`, then `/speckit-openproject-sync-status`. Every checked box whose work package is not done moves to the done status. If the OpenProject workflow forbids that transition, the task is reported as `blocked`. The first run is a baseline and reports no conflicts.
+6. Repeat steps 4–5 per feature. You can skip features that are finished and that you do not want in OpenProject.
+
+### 4. Keeping OpenProject in sync
+
+Every command is idempotent: a re-run only does what is still missing, and it reports `no changes` when there is nothing to do. Every command takes `--dry-run`.
+
+| When | Command | What it syncs |
+|---|---|---|
+| `tasks.md` changed (new tasks, new phase) | `/speckit-taskstoissues` | creates the missing work packages; `--update` also updates titles and descriptions of linked ones |
+| tasks done locally, or status changed in OpenProject | `/speckit-openproject-sync-status` | checkbox ↔ status, only `statuses.done` is pushed; OpenProject wins conflicts and the command never reopens a work package |
+| `spec.md`, `plan.md`, `research.md` or `data-model.md` changed | `/speckit-openproject-sync-docs` | replaces changed attachments, keeps the summary block in the feature description |
+| feature planned for a release | `/speckit-openproject-sync-version [--version <name>]` | creates or reuses the version and assigns unassigned work packages |
+| time spent | `/speckit-openproject-log-time T012: 1h30` | one time entry per line, no duplicates on re-run |
+| types, statuses or mandatory fields changed in OpenProject | `/speckit-openproject-discover-fields` | updates `config.yml` after a diff |
+
+Commit `.specify/openproject/` after each run; the ledger files are what prevent duplicates for the next person.
+
+### 5. Automatic sync
+
+Every command shows a plan and asks once before it writes. A run without a person to confirm is not supported. Three ways to start the sync without typing the command:
+
+1. **Hook after `/speckit-implement` (built in).** The extension registers an optional `after_implement` hook in `.specify/extensions.yml`. At the end of `/speckit-implement`, the agent offers `/speckit-openproject-sync-status`. Accept it, and it shows the plan and asks for confirmation as usual. The offer was seen in skills mode; accepting it from inside the `implement` flow has not been tested yet.
+2. **More hooks (untested).** spec-kit's core commands read hooks for other events from `.specify/extensions.yml` (`after_tasks`, `after_plan`, …). You can add entries in the same format as the installed `after_implement` entry, for example `after_tasks` → `speckit.taskstoissues` or `after_plan` → `speckit.openproject.sync-docs`. With `optional: true` the agent offers the command; with `optional: false` it starts it right away, and the command still asks before writing. This is not tested, and `specify extension update` or `remove` may rewrite the file.
+3. **Scheduled check (dry run).** A scheduled job (cron, CI) can run `claude -p "/speckit-openproject-sync-status --dry-run"` in the project, with the MCP variables exported. It reports what is out of sync without writing anything. Headless runs were tested (`discover-fields`, and `sync-status` on earlier prompt revisions); running them from a scheduler was not. Scripting the confirmation for real writes is not supported.
+
 ## Docs
 
 [architecture](docs/ARCHITECTURE.md) · [roadmap](docs/ROADMAP.md) · [first session](docs/BOOTSTRAP.md) · [testing](docs/TESTING.md) · [releasing](docs/RELEASING.md) · [publishing](docs/PUBLISHING.md).
