@@ -109,10 +109,10 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 **Independent Test**: every checklist item has a state (SC-006).
 
 - [X] T027 [US4] Re-read the current spec-kit contribution guide for the preset catalog and the extension catalog (and whether community bundles are accepted); note the date and source URLs
-- [ ] T028 [P] [US4] Write `docs/catalog/preset-checklist.md`: each upstream requirement, evidence (repo path or release URL), state `met`/`gap`/`n/a` with reason; list the monorepo-layout gap with options (explain layout, or split per ADR-0001)
-- [ ] T029 [P] [US4] Write `docs/catalog/extension-checklist.md` in the same form
-- [ ] T030 [P] [US4] Write `docs/catalog/preset-entry.json` and `docs/catalog/extension-entry.json` (proposed catalog entries; `download_url`/`sha256` filled after the final tags) and `docs/catalog/submission.md` (PR titles and bodies per package; bundle if accepted)
-- [ ] T031 [US4] Add a test in `tests/test_release.py` that every checklist item line carries a state (zero items without state, SC-006)
+- [X] T028 [P] [US4] Write `docs/catalog/preset-checklist.md`: each upstream requirement, evidence (repo path or release URL), state `met`/`gap`/`n/a` with reason; list the monorepo-layout gap with options (explain layout, or split per ADR-0001)
+- [X] T029 [P] [US4] Write `docs/catalog/extension-checklist.md` in the same form
+- [X] T030 [P] [US4] Write `docs/catalog/preset-entry.json` and `docs/catalog/extension-entry.json` (proposed catalog entries; `download_url`/`sha256` filled after the final tags) and `docs/catalog/submission.md` (PR titles and bodies per package; bundle if accepted)
+- [X] T031 [US4] Add a test in `tests/test_release.py` that every checklist item line carries a state (zero items without state, SC-006)
 
 ---
 

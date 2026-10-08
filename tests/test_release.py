@@ -573,3 +573,57 @@ def test_bundle_catalog_loads_in_speckit_parser(tmp_path):
     extensions.ExtensionCatalog._validate_catalog_payload(
         None, json.loads(extension_file.read_text()), "test"
     )
+
+
+# --- catalog-submission checklists (T031, SC-006) ---
+
+CATALOG = ROOT / "docs/catalog"
+CHECKLISTS = ["preset-checklist.md", "extension-checklist.md", "bundle-checklist.md"]
+
+
+def checklist_items(name: str) -> list[list[str]]:
+    rows = []
+    for line in (CATALOG / name).read_text().splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if line.startswith("|") and cells[0].isdigit():
+            rows.append(cells)
+    return rows
+
+
+@pytest.mark.parametrize("name", CHECKLISTS)
+def test_checklist_items_have_state(name):
+    items = checklist_items(name)
+    assert items, f"{name} has no items"
+    assert [int(item[0]) for item in items] == list(range(1, len(items) + 1))
+    for number, requirement, evidence, state, reason in items:
+        assert requirement, f"{name} #{number}: no requirement"
+        assert state in {"met", "gap", "n/a"}, f"{name} #{number}: state {state!r}"
+        if state == "met":
+            assert evidence, f"{name} #{number}: met without evidence"
+        else:
+            assert reason, f"{name} #{number}: {state} without reason"
+        if state == "gap":
+            assert "Options:" in reason, f"{name} #{number}: gap without options"
+
+
+@pytest.mark.parametrize(
+    ("kind", "manifest", "tag"),
+    [
+        ("preset", "preset/preset.yml", "preset-v{v}"),
+        ("extension", "extension/extension.yml", "extension-v{v}"),
+    ],
+)
+def test_catalog_entry_matches_manifest(kind, manifest, tag):
+    data = yaml.safe_load((ROOT / manifest).read_text())
+    meta = data[kind]
+    entry = json.loads((CATALOG / f"{kind}-entry.json").read_text())[meta["id"]]
+    for key in ("id", "name", "version", "description", "author", "repository", "license"):
+        assert entry[key] == meta[key], key
+    assert entry["requires"]["speckit_version"] == data["requires"]["speckit_version"]
+    assert entry["tags"] == data["tags"]
+    version = meta["version"]
+    archive = f"openproject-{kind}-{version}.zip"
+    assert entry["download_url"] == (
+        f"https://github.com/{REPO}/releases/download/{tag.format(v=version)}/{archive}"
+    )
+    assert f"/blob/{tag.format(v=version)}/{kind}/README.md" in entry["documentation"]
