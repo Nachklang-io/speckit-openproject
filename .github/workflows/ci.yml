@@ -20,8 +20,9 @@ jobs:
       - name: No secrets committed
         run: "! git grep -nE 'OPENPROJECT_API_TOKEN=[A-Za-z0-9_-]{16,}'"
 
-  # Builds both archives, serves them on 127.0.0.1 and installs them with --from
-  # (tests/test_install_archive.py), plus the --dev install, per supported spec-kit version.
+  # Builds both archives, serves them on 127.0.0.1 and installs them with --from and as a bundle
+  # through the generated catalogs (tests/test_install_archive.py), plus the --dev install,
+  # per supported spec-kit version.
   install-smoke:
     runs-on: ubuntu-latest
     strategy:
@@ -34,6 +35,7 @@ jobs:
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${{ matrix.speckit }}"
       - run: specify --version
+      - run: specify bundle validate --offline --path bundle
       - run: uv run pytest -v tests/test_install_archive.py tests/test_install.py
         env:
           SPECKIT_REQUIRE_CLI: "1"
