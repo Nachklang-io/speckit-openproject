@@ -1,12 +1,19 @@
 """Tests for scripts/release.py (feature 006, contracts/release-script.md)."""
 
+import hashlib
 import importlib.util
+import json
+import shutil
+import subprocess
 import sys
+import zipfile
 
 import pytest
+import yaml
 from conftest import ROOT
 
 FIXTURES = ROOT / "tests/fixtures/release"
+REPO = "Nachklang-io/speckit-openproject"
 
 _spec = importlib.util.spec_from_file_location("release", ROOT / "scripts/release.py")
 release = importlib.util.module_from_spec(_spec)
@@ -113,3 +120,285 @@ def test_breaking_without_migration():
         release.changelog_entry(
             fixture_text("changelog-breaking-no-migration.md"), "extension", "0.1.0"
         )
+
+
+# --- check / notes (T007, T008) ---
+
+
+def make_tree(tmp_path, override: str | None = None, changelog: str = "changelog-valid.md"):
+    """Copy the real manifests into tmp_path, apply an override fixture, add a changelog."""
+    for kind in ("preset", "extension"):
+        (tmp_path / kind).mkdir()
+        shutil.copy(ROOT / kind / f"{kind}.yml", tmp_path / kind / f"{kind}.yml")
+    if override:
+        patch = yaml.safe_load(fixture_text(f"manifests/{override}"))
+        for kind, fields in patch.items():
+            path = tmp_path / kind / f"{kind}.yml"
+            data = yaml.safe_load(path.read_text())
+            slug = fields.pop("repository_slug", None)
+            if slug:
+                fields["repository"] = f"https://github.com/{slug}"
+            data[kind].update(fields)
+            path.write_text(yaml.safe_dump(data, sort_keys=False))
+    shutil.copy(FIXTURES / changelog, tmp_path / "CHANGELOG.md")
+    return tmp_path
+
+
+def set_version(tree, kind: str, version: str) -> None:
+    path = tree / kind / f"{kind}.yml"
+    data = yaml.safe_load(path.read_text())
+    data[kind]["version"] = version
+    path.write_text(yaml.safe_dump(data, sort_keys=False))
+
+
+def test_check_match(tmp_path):
+    tree = make_tree(tmp_path)
+    set_version(tree, "preset", "1.0.0")
+    result = release.check(tree, "preset-v1.0.0", REPO)
+    assert result == {
+        "kind": "preset",
+        "version": "1.0.0",
+        "tag": "preset-v1.0.0",
+        "prerelease": False,
+        "archive": "openproject-preset-1.0.0.zip",
+    }
+
+
+def test_check_prerelease_compares_core_only(tmp_path):
+    tree = make_tree(tmp_path)
+    set_version(tree, "extension", "0.1.0")
+    result = release.check(tree, "extension-v0.1.0-rc.1")
+    assert result["version"] == "0.1.0"
+    assert result["prerelease"] is True
+    assert result["archive"] == "openproject-extension-0.1.0-rc.1.zip"
+
+
+def test_check_version_mismatch(tmp_path):
+    tree = make_tree(tmp_path, "extension-version-mismatch.yml")
+    with pytest.raises(
+        release.ReleaseError,
+        match=r"^version mismatch: tag 0\.1\.0 vs extension/extension\.yml 0\.1\.1$",
+    ):
+        release.check(tree, "extension-v0.1.0")
+
+
+def test_check_missing_changelog(tmp_path):
+    tree = make_tree(tmp_path, changelog="changelog-missing-entry.md")
+    set_version(tree, "extension", "0.1.0")
+    with pytest.raises(release.ReleaseError, match="missing changelog entry: Extension 0.1.0"):
+        release.check(tree, "extension-v0.1.0")
+
+
+def test_check_repository_mismatch(tmp_path):
+    tree = make_tree(tmp_path, "extension-repo-mismatch.yml")
+    with pytest.raises(release.ReleaseError, match=r"^repository mismatch: manifest https://"):
+        release.check(tree, "extension-v0.1.0", REPO)
+    # Without --repository the gate does not apply.
+    assert release.check(tree, "extension-v0.1.0")["kind"] == "extension"
+
+
+def test_shipped_manifests_point_to_publishing_repo():
+    for kind in ("preset", "extension"):
+        data = release.load_manifest(ROOT, kind)
+        assert data[kind]["repository"] == f"https://github.com/{REPO}"
+
+
+def test_notes_cli(capsys, monkeypatch, tmp_path):
+    monkeypatch.setattr(release, "ROOT", make_tree(tmp_path))
+    assert release.main(["notes", "bundle", "0.1.0"]) == 0
+    assert capsys.readouterr().out == "#### Added\n- First bundle.\n"
+    assert release.main(["notes", "preset", "9.9.9"]) == 1
+    assert "release: missing changelog entry: Preset 9.9.9" in capsys.readouterr().err
+
+
+def test_check_cli_prints_json(capsys, monkeypatch, tmp_path):
+    tree = make_tree(tmp_path)
+    set_version(tree, "preset", "1.0.0")
+    monkeypatch.setattr(release, "ROOT", tree)
+    assert release.main(["check", "preset-v1.0.0"]) == 0
+    assert json.loads(capsys.readouterr().out)["tag"] == "preset-v1.0.0"
+
+
+def test_usage_error_exits_2():
+    with pytest.raises(SystemExit) as exc:
+        release.main(["notes", "docs", "1.0.0"])
+    assert exc.value.code == 2
+
+
+# --- build (T009) ---
+
+EXPECTED_ENTRIES = {
+    "preset": [
+        "LICENSE",
+        "README.md",
+        "commands/speckit.taskstoissues.md",
+        "openproject-config.template.yml",
+        "preset.yml",
+    ],
+    "extension": [
+        "LICENSE",
+        "README.md",
+        "commands/discover-fields.md",
+        "commands/log-time.md",
+        "commands/sync-docs.md",
+        "commands/sync-status.md",
+        "commands/sync-version.md",
+        "extension.yml",
+    ],
+}
+
+
+@pytest.mark.parametrize("kind", ["preset", "extension"])
+def test_build_exact_entries_and_reproducible(kind, tmp_path):
+    first, digest1 = release.build(ROOT, kind, tmp_path / "a", "1.2.3-rc.1")
+    _, digest2 = release.build(ROOT, kind, tmp_path / "b", "1.2.3-rc.1")
+    assert first.name == f"openproject-{kind}-1.2.3-rc.1.zip"
+    assert digest1 == digest2 == hashlib.sha256(first.read_bytes()).hexdigest()
+    with zipfile.ZipFile(first) as archive:
+        infos = archive.infolist()
+    assert [i.filename for i in infos] == EXPECTED_ENTRIES[kind]
+    for info in infos:
+        assert info.date_time == (1980, 1, 1, 0, 0, 0)
+        assert info.external_attr >> 16 == 0o100644
+        assert info.compress_type == zipfile.ZIP_DEFLATED
+
+
+def test_build_excludes_hidden_and_bytecode(tmp_path):
+    pkg = tmp_path / "src" / "extension"
+    (pkg / "commands" / "__pycache__").mkdir(parents=True)
+    (pkg / "extension.yml").write_text("extension: {version: 0.1.0}\n")
+    (pkg / "commands" / "a.md").write_text("a\n")
+    (pkg / "commands" / "__pycache__" / "x.pyc").write_bytes(b"\0")
+    (pkg / "stray.pyc").write_bytes(b"\0")
+    (pkg / ".DS_Store").write_bytes(b"\0")
+    (pkg / ".hidden").mkdir()
+    (pkg / ".hidden" / "f.md").write_text("f\n")
+    target, _ = release.build(tmp_path / "src", "extension", tmp_path / "out")
+    with zipfile.ZipFile(target) as archive:
+        assert archive.namelist() == ["commands/a.md", "extension.yml"]
+    assert target.name == "openproject-extension-0.1.0.zip"
+
+
+# --- verify-archive (T010) ---
+
+
+def write_zip(path, entries: dict[str, str]):
+    with zipfile.ZipFile(path, "w") as archive:
+        for name, text in entries.items():
+            archive.writestr(name, text)
+    return path
+
+
+@pytest.mark.parametrize("kind", ["preset", "extension"])
+def test_verify_built_archive_passes(kind, tmp_path):
+    target, _ = release.build(ROOT, kind, tmp_path)
+    assert release.archive_violations(target) == []
+
+
+def _token() -> str:
+    # Built at runtime so no token-shaped string lives in a fixture or source line.
+    return "OPENPROJECT_API_TOKEN" + "=" + "a1B2" * 5
+
+
+def _url(host: str) -> str:
+    return "https" + "://" + host + "/path"
+
+
+@pytest.mark.parametrize(
+    ("entries", "expected"),
+    [
+        ({"README.md": "x"}, "manifest missing at archive root"),
+        ({"preset.yml": "x", ".env": "x"}, "forbidden path: .env"),
+        ({"preset.yml": "x", "commands/.env": "x"}, "forbidden path: commands/.env"),
+        ({"preset.yml": "x", "tests/t.py": "x"}, "forbidden path: tests/t.py"),
+        ({"preset.yml": "x", "docs/a.md": "x"}, "forbidden path: docs/a.md"),
+        ({"preset.yml": "x", "specs/a/spec.md": "x"}, "forbidden path: specs/a/spec.md"),
+        ({"preset.yml": "x", ".scratch/a": "x"}, "forbidden path: .scratch/a"),
+        ({"preset.yml": "x", "../evil.md": "x"}, "unsafe path: ../evil.md"),
+        ({"preset.yml": "x", "/abs.md": "x"}, "unsafe path: /abs.md"),
+        ({"preset.yml": "TOKEN"}, "token-like string in preset.yml"),
+        ({"preset.yml": "URL"}, "host not allowed in preset.yml: op.internal.test"),
+    ],
+)
+def test_verify_violations(entries, expected, tmp_path):
+    entries = {
+        name: text.replace("TOKEN", _token()).replace("URL", _url("op.internal.test"))
+        for name, text in entries.items()
+    }
+    violations = release.archive_violations(write_zip(tmp_path / "a.zip", entries))
+    assert expected in violations
+
+
+def test_verify_allowed_hosts_and_subdomains(tmp_path):
+    text = " ".join(
+        _url(h)
+        for h in ("github.com", "raw.githubusercontent.com", "www.openproject.org", "x.example.com")
+    )
+    zip_path = write_zip(tmp_path / "a.zip", {"extension.yml": text})
+    assert release.archive_violations(zip_path) == []
+    zip_path = write_zip(tmp_path / "b.zip", {"extension.yml": _url("notgithub.com")})
+    assert release.archive_violations(zip_path) == [
+        "host not allowed in extension.yml: notgithub.com"
+    ]
+
+
+def test_verify_cli_reports_all_violations(capsys, tmp_path):
+    zip_path = write_zip(tmp_path / "a.zip", {".env": "x", "tests/t.py": _token()})
+    assert release.main(["verify-archive", str(zip_path)]) == 1
+    err = capsys.readouterr().err.splitlines()
+    assert "release: manifest missing at archive root" in err
+    assert "release: forbidden path: .env" in err
+    assert "release: forbidden path: tests/t.py" in err
+    assert "release: token-like string in tests/t.py" in err
+
+
+# --- publish-plan (T012) ---
+
+
+@pytest.mark.parametrize(
+    ("marker", "present", "expected"),
+    [
+        (None, [], {"action": "create", "upload": ["a.zip", "b.json"]}),
+        ("abc", ["a.zip"], {"action": "upload", "upload": ["b.json"]}),
+        ("abc", ["a.zip", "b.json"], {"action": "noop", "upload": []}),
+    ],
+)
+def test_publish_plan_states(marker, present, expected):
+    assert release.publish_plan("preset-v1.0.0", "abc", marker, ["a.zip", "b.json"], present) == (
+        expected
+    )
+
+
+@pytest.mark.parametrize(
+    ("marker", "present", "shown"),
+    [
+        ("def", ["a.zip"], "def"),
+        ("", ["a.zip"], "unknown"),
+        ("", [], "unknown"),
+        ("def", [], "def"),
+    ],
+)
+def test_publish_plan_conflict(marker, present, shown):
+    with pytest.raises(
+        release.ReleaseError,
+        match=rf"^conflict: release preset-v1\.0\.0 was created from {shown}, "
+        r"tag now points to abc$",
+    ):
+        release.publish_plan("preset-v1.0.0", "abc", marker, ["a.zip"], present)
+
+
+def test_publish_plan_runs_without_pyyaml(tmp_path):
+    # The publish job runs it with a bare python3 (no uv sync): yaml must not be imported.
+    script = ROOT / "scripts/release.py"
+    blocker = tmp_path / "yaml.py"
+    blocker.write_text("raise ImportError('yaml blocked')\n")
+    env = {"PYTHONPATH": str(tmp_path), "PATH": "/usr/bin:/bin"}
+    proc = subprocess.run(
+        [sys.executable, str(script), "publish-plan", "--tag", "preset-v1.0.0", "--sha", "abc"],
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert json.loads(proc.stdout) == {"action": "create", "upload": []}
