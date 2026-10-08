@@ -448,7 +448,7 @@ The release itself never touches OpenProject (FR-013). These scenarios check tha
 | S30 | Pre-release run on GitHub (quickstart Q4, SC-007): push `preset-v1.0.0-rc.1` and `extension-v0.1.0-rc.1` **(maintainer confirms)** | two releases marked pre-release and not latest, one archive each, notes equal the changelog entry plus the commit marker; anonymous `specify preset add --from` / `specify extension add openproject --from` with the release URLs succeed | pass (2026-10-08, spec-kit 1.1.1.dev0; see run log below) |
 | S31 | Re-run and conflict on GitHub (FR-004): re-run the workflow for an rc tag; then (optional, rc only) move the rc tag to another commit and re-run | re-run: `release exists, complete: <tag>`, release unchanged; moved tag: `conflict: release <tag> was created from <old>, tag now points to <new>`, nothing written | re-run pass (2026-10-08, see run log below); conflict path not run on GitHub, covered by `test_publish_plan_conflict` only |
 | S32 | Bundle rc on GitHub (quickstart Q4 step 5, US5): push `bundle-v0.1.0-rc.1` after S30; run the install path from `bundle/README.md` against the bundle release in a fresh project | release with `openproject-0.1.0.zip` and both catalog files; catalogs point to the rc component archives; `bundle install` succeeds, spec-kit checks the `sha256`; lists as in S26 | pass (2026-10-08, spec-kit 1.1.1.dev0; see run log below) |
-| S33 | Final tags on `main` (quickstart Q5): push `preset-v1.0.0`, `extension-v0.1.0`, then `bundle-v0.1.0` **(maintainer)**; repeat the checks of S30 and S32 with the final URLs, then S27 on the final URLs | three releases, none marked pre-release (GitHub marks the newest one latest); installs as in S30 and S32 | untested until T038 |
+| S33 | Final tags on `main` (quickstart Q5): push `preset-v1.0.0`, `extension-v0.1.0`, then `bundle-v0.1.0` **(maintainer)**; repeat the checks of S30 and S32 with the final URLs, then S27 on the final URLs | three releases, none marked pre-release (GitHub marks the newest one latest); installs as in S30 and S32 | pass (2026-10-08; see run log below) |
 
 ### Notes for the scenarios
 
@@ -457,7 +457,7 @@ The release itself never touches OpenProject (FR-013). These scenarios check tha
 - The lists show the manifest (core) version, not the rc suffix of the archive name.
 - S27 setup: two scratch projects, one from `scripts/dev-install.sh`, one from the release URLs (`https://github.com/Nachklang-io/speckit-openproject/releases/download/<tag>/<archive>`), both with the same `.specify/openproject/config.yml` and the same MCP client config. Compare the dry-run output line by line; differences in wording from the model are fine, differences in the plan are not.
 - S30–S33 follow `docs/RELEASING.md`. Record for each: tag, commit, run URL, the run log's last line, asset names, and the spec-kit version of the install check. Never write a token or a private instance URL into this file.
-- Not yet run: install of the bundle by its id from a catalog entry (`docs/catalog/bundle-checklist.md` item 9), S27 on the final URLs (S33), and spec-kit v1.1.0 locally (CI only). If v1.1.0 rejects localhost HTTP catalogs, S28 is skipped on that leg with the reason in the test and noted here.
+- Not yet run: install of the bundle by its id from a catalog entry (`docs/catalog/bundle-checklist.md` item 9), and spec-kit v1.1.0 locally (CI only). If v1.1.0 rejects localhost HTTP catalogs, S28 is skipped on that leg with the reason in the test and noted here.
 
 ### Run log: rc releases (T035, 2026-10-08)
 
@@ -483,3 +483,18 @@ Two fresh `specify init` projects (spec-kit 1.1.1.dev0): one from `scripts/dev-i
 | File hashes before/after the run | unchanged | unchanged |
 
 Wording differed, the plan did not. Neither run could check the `SPECKIT_OPENPROJECT_*` variables (shell calls were not allowed in the headless session); that is a limit of the test setup. Command mode was not covered.
+
+### Run log: final releases (S33, T038, 2026-10-08)
+
+All three tags point to `3c2fd87` (`main` after PR #11), pushed in the order preset, extension, bundle. The install checks ran in fresh `specify init` projects with spec-kit 1.1.1.dev0; `specify` fetched the release URLs itself over HTTPS.
+
+| Tag | Run | Last line of the run log | Release |
+|---|---|---|---|
+| `preset-v1.0.0` | [37831067769](https://github.com/Nachklang-io/speckit-openproject/actions/runs/37831067769) | `created preset-v1.0.0` | not pre-release; notes end with `<!-- release-commit: 3c2fd87… -->` |
+| `extension-v0.1.0` | [37831089722](https://github.com/Nachklang-io/speckit-openproject/actions/runs/37831089722) | `created extension-v0.1.0` | not pre-release; notes end with the commit marker |
+| `bundle-v0.1.0` | [37831218880](https://github.com/Nachklang-io/speckit-openproject/actions/runs/37831218880) | green | not pre-release, marked Latest; `openproject-0.1.0.zip`, `openproject-presets-catalog.json`, `openproject-extensions-catalog.json`; notes end with the commit marker |
+
+- S30 repeat: `specify preset add --from <final URL>` installs v1.0.0, `speckit-taskstoissues` carries `preset:openproject`; `specify extension add openproject --from <final URL>` (answered `y`) installs v0.1.0 with all five `speckit-openproject-*` skills.
+- S32 repeat: both catalogs point to the final component archives, and their `sha256` values match the archives (computed locally after `gh release download`). `preset catalog add` / `extension catalog add` with the release URLs, then `specify bundle install ./openproject-0.1.0.zip`: `Installed 'openproject' (2 added, 0 already present)`, preset v1.0.0 and extension v0.1.0 listed.
+- S27 repeat: set up as in the S27 run log above, with the project installed from the final URLs instead of the rc URLs. Installed skill files are identical to the `--dev` project. Both dry runs show the same proposals 1-7 and the same `statuses` diff, and both end with `Dry run: nothing was written.`. File hashes were unchanged in both projects.
+- Catalog entries: `sha256` filled into `docs/catalog/preset-entry.json` and `docs/catalog/extension-entry.json`. The archives were downloaded with `gh release download` (authenticated), not with an anonymous `curl` as `docs/catalog/submission.md` describes. The values match the ones the release workflow wrote into the bundle catalogs.
