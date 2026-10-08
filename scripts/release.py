@@ -40,6 +40,10 @@ TOKEN_RE = re.compile(r"OPENPROJECT_API_(?:TOKEN|KEY)['\"]?\s*[=:]\s*['\"]?[A-Za
 URL_HOST_RE = re.compile(r"https?://(?:[^/\s@\"'<>]*@)?([A-Za-z0-9.-]+)")
 # Extending this allowlist is a reviewed code change (contracts/archive-layout.md).
 ALLOWED_HOSTS = ("github.com", "raw.githubusercontent.com", "www.openproject.org", "example.com")
+# Archive entries: root manifest, README, LICENSE and templates (*.yml, *.md), command prompts.
+ENTRY_ALLOWED_RE = re.compile(
+    r"^(?:[A-Za-z0-9_.-]+\.(?:yml|md)|LICENSE|commands/[A-Za-z0-9_.-]+\.md)$"
+)
 
 
 class ReleaseError(Exception):
@@ -138,6 +142,10 @@ def load_manifest(root: Path, kind: str) -> dict:
     return data
 
 
+def _speckit_range(data: dict) -> str:
+    return str((data.get("requires") or {}).get("speckit_version", ""))
+
+
 def check(root: Path, tag_name: str, repository: str | None = None) -> dict:
     tag = parse_tag(tag_name)
     data = load_manifest(root, tag.kind)
@@ -158,6 +166,13 @@ def check(root: Path, tag_name: str, repository: str | None = None) -> dict:
         for kind, pin in bundle_pins(data).items():
             if not CORE_RE.match(pin):
                 raise ReleaseError(f"invalid pin: {kind} {pin} (must be X.Y.Z)")
+        bundle_range = _speckit_range(data)
+        for kind in ("preset", "extension"):
+            package_range = _speckit_range(load_manifest(root, kind))
+            if bundle_range != package_range:
+                raise ReleaseError(
+                    f"speckit_version mismatch: bundle {bundle_range} vs {kind} {package_range}"
+                )
     return {
         "kind": tag.kind,
         "version": tag.core,
@@ -296,6 +311,20 @@ def _host_allowed(host: str) -> bool:
     return any(host == allowed or host.endswith("." + allowed) for allowed in ALLOWED_HOSTS)
 
 
+def _entry_allowed(name: str) -> bool:
+    return bool(ENTRY_ALLOWED_RE.match(name))
+
+
+def text_violations(name: str, text: str) -> list[str]:
+    violations = []
+    if TOKEN_RE.search(text):
+        violations.append(f"token-like string in {name}")
+    for host in sorted({m.lower() for m in URL_HOST_RE.findall(text)}):
+        if not _host_allowed(host):
+            violations.append(f"host not allowed in {name}: {host}")
+    return violations
+
+
 def archive_violations(path: Path) -> list[str]:
     violations = []
     with zipfile.ZipFile(path) as archive:
@@ -311,14 +340,12 @@ def archive_violations(path: Path) -> list[str]:
                 violations.append(f"forbidden path: {name}")
             elif any(part.startswith(".") for part in parts if part):
                 violations.append(f"hidden path: {name}")
+            elif not name.endswith("/") and not _entry_allowed(name):
+                violations.append(f"entry not allowed: {name}")
             if name.endswith("/"):
                 continue
             text = archive.read(name).decode("utf-8", errors="replace")
-            if TOKEN_RE.search(text):
-                violations.append(f"token-like string in {name}")
-            for host in sorted({m.lower() for m in URL_HOST_RE.findall(text)}):
-                if not _host_allowed(host):
-                    violations.append(f"host not allowed in {name}: {host}")
+            violations.extend(text_violations(name, text))
     return violations
 
 
@@ -353,6 +380,15 @@ def _cmd_build(args: argparse.Namespace) -> int:
 
 def _cmd_verify_archive(args: argparse.Namespace) -> int:
     violations = archive_violations(Path(args.zip))
+    for violation in violations:
+        print(f"release: {violation}", file=sys.stderr)
+    return 1 if violations else 0
+
+
+def _cmd_verify_text(args: argparse.Namespace) -> int:
+    violations = []
+    for name in args.files:
+        violations.extend(text_violations(name, Path(name).read_text()))
     for violation in violations:
         print(f"release: {violation}", file=sys.stderr)
     return 1 if violations else 0
@@ -402,6 +438,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("verify-archive", help="check an archive against the layout rules")
     p.add_argument("zip")
     p.set_defaults(func=_cmd_verify_archive)
+
+    p = sub.add_parser("verify-text", help="check release notes or catalogs for secrets and hosts")
+    p.add_argument("files", nargs="+")
+    p.set_defaults(func=_cmd_verify_text)
 
     p = sub.add_parser("bundle-catalog", help="write the one-entry catalogs for a bundle")
     p.add_argument("--bundle", default="bundle/bundle.yml")

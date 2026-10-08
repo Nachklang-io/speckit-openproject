@@ -363,6 +363,26 @@ def test_verify_bundle_archive_passes(tmp_path):
     assert release.archive_violations(zip_path) == []
 
 
+@pytest.mark.parametrize(
+    "name", ["script.sh", "lib/helper.py", "commands/nested/a.md", "commands/a.sh", "config.json"]
+)
+def test_verify_rejects_unexpected_entries(name, tmp_path):
+    zip_path = write_zip(tmp_path / "a.zip", {"preset.yml": "x", name: "x"})
+    assert release.archive_violations(zip_path) == [f"entry not allowed: {name}"]
+
+
+def test_verify_text_cli(capsys, tmp_path):
+    clean = tmp_path / "notes.md"
+    clean.write_text("See " + _url("github.com") + "\n")
+    dirty = tmp_path / "catalog.json"
+    dirty.write_text(json.dumps({"url": _url("op.internal.test"), "x": _token()}))
+    assert release.main(["verify-text", str(clean)]) == 0
+    assert release.main(["verify-text", str(clean), str(dirty)]) == 1
+    err = capsys.readouterr().err.splitlines()
+    assert f"release: token-like string in {dirty}" in err
+    assert f"release: host not allowed in {dirty}: op.internal.test" in err
+
+
 def test_verify_cli_reports_all_violations(capsys, tmp_path):
     zip_path = write_zip(tmp_path / "a.zip", {".env": "x", "tests/t.py": _token()})
     assert release.main(["verify-archive", str(zip_path)]) == 1
@@ -482,6 +502,28 @@ def test_component_tags(tag, expected):
     tags = release.component_tags(release.parse_tag(tag), pins)
     names = {kind: t.name for kind, t in tags.items()}
     assert names == {k: v.format(p="1.0.0", e="0.1.0") for k, v in expected.items()}
+
+
+def test_check_bundle_on_repo():
+    version = str(release.load_manifest(ROOT, "bundle")["bundle"]["version"])
+    assert release.check(ROOT, f"bundle-v{version}")["kind"] == "bundle"
+
+
+def test_check_bundle_speckit_range_mismatch(tmp_path):
+    for kind in ("preset", "extension", "bundle"):
+        (tmp_path / kind).mkdir()
+        shutil.copy(ROOT / release.manifest_path(kind), tmp_path / release.manifest_path(kind))
+    shutil.copy(ROOT / "CHANGELOG.md", tmp_path / "CHANGELOG.md")
+    path = tmp_path / "bundle/bundle.yml"
+    data = yaml.safe_load(path.read_text())
+    data["requires"]["speckit_version"] = ">=1.2.0"
+    path.write_text(yaml.safe_dump(data, sort_keys=False))
+    version = data["bundle"]["version"]
+    with pytest.raises(
+        release.ReleaseError,
+        match=r"^speckit_version mismatch: bundle >=1\.2\.0 vs preset >=1\.1\.0$",
+    ):
+        release.check(tmp_path, f"bundle-v{version}")
 
 
 def test_bundle_pins_read_provides():

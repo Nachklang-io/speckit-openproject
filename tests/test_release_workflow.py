@@ -45,8 +45,17 @@ def test_verify_gates_before_publishing():
         "release.py verify-archive",
         "release.py notes",
         "<!-- release-commit: %s -->",
+        "release.py verify-text notes/notes.md",
     ):
         assert command in runs, command
+
+
+def test_publish_expects_assets_from_metadata():
+    data, _ = _load()
+    runs = _runs(data["jobs"]["publish"])
+    assert 'expected=("$ARCHIVE")' in runs
+    assert "missing asset" in runs
+    assert "ls -1" not in runs
 
 
 def test_publish_never_overwrites_or_edits():
@@ -65,7 +74,8 @@ def test_publish_never_overwrites_or_edits():
 def test_only_github_token_is_used():
     _, text = _load()
     assert set(re.findall(r"secrets\.(\w+)", text)) <= {"GITHUB_TOKEN"}
-    assert "OPENPROJECT" not in text.upper().replace("NO OPENPROJECT", "")
+    # Asset names contain "openproject"; what must never appear is an OpenProject credential.
+    assert "OPENPROJECT_API" not in text.upper()
     assert "mcp" not in text.lower().replace("no mcp", "")
 
 
@@ -84,6 +94,9 @@ def test_bundle_steps_resolve_components_and_build():
         "specify bundle validate --offline --path bundle",
         "specify bundle build --path bundle --output dist",
         'release.py verify-archive "dist/$ARCHIVE"',
+        "release.py verify-text",
+        "openproject-presets-catalog.json",
+        "openproject-extensions-catalog.json",
     ):
         assert command in run, command
     assert "--download-base" not in run

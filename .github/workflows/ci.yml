@@ -50,6 +50,7 @@ jobs:
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@main"
       - run: specify --version
+      - run: specify bundle validate --offline --path bundle
       - run: uv run pytest -v tests/test_install_archive.py tests/test_install.py
         env:
           SPECKIT_REQUIRE_CLI: "1"

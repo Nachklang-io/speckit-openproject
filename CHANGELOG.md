@@ -12,8 +12,8 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 - `speckit.taskstoissues` creates OpenProject work packages from `tasks.md` through an OpenProject MCP server: one work package per phase, task and sub-task, with parent/child hierarchy and dependency relations.
 - Idempotent re-runs: the per-feature mapping file `.specify/openproject/mapping-<feature>.json` is the ledger; existing work packages are updated, never duplicated.
 - `--dry-run` previews every planned write without touching OpenProject.
-- Shared JSON schemas for the configuration and the mapping file.
-- Release archives built and verified by the release workflow.
+- Configuration template `openproject-config.template.yml`; the configuration and the mapping file follow the JSON schemas in the repository.
+- Installable from the GitHub release archive with `specify preset add --from <release URL>`.
 
 ## Extension
 
@@ -27,7 +27,7 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 - `speckit.openproject.sync-docs`: uploads `spec.md` and `plan.md` as attachments and keeps a summary in the feature work package description.
 - `speckit.openproject.sync-version`: maps a feature to an OpenProject version.
 - `speckit.openproject.log-time`: logs time entries against mapped work packages.
-- Release archives built and verified by the release workflow.
+- Installable from the GitHub release archive with `specify extension add openproject --from <release URL>`.
 
 ## Bundle
 

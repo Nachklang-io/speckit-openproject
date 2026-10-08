@@ -64,7 +64,7 @@ How the maintainer releases the preset, the extension and the bundle. The releas
 5. **Verify the install from the URL** in a fresh project, without a GitHub login:
 
    ```bash
-   specify init release-check --ai claude --script sh && cd release-check
+   specify init release-check --integration claude --non-interactive --ignore-agent-tools && cd release-check
    specify preset add --from https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.0/openproject-preset-1.0.0.zip
    specify extension add openproject --from https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.1.0/openproject-extension-0.1.0.zip   # answer y
    specify preset list && specify extension list

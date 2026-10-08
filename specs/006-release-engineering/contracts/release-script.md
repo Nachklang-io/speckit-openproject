@@ -30,6 +30,10 @@ Read-only. Enforces archive-layout.md: the manifest is at the root, every entry 
 
 Resolves the component tags from the pins and the bundle tag's suffix, as described in release-workflow.md. It reads the two downloaded package archives from `<dir>`; their names must be exactly the resolved archive names. `download_url` points to the resolved component release (`https://github.com/<repo>/releases/download/<component tag>/<archive name>`). `--download-base` replaces everything before `/<archive name>`; it exists only for the local and CI install tests (`http://127.0.0.1:<port>`) and is never used by the release workflow. It writes `openproject-presets-catalog.json` and `openproject-extensions-catalog.json` as described in bundle-and-catalog.md. It fails with `missing release archive: <name>` if an archive is absent, and with `pin mismatch` if the manifest inside the archive does not report the pinned version.
 
+## `verify-text <file> ...`
+
+Read-only. Applies the content rules of archive-layout.md (token pattern, host allowlist) to plain files: the release notes and the two bundle catalogs. Each violation is printed. If there is at least one, the exit code is 1.
+
 ## `publish-plan --tag <tag> --sha <commit> [--marker <sha>] [--expected <name> ...] [--present <name> ...]`
 
 Read-only, pure decision for the publish job (FR-004; data-model.md state transitions). `--marker` is the commit sha parsed from the existing release notes (`<!-- release-commit: <sha> -->`); it is omitted when no release exists. `--expected` lists the assets this tag must have, `--present` the assets the existing release has. Prints one JSON line `{"action": "create"|"upload"|"noop"|"conflict", "upload": [<names>]}`:
