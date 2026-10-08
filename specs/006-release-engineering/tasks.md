@@ -124,7 +124,7 @@ Monorepo: `scripts/`, `bundle/`, `.github/workflows/`, `docs/`, `tests/`, `prese
 - [X] T035 **(maintainer)** Q4: after explicit confirmation push `preset-v1.0.0-rc.1` and `extension-v0.1.0-rc.1` on the branch head; verify pre-release flag, not-latest, archive, notes + marker; anonymous install from the URL; parity scenario (Q7, US2-3, read-only via MCP); re-run for idempotency; push `bundle-v0.1.0-rc.1` and run the bundle install path; record executed results in `docs/TESTING.md`. Done 2026-10-08; parity scenario S27 ran on the rc URLs afterwards (pass, see `docs/TESTING.md`); it repeats on the final URLs in T038
 - [X] T036 Run `uv run pytest`, `uv run ruff check . && uv run ruff format --check .`, `scripts/dev-install.sh` with `specify preset list` / `specify extension list`; run the `spec-conformance-reviewer` and the `openproject-api-reviewer` subagents on the diff (the latter confirms that no release step accesses OpenProject, FR-013)
 - [X] T037 Update `README.md` (install from release URL and bundle) and `docs/ROADMAP.md` (M1/M2 release state, catalog submission prepared); open the PR (Conventional Commits, one feature = one PR)
-- [ ] T038 **(maintainer)** Q5: after merge, push `preset-v1.0.0`, `extension-v0.1.0`, `bundle-v0.1.0` on main; repeat the anonymous installs, the parity scenario and the bundle install; record the outcome in `docs/TESTING.md` (SC-007)
+- [X] T038 **(maintainer)** Q5: after merge, push `preset-v1.0.0`, `extension-v0.1.0`, `bundle-v0.1.0` on main; repeat the anonymous installs, the parity scenario and the bundle install; record the outcome in `docs/TESTING.md` (SC-007). Done 2026-10-08 on `3c2fd87`; S33 pass
 
 ---
 
