@@ -112,7 +112,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`. `preset/` and 
 - [ ] T028 Update `docs/TESTING.md`: scenarios S22–S25 in the checklist and an "Untested after feature 005" list (command mode, crash between a confirmed write and the ledger, closed or locked version if not run, version shared across projects, instance with start/end time tracking) (depends on T016, T019, T023, T025)
 - [x] T029 Run `scripts/dev-install.sh`; confirm `specify preset list` and `specify extension list` show `openproject` in both and that the skills `speckit-openproject-sync-version` and `speckit-openproject-log-time` exist in the scratch project (depends on T013, T024)
 - [x] T030 Run `uv run pytest` and `uv run ruff check . && uv run ruff format --check .`; all green (depends on T029)
-- [ ] T031 Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings or record the reason for not fixing; rerun once after the last prompt change (depends on T030)
+- [X] T031 Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings or record the reason for not fixing; rerun once after the last prompt change (depends on T030)
 - [ ] T032 Mark finished tasks in this file, prepare the PR description (summary, executed scenarios, untested paths); opening the PR is the maintainer's call (depends on T028, T031)
 
 ---
