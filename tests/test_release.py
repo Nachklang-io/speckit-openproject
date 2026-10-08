@@ -33,7 +33,7 @@ def fixture_text(name: str) -> str:
     [
         ("preset-v1.0.0", "preset", "1.0.0", "", "openproject-preset-1.0.0.zip"),
         ("extension-v0.1.0", "extension", "0.1.0", "", "openproject-extension-0.1.0.zip"),
-        ("bundle-v0.1.0", "bundle", "0.1.0", "", "openproject-bundle-0.1.0.zip"),
+        ("bundle-v0.1.0", "bundle", "0.1.0", "", "openproject-0.1.0.zip"),
         (
             "extension-v0.1.0-rc.1",
             "extension",
@@ -402,3 +402,36 @@ def test_publish_plan_runs_without_pyyaml(tmp_path):
     )
     assert proc.returncode == 0, proc.stderr
     assert json.loads(proc.stdout) == {"action": "create", "upload": []}
+
+
+# --- the repository's own CHANGELOG.md (T020, SC-005) ---
+
+GROUPS = {"Added", "Changed", "Fixed", "Removed", "Security", "Migration"}
+
+
+def test_changelog_sections_and_headings():
+    lines = (ROOT / "CHANGELOG.md").read_text().splitlines()
+    sections = [line[3:].strip() for line in lines if line.startswith("## ")]
+    assert sections == ["Preset", "Extension", "Bundle"]
+    current = None
+    first_sub: dict[str, str] = {}
+    for line in lines:
+        if line.startswith("## "):
+            current = line[3:].strip()
+        elif line.startswith("### "):
+            first_sub.setdefault(current, line)
+            assert line == "### Unreleased" or release.VERSION_HEADING_RE.match(line), line
+            assert "-rc" not in line, line
+        elif line.startswith("#### "):
+            assert line[5:].strip() in GROUPS, line
+    assert all(first_sub[s] == "### Unreleased" for s in sections), first_sub
+
+
+@pytest.mark.parametrize("kind", ["preset", "extension", "bundle"])
+def test_changelog_has_entry_for_manifest_version(kind):
+    path = ROOT / release.manifest_path(kind)
+    if not path.exists():
+        pytest.skip(f"{path.name} not created yet")
+    version = str(release.load_manifest(ROOT, kind)[kind]["version"])
+    entry = release.changelog_entry((ROOT / "CHANGELOG.md").read_text(), kind, version)
+    assert entry.strip()
