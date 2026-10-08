@@ -1,6 +1,6 @@
 # spec-kit extension: openproject
 
-Version 0.0.5. Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`, `speckit.openproject.sync-docs`, `speckit.openproject.sync-version`, `speckit.openproject.log-time`. Requires the `openproject` preset for `speckit.taskstoissues`.
+Version 0.1.0. Implemented: `speckit.openproject.discover-fields`, `speckit.openproject.sync-status`, `speckit.openproject.sync-docs`, `speckit.openproject.sync-version`, `speckit.openproject.log-time`. Requires the `openproject` preset for `speckit.taskstoissues`.
 
 ## `discover-fields`
 
