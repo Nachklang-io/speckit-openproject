@@ -104,9 +104,202 @@ Per work package, once the version is fixed (`V` = the chosen version's name; `W
 
 Ledger items that are phases or the feature work package are classified and assigned like tasks (as any other ledger item). A version with status closed or locked stops assignment entirely and is reported; nothing is written for any work package in that case.
 
-## Outline
+## Steps
 
-Steps are added by tasks T014, T015 and T020 of feature 005. Until they exist, this command has no executable steps: stop and say that it is not implemented yet. Nothing was written.
+### Step 0: Stop conditions (pre-flight checks)
+
+Before proceeding with any read or write, check all stop conditions. If any fails, report the condition and stop. **Do not proceed to steps 1–4 if any of these fail.**
+
+1. **Config and ledger must exist and be readable**: Try to read `.specify/openproject/config.yml` (or `.specify/config.yml`). If it does not exist or cannot be read, stop and report: `Configuration file not found. Expected: .specify/openproject/config.yml or .specify/config.yml`.
+
+2. **Ledger file name depends on the feature directory.** If no feature is given as an argument and the current directory name does not match the pattern `NNN-*`, you cannot determine the ledger file name yet. Proceed to step 1 to resolve the feature name first, then return here to check the ledger.
+
+3. **Ledger must exist**: Try to read the ledger file. If it does not exist, stop and report: `Ledger file not found. Expected: .specify/openproject/mapping-<FEATURE>.json`.
+
+4. **Capability check**: This command requires the capability `create-version` to make any write. Check if the MCP server exposes a tool that maps to `create-version` (from the capability-map table above). If the capability is not available, stop and report:
+   ```
+   Capability 'create-version' is not available on the server.
+   The MCP server must be configured with OPENPROJECT_ENABLE_VERSION_WRITE=true.
+   See the OpenProject documentation or your MCP server's configuration.
+   ```
+   This check applies even if `--dry-run` is given.
+
+5. **Server connection**: Try a simple read operation (e.g., `list-versions` with an empty search, limit 1) to verify the server is reachable. If the call fails, stop and report: `Server not connected: <error message (redacted)>`.
+
+If all checks pass, proceed to step 1.
+
+### Step 1: Arguments and feature resolution
+
+Parse `$ARGUMENTS`. Accepted: feature directory name (for example `001-tasks-to-work-packages`), `--version <name>`, `--dry-run`, nothing else. Report any unrecognized flag and stop with the supported syntax: `[feature] [--version <name>] [--dry-run]`. Do not guess abbreviations or aliases.
+
+Resolve the feature directory:
+- If an argument is given and it contains a slash or a dash (like `001-tasks` or `./specs/001-tasks`), treat it as the feature directory path (relative to repo root, or absolute). Read the directory name: if it matches the pattern `NNN-*` (three digits, then a dash, then any text), remember it. If no feature name in this pattern: stop and ask for one.
+- If no directory argument is given, use the working directory (or current branch context if available from environment). If the current directory name matches `NNN-*`, use it. Otherwise, stop and ask for the feature directory.
+
+**Never prompt the user for confirmation at this stage.** You have the feature directory and its name (e.g., `005-versions-and-time`).
+
+### Step 2: Read and validate config and ledger
+
+Read the configuration file (default location: `.specify/openproject/config.yml` or `.specify/config.yml`).
+Read the ledger file (default location: `.specify/openproject/mapping-<FEATURE>.json` where `<FEATURE>` is the feature name from the directory).
+
+Validate the configuration against the `config-rules` block above:
+- Check all required top-level keys are present: `project`, `types`.
+- Check all top-level keys are known (no unknown keys).
+- Check `types` has the required keys: `feature`, `phase`, `task`.
+- Check `defaults`, `statuses` and `required_custom_fields` (if present) follow the rules.
+- If any violation: print it and stop. No writes.
+
+Validate the ledger against the `ledger-rules` block above:
+- Check required top-level keys: `feature`, `items`, `project`, `schema_version`.
+- Check `schema_version` is `1.0`.
+- Check all required item keys: `id`, `kind`.
+- If any violation: print it and stop. No writes.
+
+### Step 3: Resolve the version name
+
+The intended version name is determined by priority:
+1. If `--version <name>` was given, use it as-is (do not trim).
+2. Else if `defaults.version` exists in the config and is non-empty, use it.
+3. Else use the feature directory name (e.g., `005-versions-and-time`).
+
+Do not prompt or accept user input beyond what was already in the arguments.
+
+**Store the intended version name for the next steps.**
+
+### Step 4: List and select the version
+
+Call `list-versions` with the intended name as the search term. The server does substring matching (case-insensitive). Post-filter the results for an **exact match** (case-sensitive) of the intended name.
+
+Classify the result by count:
+- **No matches** (`M` is empty): The version does not exist yet. This is the `create` action; proceed to step 5.
+- **Exactly one match** (`M` is one version): Get its `id` and call `get-version` to read the full `status` (`open`, `closed`, or `locked`). Store the version id and name for step 5.
+- **Multiple matches** (`M` is several versions): Stop. The name is ambiguous in this project. Report: `The name "{intended_name}" matches multiple versions. Please use a more specific name or resolve the ambiguity in OpenProject.` No writes.
+
+If `get-version` fails (tool error), stop and report the error (redacted). No writes.
+
+### Step 5: Classify each work package
+
+For each ledger item (`feature`, `phase`, or `task`):
+1. Call `get-work-package` with `select=["id", "version"]` for the item's `id`.
+2. If the call returns an error (tool error or the work package does not exist), classify as `stale, skip`.
+3. Read the returned `version` field. It may be `null` (no version assigned) or a string (version name).
+
+For each work package, apply the **version decision table** (R3, per work package):
+
+| W | Action | Writes |
+|---|---|---|
+| = V (by name) | unchanged | none |
+| none | assign | update (bulk) |
+| other | other version (reported, never moved) | none |
+| not found | stale, skip | none |
+
+Where `V` is the chosen version's name (from step 4) and `W` is the work package's current version (the `version` field from `get-work-package`).
+
+**Special case (step 4, continued):** If the chosen version (from step 4, whether reused or to be created) has `status` = `closed` or `locked`, then:
+- Do not proceed with any assignment.
+- Classify all work packages as `blocked (closed or locked)`.
+- Report the status and stop. No writes.
+
+Store the classification results for the plan in step 6.
+
+### Step 6: Show the plan
+
+Before any write, show a text plan. Include one line per ledger work package with:
+- The work package's OpenProject id (from the ledger).
+- The action: `create version` (if the version doesn't exist yet), `reuse version` (if it does), `assign`, `unchanged`, `other version`, `stale`, or `blocked`.
+- A reason (e.g., `no version assigned`, `already assigned`, `has another version`).
+
+For each `assign` action, record the work package id for the bulk update.
+
+### Step 7: Check for `--dry-run`
+
+If the `--dry-run` flag was given, stop here and output:
+
+```
+Dry run: nothing was written.
+```
+
+Set the result to `dry run` and proceed to the report (step 10).
+
+### Step 8: Confirmation and version creation
+
+Ask the user to confirm the plan:
+
+```
+Ready to proceed? (yes/no)
+```
+
+If the user answers anything other than `yes` (e.g., `no`, `n`, `cancel`), stop and output:
+
+```
+Cancelled.
+```
+
+Set the result to `stopped` and proceed to the report (step 10).
+
+If the user confirms (`yes`):
+
+**If the version needs to be created** (action is `create` from step 4):
+1. Call `create-version` with `project` (from config), `name` (the intended version name from step 3), **without `confirm`** (this is a preview).
+2. If the preview fails: report the validation error (redacted), classify all work packages as `blocked`, set the result to `stopped` and proceed to the report (step 10). No writes yet.
+3. If the preview succeeds (state is `preview`, ready is `true`, validation_errors is empty), extract the `version_id` from the result.
+4. Call `create-version` again with the **same parameters** and `confirm=true`.
+5. If the confirm call fails or does not return `state` = `confirmed`, mark the version creation as `failed`, set the result to `incomplete`, and proceed to the report (step 10). The version may or may not have been created; the user should check OpenProject.
+6. If the confirm succeeds, extract the `version_id` again. **Write the ledger `version` key at once:** `{id: <version_id>, name: <intended_name>}` (temporary file `mapping-<FEATURE>.json.tmp`).
+
+**If the version exists** (action is `reuse` from step 4):
+- **Write the ledger `version` key at once:** `{id: <existing_version_id>, name: <intended_name>}` (temporary file `mapping-<FEATURE>.json.tmp`).
+
+Continue to step 9.
+
+### Step 9: Bulk assignment
+
+Collect all work packages from step 5 with action `assign` (the `assign` list).
+
+If the list is not empty:
+1. Build the bulk-update payload: `items[{work_package_id: <id>, target_versions: [<version_name>]}, ...]` (one per `assign` item).
+2. Call `bulk-update-work-packages` with this payload, **without `confirm`** (preview).
+3. If the preview fails (state is not `preview`, or ready is `false` or any item has validation_errors), report the errors (redacted per item), mark those items as `failed`, and proceed to the report (step 10). No confirm is needed if preview fails.
+4. If the preview succeeds, show the preview inside the plan (the payload and any confirmation details).
+5. **Same confirmation as step 8**: Ask the user again. If not `yes`, stop and proceed to the report (step 10) with result `stopped`. If `yes`, call `bulk-update-work-packages` again with `confirm=true`.
+6. If confirm succeeds, read the per-item results. For each item:
+   - If `state` = `confirmed`, mark as `assigned`.
+   - If `state` = `rejected` or `ready` = `false`, mark as `failed` and report the error (redacted).
+7. If confirm fails (generic tool error), **fallback to per-item writes**: For each `assign` item not yet marked `assigned`, call `update-work-package` with the same parameters (`work_package_id`, `target_versions: [<version_name>]`), preview then confirm, and mark as `assigned` or `failed` per result. Report the fallback in the summary (e.g., `bulk-update-work-packages failed; using per-item fallback`).
+
+If all items are `assigned`, proceed to step 10 with the results.
+
+### Step 10: Report
+
+Count the classifications:
+- `created`: versions created.
+- `reused`: versions reused.
+- `assigned`: work packages assigned.
+- `unchanged`: work packages already assigned.
+- `other-version`: work packages in another version (never moved).
+- `stale`: work packages that could not be read.
+- `blocked`: actions blocked by a closed or locked version, or a preview failure.
+- `failed`: items that failed during confirm.
+
+Determine the result:
+- If no writes were attempted or all writes succeeded, and nothing failed: `complete`.
+- If some items failed during confirm: `incomplete`.
+- If a stop condition was hit before any write (blocked, missing config, etc.): `stopped`.
+- If `--dry-run` was given: `dry run`.
+- If nothing changed (no version created, no work packages assigned, all unchanged): `no changes`.
+
+Output a summary:
+
+```
+Versions: <created> created, <reused> reused.
+Work packages: <assigned> assigned, <unchanged> unchanged, <other-version> in another version, <stale> stale, <blocked> blocked, <failed> failed.
+Result: <result>.
+```
+
+If there were any errors, redact them (replace URLs and host names with `<redacted-host>`, any token-like text with `<redacted-secret>`).
+
+**Stop.**
 
 ## Rules
 
@@ -119,3 +312,37 @@ Steps are added by tasks T014, T015 and T020 of feature 005. Until they exist, t
 - Every run ends with exactly one result: `complete`, `incomplete`, `no changes`, `dry run` or `stopped`.
 - Version and work-package names are compared exactly; a difference in case or whitespace is a mismatch that is reported, never corrected.
 - Works in skills mode (`/speckit-openproject-sync-version`) and command mode (`/speckit.openproject.sync-version`).
+
+## Appendix: Ledger write strategy
+
+When a write to `mapping-<FEATURE>.json` is needed:
+
+1. **Read the current ledger** from the file (at the start of the run, already done in step 2).
+2. **Modify the ledger object in memory**:
+   - Set the `version` key: `{"id": <version_id>, "name": "<version_name>"}` (both required).
+   - Do not modify any other keys.
+3. **Atomically write the ledger**: Write the updated JSON to a temporary file `mapping-<FEATURE>.json.tmp` (in the same directory).
+4. **Rename the temporary file**: Move `mapping-<FEATURE>.json.tmp` to `mapping-<FEATURE>.json` (atomic on POSIX systems).
+
+This strategy ensures idempotence: if a write is interrupted (e.g., the process crashes after step 3 but before step 4), the original ledger file remains intact; a re-run will read the original state and retry the write.
+
+The `version` key is written **once per run**: either after a successful `create-version` confirm (step 8) or after a successful `reuse` decision (before bulk assignment, step 8). It is not written on errors, on `--dry-run`, or on `stopped` results.
+
+## Appendix: Redaction rules
+
+When reporting errors or server messages that contain sensitive information:
+
+1. **URLs**: Replace the entire URL with `<redacted-host>`. When you see a full URL like the pattern `[scheme]://[host]/[path]`, replace it with `<redacted-host>/[path]` (keep the path for debugging, redact only the host).
+2. **Authorization headers**: Replace the value (the token or credentials) with `<redacted-secret>`. When you see `Authorization: [scheme] [value]` patterns in headers, replace the value with `<redacted-secret>`.
+3. **API tokens in error text**: If the error message includes a token-like string (hex, base64, or alphanumeric sequences longer than 20 characters), replace it with `<redacted-secret>`.
+4. **Instance names or hostnames**: Replace with `<redacted-host>`.
+
+Apply these rules to:
+- Validation errors returned by the server (in `validation_errors` fields).
+- Generic tool errors (error messages when a tool call fails).
+- Any user-facing output (the plan, the report, logs).
+
+Do not redact:
+- Work package ids, version ids, project names, or version names (these are not secrets).
+- HTTP status codes (e.g., 403, 500).
+- Feature names or file paths in the repo.
