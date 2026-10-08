@@ -754,3 +754,10 @@ def test_log_time_skipped_lines_make_run_incomplete(log_time):
         "At least one line is `failed`, `stale`, `unknown` or `rejected` "
         "(even if every attempted write succeeded): `incomplete`."
     ) in log_time
+
+
+def test_taskstoissues_caps_subject_length(root):
+    text = (root / PROMPT).read_text()
+    assert "at most 255 characters" in text
+    assert "first 254 characters and append `…`" in text
+    assert "never shortened" in text

@@ -111,6 +111,7 @@ Every run starts from scratch. Execute steps 1–15 in order, every time, even i
 7. **Subjects and descriptions.**
    - Feature: subject `<FEATURE> <title>` where title is the first `# Tasks:` heading text after the colon (or `FEATURE` if absent). Key `feature`.
    - Phase: `Phase N: <title>`. Task: `T### <title>` where the title is the task text without the markers (`[P]`, `[US#]`), without a dependency clause such as `(depends on T002)`, and without the file hint **and the preposition directly in front of it** (`in`, `at`, `to`, `for`, `from`, `into`, `under`); example: `Create database schema in db/schema.sql` becomes `T001 Create database schema`.
+   - Subject length: OpenProject accepts at most 255 characters per subject; longer ones fail with a generic tool error. Count characters, not bytes. If a subject built above is longer than 255 characters, cut it to its first 254 characters and append `…` (U+2026), so it has exactly 255. The key prefix (`T###`, `Phase N:`, `FEATURE`) is always kept. The description keeps the full task text and is never shortened. The shortened subject is the subject for the plan, the content hash and the ledger.
    - Description (Markdown): the following parts, only those that exist, **each separated from the next by one blank line** (single line breaks would be rendered as one line):
      1. `Labels: US1 · parallel` (story and, if `mark_parallel`, parallel);
      2. the task text;

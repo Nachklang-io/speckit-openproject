@@ -123,6 +123,7 @@ Misconfiguration is detected before any write: missing configuration, unavailabl
 - Dependency cycle: report it, skip the relations on the cycle, create everything else.
 - Two tasks share the same title: identified by task identifier prefix, never by title alone.
 - Very large task lists (100+): see FR-015.
+- A subject longer than 255 characters (OpenProject rejects it with a generic tool error): the subject is shortened to 255 characters ending in `…`; the full task text stays in the description (FR-007).
 - Network or tool failure mid-run: items already written stay in the ledger; the run reports where it stopped and is resumable.
 - Work package deleted in OpenProject but still in the ledger: reported as stale; not silently recreated.
 - Ledger file corrupt or schema-invalid: stop and explain, never overwrite.
@@ -137,7 +138,7 @@ Misconfiguration is detected before any write: missing configuration, unavailabl
 - **FR-004**: The command MUST create one parent work package for the feature, one work package per phase (child of the feature work package) and one per task (child of its phase). The command MUST NOT create or assign OpenProject versions.
 - **FR-005**: The command MUST keep a mapping ledger per feature at `.specify/openproject/mapping-<feature>.json` (feature = the feature directory name), validated against the shared mapping schema, and update it immediately after each successful write.
 - **FR-006**: The command MUST NOT create a work package for an item that is already in the ledger.
-- **FR-007**: Every work package created by the command MUST carry its `tasks.md` identifier as a subject prefix (e.g. "T012 Create schema"); the feature work package subject MUST start with the full feature directory name followed by a space (identical to the ledger field `feature`). Before creating an item that is not in the ledger, the command MUST search the project by that prefix, restricted to the feature's work package tree, and adopt a match instead of duplicating. Multiple matches MUST be reported and the item skipped, never guessed.
+- **FR-007**: Every work package created by the command MUST carry its `tasks.md` identifier as a subject prefix (e.g. "T012 Create schema"); the feature work package subject MUST start with the full feature directory name followed by a space (identical to the ledger field `feature`). Before creating an item that is not in the ledger, the command MUST search the project by that prefix, restricted to the feature's work package tree, and adopt a match instead of duplicating. Multiple matches MUST be reported and the item skipped, never guessed. A subject MUST NOT exceed 255 characters: a longer one is cut to its first 254 characters followed by `…`, and the description (which holds the full task text) is not shortened.
 - **FR-008**: The command MUST create an ordered ("follows") relation for each real dependency, MUST NOT create relations solely because tasks are marked `[P]`, and MUST NOT duplicate existing relations.
 - **FR-009**: The command MUST support `--dry-run`, which shows the full plan (create / skip / update / blocked per item) and writes nothing to OpenProject or the ledger.
 - **FR-010**: The command MUST support `--update`; without it, existing linked work packages MUST NOT be modified.
