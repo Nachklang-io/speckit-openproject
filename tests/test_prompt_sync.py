@@ -8,7 +8,7 @@ import jsonschema
 import pytest
 import yaml
 from docs_reference import DECISION_ROWS as DOCS_DECISION_ROWS
-from headline_reference import headline
+from headline_reference import cap_subject, headline
 from sync_reference import DECISION_ROWS
 from version_time_reference import (
     ACCEPTED_DURATION_FORMS,
@@ -772,6 +772,9 @@ def test_taskstoissues_states_headline_rule(root):
         "EARLIEST occurrence of `: `, `; `, ` (` or `. `",
         "remove backticks",
         "If the headline is empty",
+        "if that is empty too, use the text above before (a)",
+        "an unbalanced `(` is left as is",
+        "| LC_ALL=en_US.UTF-8 wc -m`, never by eye",
         "longer than 70 characters",
         "The description keeps the full task text and is never shortened.",
     ):
@@ -788,6 +791,10 @@ def test_taskstoissues_states_headline_rule(root):
         ("Run it; then stop", "Run it"),
         ("(Optional): foo bar", ": foo bar"),
         ("Do this. Then that", "Do this"),
+        ("**(a (b))** Ship it", "Ship it"),
+        ("(Optional)", "(Optional)"),
+        ("(unclosed group: rest", "(unclosed group"),
+        ("Tab\tstays: cut", "Tab\tstays"),
         (
             "Add a test in tests/test_release.py that every checklist item line carries a state",
             "Add a test in tests/test_release.py that every checklist item line…",
@@ -797,3 +804,12 @@ def test_taskstoissues_states_headline_rule(root):
 def test_headline_reference(text, expected):
     assert headline(text) == expected
     assert len(headline(text)) <= 71
+
+
+@pytest.mark.parametrize("length", [254, 255, 256, 300])
+def test_subject_cap_reference(length):
+    subject = "Phase 1: " + "ä" * (length - len("Phase 1: "))
+    capped = cap_subject(subject)
+    assert len(capped) == min(length, 255)
+    assert capped.startswith("Phase 1: ")
+    assert capped.endswith("\u2026") == (length > 255)

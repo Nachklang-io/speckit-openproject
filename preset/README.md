@@ -48,7 +48,7 @@ In command mode use `/speckit.taskstoissues`. Configuration order per value: arg
 1. Validates the config, verifies the MCP capabilities, the project and the three types.
 2. Parses phases, tasks, `[P]` markers, `[US#]` labels and dependencies from `tasks.md`.
 3. Plans every item: skip (already in the ledger), adopt (found in OpenProject by its subject prefix), create, stale (ledger entry whose work package is gone, reported only), blocked.
-4. Asks for confirmation once per phase, then creates the hierarchy Feature → Phase → Task, one work package at a time (preview, then confirm), and writes the ledger `.specify/openproject/mapping-<feature>.json` after every write. Subjects start with the task id and a short headline (`T012 Create schema`: the task text up to the first `: `, `; `, ` (` or `. `, at most 70 characters; the description keeps the full text); the feature subject starts with the feature directory name.
+4. Asks for confirmation once per phase, then creates the hierarchy Feature → Phase → Task, one work package at a time (preview, then confirm), and writes the ledger `.specify/openproject/mapping-<feature>.json` after every write. Subjects start with the task id and a short headline (`T012 Create schema`: the task text up to the first `: `, `; `, ` (` or `. `, at most 70 characters; the description keeps the full text); the feature subject starts with the feature directory name. Work packages adopted from an earlier run keep their old subjects until you re-run with `--update`.
 5. Creates `follows` relations for real dependencies only (not for `[P]` tasks).
 6. Prints a report with counts, work package ids and reasons for blocked, stale and failed items.
 
