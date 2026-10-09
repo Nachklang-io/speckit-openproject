@@ -58,9 +58,9 @@ Labels (`[US#]`, `[P]`) are written as plain text in the first line of the descr
 
 Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 - Lists of 100+ tasks beyond a dry run.
-- Command mode (`/speckit.taskstoissues`) and other MCP servers.
+- Command mode was run with the file rendered for the `opencode` integration (S1, S2, S5, S7, S8, see `docs/TESTING.md`). The `generic` integration of spec-kit registers no preset overrides, so there `/speckit.taskstoissues` stays the core command.
 - Other MCP servers and other server names: the front matter filter `tools: ['openproject-ce-mcp/*']` worked in the runs with the server configured as `openproject`; behaviour with other servers is untested.
-- The installed skill was run in skills mode only (S1–S4, S6, S8, S9, see `docs/TESTING.md`); S5 (logic only) and S7 (project outside the server allowlist only, not the OpenProject read-only role) were manual walkthroughs.
+- S7 with a project outside the server allowlist was a manual walkthrough only; the OpenProject read-only role was run and stops before any write, but reports missing types rather than missing write permission.
 - spec-kit 1.0.x: not tested, so `requires.speckit_version` is `>=1.1.0`.
 
 ## Limitations
