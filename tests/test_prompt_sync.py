@@ -8,6 +8,7 @@ import jsonschema
 import pytest
 import yaml
 from docs_reference import DECISION_ROWS as DOCS_DECISION_ROWS
+from headline_reference import cap_subject, headline
 from sync_reference import DECISION_ROWS
 from version_time_reference import (
     ACCEPTED_DURATION_FORMS,
@@ -214,6 +215,8 @@ def test_description_parts_are_separated_by_blank_lines(prompt):
 def test_task_title_rule_drops_preposition_before_file_hint(prompt):
     assert "the preposition directly in front of it" in prompt
     assert "`T001 Create database schema`" in prompt
+    assert "Remove the file hint only together with such a preposition" in prompt
+    assert "keeps its path" in prompt
 
 
 def test_every_run_starts_from_scratch_and_hashes_are_computed(prompt):
@@ -754,3 +757,80 @@ def test_log_time_skipped_lines_make_run_incomplete(log_time):
         "At least one line is `failed`, `stale`, `unknown` or `rejected` "
         "(even if every attempted write succeeded): `incomplete`."
     ) in log_time
+
+
+def test_taskstoissues_caps_subject_length(root):
+    text = (root / PROMPT).read_text()
+    assert "at most 255 characters" in text
+    assert "first 254 characters and append `…`" in text
+    assert "never shortened" in text
+
+
+def test_taskstoissues_states_headline_rule(root):
+    text = (root / PROMPT).read_text()
+    assert "Headline rule" in text
+    for part in (
+        "`**(...)**` group or a `(...)` group",
+        "EARLIEST occurrence of `: `, `; `, ` (` or `. `",
+        "remove backticks",
+        "If the headline is empty",
+        "if that is empty too, use the text above before (a)",
+        "an unbalanced `(` is left as is",
+        "| LC_ALL=<locale> wc -m`, never by eye",
+        "the first of `C.UTF-8` and `en_US.UTF-8`",
+        'it is `failed` with the reason "subject length <n>"',
+        "as single-quoted literals",
+        "remove the spaces at its end",
+        "Later paths in the text are ordinary text.",
+        "longer than 70 characters",
+        "The description keeps the full task text and is never shortened.",
+    ):
+        assert part in text, part
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Create database schema", "Create database schema"),
+        ("Write `docs/RELEASING.md` (FR-009): bump version", "Write docs/RELEASING.md"),
+        ("**(maintainer)** Q4: after explicit confirmation push", "Q4"),
+        ("(optional) Add step 7: details", "Add step 7"),
+        ("Run it; then stop", "Run it"),
+        ("(Optional): foo bar", ": foo bar"),
+        ("Do this. Then that", "Do this"),
+        ("**(a (b))** Ship it", "Ship it"),
+        ("(Optional)", "(Optional)"),
+        ("(unclosed group: rest", "(unclosed group"),
+        ("Tab\tstays: cut", "Tab\tstays"),
+        (
+            "Add a test in tests/test_release.py that every checklist item line carries a state",
+            "Add a test that every checklist item line carries a state",
+        ),
+        ("Create database schema in db/schema.sql", "Create database schema"),
+        ("Update `README.md` with a section", "Update README.md with a section"),
+        ("Add docs in `docs/TESTING.md`: run log", "Add docs"),
+        ("Log in to the server", "Log in to the server"),
+        ("Release in v1.0 of the app", "Release in v1.0 of the app"),
+        ("Tag to 1.2.3 now", "Tag to 1.2.3 now"),
+        ("Use for e.g. bar", "Use for e.g"),
+        ("Copy `ab.md` to `b/c.md`", "Copy ab.md to b/c.md"),
+        ("Add a section to README.md and to docs/X.md", "Add a section and to docs/X.md"),
+        ("Do X  " + "y" * 80, "Do X…"),
+        (
+            "Rewrite the whole release checklist so every single item line carries a state",
+            "Rewrite the whole release checklist so every single item line carries…",
+        ),
+    ],
+)
+def test_headline_reference(text, expected):
+    assert headline(text) == expected
+    assert len(headline(text)) <= 71
+
+
+@pytest.mark.parametrize("length", [254, 255, 256, 300])
+def test_subject_cap_reference(length):
+    subject = "Phase 1: " + "ä" * (length - len("Phase 1: "))
+    capped = cap_subject(subject)
+    assert len(capped) == min(length, 255)
+    assert capped.startswith("Phase 1: ")
+    assert capped.endswith("\u2026") == (length > 255)
