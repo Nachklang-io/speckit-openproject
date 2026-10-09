@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${SPECKIT_REF}"
       - run: uv run ruff check .
@@ -31,7 +31,7 @@ jobs:
         speckit: [v1.1.0, v1.1.2]
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${{ matrix.speckit }}"
       - run: specify --version
@@ -46,7 +46,7 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync
       - run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@main"
       - run: specify --version
