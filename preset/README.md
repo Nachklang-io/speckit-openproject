@@ -12,7 +12,7 @@ The tested setup runs the server with `uvx openproject-ce-mcp` from a `.mcp.json
 
 Restrict write access in the MCP server environment: `OPENPROJECT_WRITE_PROJECTS=<your-project>`.
 
-Step-by-step setup for new and existing spec-kit projects, and how to keep OpenProject in sync: [setup guide](../README.md#setup-guide).
+Step-by-step setup for new and existing spec-kit projects, and how to keep OpenProject in sync: [setup guide](../README.md#setup-guide). If a run stops or reports `blocked`, `failed` or `stale` items: [when something goes wrong](../README.md#6-when-something-goes-wrong).
 
 ## Install
 
