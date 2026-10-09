@@ -28,8 +28,9 @@ if os.environ.get("SPECKIT_REQUIRE_CLI") != "1":
         shutil.which("specify") is None, reason="specify CLI not installed"
     )
 
-PRESET_VERSION = "1.0.0"
+PRESET_VERSION = "1.0.1"
 EXTENSION_VERSION = "0.1.0"
+BUNDLE_VERSION = "0.1.1"
 
 
 def run(cmd, cwd, answer=None):
@@ -120,7 +121,7 @@ def test_bundle_installs_from_catalogs(root, server, tmp_path):
     release.bundle_catalog(
         root,
         root / "bundle/bundle.yml",
-        "bundle-v0.1.0",
+        f"bundle-v{BUNDLE_VERSION}",
         dist,
         "Nachklang-io/speckit-openproject",
         dist,
@@ -131,7 +132,7 @@ def test_bundle_installs_from_catalogs(root, server, tmp_path):
         ["specify", "bundle", "build", "--path", str(root / "bundle"), "--output", str(built)],
         tmp_path,
     )
-    archive = built / "openproject-0.1.0.zip"
+    archive = built / f"openproject-{BUNDLE_VERSION}.zip"
     assert archive.is_file()
 
     project = init_project(tmp_path)

@@ -528,7 +528,7 @@ def test_check_bundle_speckit_range_mismatch(tmp_path):
 
 def test_bundle_pins_read_provides():
     assert release.bundle_pins(yaml.safe_load(BUNDLE.read_text())) == {
-        "preset": "1.0.0",
+        "preset": "1.0.1",
         "extension": "0.1.0",
     }
 
@@ -597,7 +597,8 @@ def test_bundle_catalog_is_deterministic_except_updated_at(tmp_path):
 def test_bundle_catalog_download_base(tmp_path):
     written = run_bundle_catalog(tmp_path, base="http://127.0.0.1:8123/")
     entry = json.loads(written[0].read_text())["presets"]["openproject"]
-    assert entry["download_url"] == "http://127.0.0.1:8123/openproject-preset-1.0.0.zip"
+    pin = bundle_pin_map()["preset"]
+    assert entry["download_url"] == f"http://127.0.0.1:8123/openproject-preset-{pin}.zip"
 
 
 def test_bundle_catalog_missing_archive(tmp_path):
@@ -608,14 +609,15 @@ def test_bundle_catalog_missing_archive(tmp_path):
 
 
 def test_bundle_catalog_rc_needs_rc_archives(tmp_path):
-    with pytest.raises(release.ReleaseError, match=r"missing release archive: .*-1\.0\.0-rc\.1"):
+    with pytest.raises(release.ReleaseError, match=r"missing release archive: .*-rc\.1\.zip"):
         run_bundle_catalog(tmp_path, tag="bundle-v0.1.0-rc.1")
 
 
 def test_bundle_catalog_pin_mismatch(tmp_path):
     archives = build_components(tmp_path)
     write_zip(
-        archives / "openproject-preset-1.0.0.zip", {"preset.yml": "preset:\n  version: 9.9.9\n"}
+        archives / f"openproject-preset-{bundle_pin_map()['preset']}.zip",
+        {"preset.yml": "preset:\n  version: 9.9.9\n"},
     )
     with pytest.raises(release.ReleaseError, match="pin mismatch"):
         run_bundle_catalog(tmp_path, archives=archives)

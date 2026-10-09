@@ -19,7 +19,7 @@ Step-by-step setup for new and existing spec-kit projects, and how to keep OpenP
 From a release (replace the version as needed):
 
 ```bash
-specify preset add --from https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.0/openproject-preset-1.0.0.zip
+specify preset add --from https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.1/openproject-preset-1.0.1.zip
 ```
 
 For local development, from a clone of https://github.com/Nachklang-io/speckit-openproject:
