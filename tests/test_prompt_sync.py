@@ -215,6 +215,8 @@ def test_description_parts_are_separated_by_blank_lines(prompt):
 def test_task_title_rule_drops_preposition_before_file_hint(prompt):
     assert "the preposition directly in front of it" in prompt
     assert "`T001 Create database schema`" in prompt
+    assert "Remove the file hint only together with such a preposition" in prompt
+    assert "keeps its path" in prompt
 
 
 def test_every_run_starts_from_scratch_and_hashes_are_computed(prompt):
@@ -797,7 +799,15 @@ def test_taskstoissues_states_headline_rule(root):
         ("Tab\tstays: cut", "Tab\tstays"),
         (
             "Add a test in tests/test_release.py that every checklist item line carries a state",
-            "Add a test in tests/test_release.py that every checklist item line…",
+            "Add a test that every checklist item line carries a state",
+        ),
+        ("Create database schema in db/schema.sql", "Create database schema"),
+        ("Update `README.md` with a section", "Update README.md with a section"),
+        ("Add docs in `docs/TESTING.md`: run log", "Add docs"),
+        ("Log in to the server", "Log in to the server"),
+        (
+            "Rewrite the whole release checklist so every single item line carries a state",
+            "Rewrite the whole release checklist so every single item line carries…",
         ),
     ],
 )

@@ -4,6 +4,10 @@ import re
 
 MAX_HEADLINE = 70
 MAX_SUBJECT = 255
+PREPOSITIONS = ("in", "at", "to", "for", "from", "into", "under")
+# A file hint: a path with a `/` or a file extension, optionally in backticks.
+_FILE_HINT = r"`?[\w.-]*(?:/[\w.-]+)+`?|`?[\w-]+\.[A-Za-z0-9]{1,5}`?"
+_PREP_HINT = re.compile(rf" (?:{'|'.join(PREPOSITIONS)}) (?:{_FILE_HINT})(?=[\s:;.,]|$)")
 
 
 def _group_end(text, start):
@@ -45,7 +49,13 @@ def _cap(text):
     return text
 
 
+def drop_file_hint(text):
+    """Remove the first file hint together with the preposition directly in front of it."""
+    return _PREP_HINT.sub("", text, count=1)
+
+
 def headline(text):
+    text = drop_file_hint(text)
     stripped = strip_leading_groups(text)
     return _cap(_cut(stripped)) or _cap(stripped) or _cap(text)
 
