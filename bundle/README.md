@@ -9,13 +9,13 @@ that server in your agent's MCP client config first (see the main repository REA
 spec-kit bundles reference packages instead of embedding them. Each bundle release therefore
 ships two one-entry catalogs that point at the published preset and extension archives (pinned
 by version and sha256). Replace `<release>` with the bundle release's download URL, for example
-`https://github.com/Nachklang-io/speckit-openproject/releases/download/bundle-v0.1.0`.
+`https://github.com/Nachklang-io/speckit-openproject/releases/download/bundle-v0.1.1`.
 
 ```bash
 specify preset catalog add <release>/openproject-presets-catalog.json --name openproject --install-allowed
 specify extension catalog add <release>/openproject-extensions-catalog.json --name openproject --install-allowed
-curl -LO <release>/openproject-0.1.0.zip
-specify bundle install ./openproject-0.1.0.zip
+curl -LO <release>/openproject-0.1.1.zip
+specify bundle install ./openproject-0.1.1.zip
 ```
 
 ## Contents

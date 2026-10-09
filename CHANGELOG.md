@@ -6,6 +6,8 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 
 ### Unreleased
 
+### 1.0.1 - 2026-10-09
+
 #### Fixed
 - `speckit.taskstoissues`: task work package subjects are short headlines (`T### <headline>`, at most 70 characters plus `…`) instead of the full task text; the description keeps the complete text. Existing ledgers report "differs, not updated" for tasks synced with the old full-text subjects; `--update` rewrites them, subject and description (description edits made in OpenProject are overwritten). Work packages adopted without a ledger entry keep their old subjects. Feature and phase subjects longer than 255 characters (OpenProject's limit) are cut to 254 characters plus `…`, measured with `wc -m` in a UTF-8 locale (`C.UTF-8` or `en_US.UTF-8`; the command stops without one). Subjects and descriptions are passed to the shell as single-quoted literals. Headlines can be terse: the text is cut at the first `. `, so `Use e.g. foo` becomes `Use e.g`. A file path is removed from the headline only together with a preposition in front of it (`Create schema in db/schema.sql` → `Create schema`); without one it stays (`Write docs/RELEASING.md`).
 
@@ -35,6 +37,11 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 ## Bundle
 
 ### Unreleased
+
+### 0.1.1 - 2026-10-09
+
+#### Changed
+- Pins preset 1.0.1 (short headline subjects for task work packages, 255-character subject cap). The extension pin stays at 0.1.0.
 
 ### 0.1.0 - 2026-10-08
 
