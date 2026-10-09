@@ -5,9 +5,10 @@ import re
 MAX_HEADLINE = 70
 MAX_SUBJECT = 255
 PREPOSITIONS = ("in", "at", "to", "for", "from", "into", "under")
-# A file hint: a path with a `/` or a file extension, optionally in backticks.
-_FILE_HINT = r"`?[\w.-]*(?:/[\w.-]+)+`?|`?[\w-]+\.[A-Za-z0-9]{1,5}`?"
-_PREP_HINT = re.compile(rf" (?:{'|'.join(PREPOSITIONS)}) (?:{_FILE_HINT})(?=[\s:;.,]|$)")
+# The file hint: the first token with a `/`, or ending in `.ext` (letter first, 2+ chars before).
+_FILE_HINT = re.compile(
+    r"`?(?:\S*/\S*?|[\w./-]{2,}\.[A-Za-z][A-Za-z0-9]{0,4})`?(?=[.,:;]?(?:\s|$))"
+)
 
 
 def _group_end(text, start):
@@ -45,13 +46,22 @@ def _cap(text):
     text = text.replace("`", "").strip()
     if len(text) > MAX_HEADLINE:
         head = text[:MAX_HEADLINE]
-        text = (head.rsplit(" ", 1)[0] if " " in head else head) + "…"
+        text = (head.rsplit(" ", 1)[0].rstrip() if " " in head else head) + "…"
     return text
 
 
 def drop_file_hint(text):
-    """Remove the first file hint together with the preposition directly in front of it."""
-    return _PREP_HINT.sub("", text, count=1)
+    """Remove the file hint (first path) only together with the preposition directly before it."""
+    for token in re.finditer(r"\S+", text):
+        hint = _FILE_HINT.match(token.group())
+        if hint is None:
+            continue
+        before = text[: token.start()]
+        words = before.rstrip().rsplit(" ", 1)
+        if before.endswith(" ") and len(words) == 2 and words[1] in PREPOSITIONS:
+            return words[0] + text[token.start() + hint.end() :]
+        return text
+    return text
 
 
 def headline(text):
