@@ -114,6 +114,51 @@ Every command shows a plan and asks once before it writes. A run without a perso
 2. **More hooks (untested).** spec-kit's core commands read hooks for other events from `.specify/extensions.yml` (`after_tasks`, `after_plan`, …). You can add entries in the same format as the installed `after_implement` entry, for example `after_tasks` → `speckit.taskstoissues` or `after_plan` → `speckit.openproject.sync-docs`. With `optional: true` the agent offers the command; with `optional: false` it starts it right away, and the command still asks before writing. This is not tested, and `specify extension update` or `remove` may rewrite the file.
 3. **Scheduled check (dry run).** A scheduled job (cron, CI) can run `claude -p "/speckit-openproject-sync-status --dry-run"` in the project, with the MCP variables exported. It reports what is out of sync without writing anything. Headless runs were tested (`discover-fields`, and `sync-status` on earlier prompt revisions); running them from a scheduler was not. Scripting the confirmation for real writes is not supported.
 
+### 6. When something goes wrong
+
+Every command reports what it did and why it stopped. Error texts from the server are shown verbatim (URLs and host names redacted); the commands do not guess the cause. Start here:
+
+**Nothing was written yet**
+
+| Message or symptom | What to do |
+|---|---|
+| No OpenProject tools in the session, `/mcp` shows the server as failed | Start the agent from a shell where the variables of step 2 are exported, then check `/mcp`. Use `MCP_TIMEOUT` if the server starts slowly. |
+| A capability id is missing (for example `create-work-package`) | The server runs without write access. Set `OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE` (or `OPENPROJECT_ENABLE_VERSION_WRITE` for `sync-version`) and restart the server. |
+| `create-attachment` is missing (`sync-docs`) | Set `OPENPROJECT_ATTACHMENT_ROOT` to an absolute directory that contains the feature directory, restart the server. |
+| Project not found, or several projects listed | Use the exact project identifier. The project must be in `OPENPROJECT_READ_PROJECTS` (and `OPENPROJECT_WRITE_PROJECTS` for writes). |
+| A type or status is missing | Enable the type in the project settings (Work packages → Types), or pick other names with `discover-fields`. Types, statuses and workflows cannot be created through the API. |
+| Configuration or ledger violation | The command prints every violation and stops; it never repairs the file. Fix the named key, or run `discover-fields` for the configuration. A ledger whose `project` or `feature` does not match belongs to another project or feature: do not edit ids by hand. |
+| `Error executing tool …` on the first preview | Typical causes: unknown type, parent or project, a project outside the allowlist, a token without permission. Check these in OpenProject and in the server variables; nothing was written. |
+
+**Some items were not written**
+
+| State in the report | Meaning and fix |
+|---|---|
+| `blocked` – "mandatory field …" | A required custom field has no default. Run `discover-fields` and give it a value, or set it under `required_custom_fields`, then re-run. |
+| `blocked` – "ambiguous" | Several work packages match the same key. Delete or rename the duplicates in OpenProject, then re-run. |
+| `blocked` – "parent …" | The parent failed or is blocked; fix the parent first. |
+| `failed` or `blocked` with `validation_errors` | The server rejected the preview of this item, for example a workflow that does not allow the transition to `statuses.done` (`sync-status`). Fix it in OpenProject or the configuration and re-run; the other items were written. |
+| `blocked (closed or locked)` (`sync-version`) | The target version is closed or locked; nothing is assigned. Reopen it in OpenProject or choose another one with `--version`. |
+| `stale` | The ledger points to a work package that no longer exists. The commands never recreate it. Remove the entry from the ledger if you want `speckit.taskstoissues` to create a new one. |
+| "differs, not updated" | `tasks.md` changed since the last sync. Run `speckit.taskstoissues --update`. |
+| `unpublished` (`sync-status`) | The task has no work package yet. Run `speckit.taskstoissues`. |
+| `orphan` (`sync-status`, `sync-docs`) | The ledger has an entry for a task or document that is gone locally. Nothing is changed in OpenProject; remove the work package or attachment there by hand if it is no longer needed. |
+
+**The run stopped in the middle**
+
+The ledger is written after every confirmed write, so it always matches what was created.
+
+- `speckit.taskstoissues`: run it again. It skips what is done and finds a work package from an interrupted write by its key (adoption).
+- `sync-status`, `sync-docs`, `sync-version`: run the command again. It reads the current state from OpenProject and only writes what is still missing.
+- Never repeat a write by hand in OpenProject while a command is running.
+- `log-time`: time entries have no natural key. If a line was `failed` after confirmation, check the work package's time entries in OpenProject before you log that line again.
+
+**Cleaning up**
+
+The commands never delete work packages, attachments they did not upload, versions or time entries. To start over, delete the work packages in OpenProject and remove `.specify/openproject/mapping-<feature>.json`. Keep the ledger as long as the work packages exist; without it the next run adopts them by key.
+
+Report bugs with the command's report (it contains no tokens or instance URLs) at the [issue tracker](https://github.com/Nachklang-io/speckit-openproject/issues).
+
 ## Docs
 
 [architecture](docs/ARCHITECTURE.md) · [roadmap](docs/ROADMAP.md) · [first session](docs/BOOTSTRAP.md) · [testing](docs/TESTING.md) · [releasing](docs/RELEASING.md) · [publishing](docs/PUBLISHING.md).

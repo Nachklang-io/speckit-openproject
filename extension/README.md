@@ -18,7 +18,7 @@ specify extension add --dev ./extension
 
 Install the preset in the same way (see `preset/README.md`), or install both with the bundle (`bundle/README.md`). Configure the OpenProject MCP server in your agent's MCP client config, as the preset README describes. Changes are listed in the repository's `CHANGELOG.md` under "Extension".
 
-Step-by-step setup for new and existing spec-kit projects, which command to run when, and the options for automatic sync: [setup guide](../README.md#setup-guide). Typical order: `discover-fields` once, `speckit.taskstoissues` after `/speckit-tasks`, `sync-version` and `sync-docs` when planning, `sync-status` after implementing, `log-time` when time was spent.
+Step-by-step setup for new and existing spec-kit projects, which command to run when, and the options for automatic sync: [setup guide](../README.md#setup-guide). If a run stops or reports `blocked`, `failed` or `stale` items: [when something goes wrong](../README.md#6-when-something-goes-wrong). Typical order: `discover-fields` once, `speckit.taskstoissues` after `/speckit-tasks`, `sync-version` and `sync-docs` when planning, `sync-status` after implementing, `log-time` when time was spent.
 
 ### Automation
 
