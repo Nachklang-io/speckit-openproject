@@ -11,3 +11,10 @@ dist/
 .DS_Store
 .claude/settings.local.json
 .claude/worktrees/
+
+# Dogfooding: preset and extension installed into this repo
+.specify/presets/
+.specify/extensions/
+.specify/extensions.yml
+.specify/openproject/
+.claude/skills/speckit-openproject-*/

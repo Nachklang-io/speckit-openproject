@@ -498,3 +498,21 @@ All three tags point to `3c2fd87` (`main` after PR #11), pushed in the order pre
 - S32 repeat: both catalogs point to the final component archives, and their `sha256` values match the archives (computed locally after `gh release download`). `preset catalog add` / `extension catalog add` with the release URLs, then `specify bundle install ./openproject-0.1.0.zip`: `Installed 'openproject' (2 added, 0 already present)`, preset v1.0.0 and extension v0.1.0 listed.
 - S27 repeat: set up as in the S27 run log above, with the project installed from the final URLs instead of the rc URLs. Installed skill files are identical to the `--dev` project. Both dry runs show the same proposals 1-7 and the same `statuses` diff, and both end with `Dry run: nothing was written.`. File hashes were unchanged in both projects.
 - Catalog entries: `sha256` filled into `docs/catalog/preset-entry.json` and `docs/catalog/extension-entry.json`. The archives were downloaded with `gh release download` (authenticated), not with an anonymous `curl` as `docs/catalog/submission.md` describes. The values match the ones the release workflow wrote into the bundle catalogs.
+
+## Run log: subject length fix (branch `fix/subject-length`, 2026-10-09)
+
+Scratch feature `950-subject-length` in `.scratch/proj` (spec-kit skills mode, headless sessions via `claude -p` with `--continue` for the confirmations), sandbox project `speckit-sandbox`, config from the earlier scratch project. Six tasks cover the edge cases: a file hint without preposition (T002), a nested `**(a (b))**` group (T003), a text that is only a group (T004), a long task text with a file hint (T005) and an unbalanced `(` (T006).
+
+| Step | Prompt revision | Result |
+|---|---|---|
+| 1. Real run, short feature title | `main` (`ac17f1f`, before the fix) | 9 work packages (#405–#413) and 1 `follows` relation created; old-style full-text subjects such as `T003 **(a (b))** Ship it: after explicit confirmation …`; ledger written |
+| 2. `--dry-run`, feature title of 309 characters (umlauts included) | `c860d2d` | 9 skip, 4 of them "differs, not updated" (feature, T002, T003, T006); feature subject measured with `wc -m`: 328 → 255; `Dry run: nothing was written.` |
+| 3. `--update`, fresh session | `c860d2d` | update table with old/new subjects, one confirmation; 4 updated, 5 skipped, relation skipped (already in the ledger) |
+
+Checked from the main session afterwards: the subjects of #405, #408, #409 and #413 in OpenProject are the new ones (#405 has exactly 255 characters by `wc -m` and by `cap_subject` in `tests/headline_reference.py`); the ledger hashes changed for exactly these four items; the T002 hash recomputed from the server's subject and description equals the ledger hash.
+
+Findings:
+- `T002 Write`: the file-hint rule removes `` `docs/RELEASING.md` `` (no preposition in front of it), then the headline rule cuts at ` (`. The old prompt produced `T002 Write (FR-009): …` from the same text, so the file-hint rule is older than this fix; the headline rule makes the result shorter.
+- The headless session refused shell variables, loops and helper scripts, so the skill measured every length and hash with a single `printf … | wc -m` / `| shasum` call with literal strings. That works but is slow; interactive sessions are not affected.
+
+Not covered: command mode; an adopt run (work package without ledger entry) after the change.
