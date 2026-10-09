@@ -61,9 +61,9 @@ Labels (`[US#]`, `[P]`) are written as plain text in the first line of the descr
 Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 - Lists of 100+ tasks beyond a dry run (a 120-task dry run was checked in feature 008).
 - The "Missing write permission" stop for a user who still has a project membership with a read-only role (only a user without a membership was run), and the check on other servers or OpenProject versions.
-- Command mode (`/speckit.taskstoissues`) and other MCP servers.
+- Command mode was run only with the file rendered for the `opencode` integration (S1, S2, S5, S7, S8 on preset 1.0.1, see `docs/TESTING.md`); the changes of preset 1.0.3 were not run in command mode.
 - Other MCP servers and other server names: the front matter filter `tools: ['openproject-ce-mcp/*']` worked in the runs with the server configured as `openproject`; behaviour with other servers is untested.
-- The installed skill was run in skills mode only (S1–S4, S6, S8, S9, see `docs/TESTING.md`); S5 (logic only) and S7 (project outside the server allowlist only, not the OpenProject read-only role) were manual walkthroughs.
+- S7 with a project outside the server allowlist was a manual walkthrough only; the OpenProject read-only role was run and stops before any write, but reports missing types rather than missing write permission.
 - spec-kit 1.0.x: not tested, so `requires.speckit_version` is `>=1.1.0`.
 
 ## Limitations
