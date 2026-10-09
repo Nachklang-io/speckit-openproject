@@ -519,3 +519,20 @@ Findings:
 - Step 5: the session cut the feature subject with `LC_ALL=C.UTF-8 cut -c 1-254` (a `python3` call was refused) and measured the result with `wc -m`. It did not measure the short task and phase subjects one by one, although the prompt says every subject; their hashes matched the ledger, so no subject changed.
 
 Not covered: command mode; an adopt run (work package without ledger entry) after the change.
+
+## Run log: patch releases preset 1.0.1 and bundle 0.1.1 (2026-10-09)
+
+Both tags point to `83f8db8` (`main` after PR #17). They were pushed by the maintainer in the order preset, then bundle. The install checks ran in fresh `specify init` projects with spec-kit 1.1.1.dev0.
+
+| Tag | Run | Last line of the run log | Release |
+|---|---|---|---|
+| `preset-v1.0.1` | [37901097606](https://github.com/Nachklang-io/speckit-openproject/actions/runs/37901097606) | `created preset-v1.0.1` | not pre-release; one asset `openproject-preset-1.0.1.zip`; notes equal the changelog entry and end with `<!-- release-commit: 83f8db8… -->` |
+| `bundle-v0.1.1` | [37901807207](https://github.com/Nachklang-io/speckit-openproject/actions/runs/37901807207) | `created bundle-v0.1.1` | not pre-release, marked Latest; `openproject-0.1.1.zip`, `openproject-presets-catalog.json`, `openproject-extensions-catalog.json` |
+
+- These are the first release runs with `actions/checkout@v7` and `astral-sh/setup-uv@v7` (Dependabot PRs #1 and #2).
+- Checksum: the asset's sha256 is `f9f39b9688817d93b02c6428664bddb7bd521daacdb0acfc4a0737197de15ce1` (GitHub asset digest). This equals the value written into `docs/catalog/preset-entry.json` before the tag, which was computed from a local `release.build`. A local build of `preset-v1.0.0` had reproduced the published `e645436e…`, so archive builds are deterministic.
+- S30 repeat (preset only): `specify preset add --from <preset-v1.0.1 URL>` installs v1.0.1. `speckit-taskstoissues` carries `preset:openproject` and contains the 1.0.1 rule text ("single-quoted literals").
+- S32 repeat: the presets catalog pins `1.0.1` with the URL and sha256 above, and the extensions catalog pins `0.1.0`. `preset catalog add` / `extension catalog add` with the `bundle-v0.1.1` URLs, then `specify bundle install ./openproject-0.1.1.zip` (archive fetched with `gh release download`) gives `Installed 'openproject' (2 added, 0 already present)`. Preset v1.0.1 and extension v0.1.0 are listed, and the five `speckit-openproject-*` skills are installed.
+- Catalog submission: the 1.0.1 URL and sha256 were posted to github/spec-kit#4886.
+
+Not run: S27 parity on the 1.0.1 URLs, and the `taskstoissues` scenarios from the release install against the test instance. The changed prompt ran against the sandbox only from the `--dev` install (run log above). The extension did not change, so its install was checked only through the bundle.
