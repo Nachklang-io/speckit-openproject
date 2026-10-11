@@ -6,6 +6,16 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 
 ### Unreleased
 
+Planned as 1.0.3.
+
+#### Fixed
+- `speckit.taskstoissues`: the plan has exactly one row per feature, phase and task, with the columns `hash` and `stored` (first 12 hexadecimal characters of the current and of the ledger hash, `—` without a ledger entry); ranges such as `T001–T020`, `…` and "and N more" are not allowed, and long plans are printed in parts of at most 40 rows (`part i of n`). (#23)
+- `speckit.taskstoissues`: a role that can read but not create work packages in the project stops before any write, also with `--dry-run`, with "Missing write permission" instead of a message about missing types. The check lists the project's capabilities (two read calls, `get-my-access` and `list-capabilities`) and stops only when read is listed and create is not; in every other case the command continues as before. The "missing type" message gets a hint about read-only roles. Untested: the denied case with a real read-only role (S43), unless the run log of `docs/TESTING.md` says otherwise. (#22)
+- `speckit.taskstoissues`: when the prerequisite script fails, the command prints its message and names the missing file and the command that creates it for the current mode (`/speckit-plan` or `/speckit.plan`, `/speckit-tasks` or `/speckit.tasks`). With both files missing, `plan.md` is named first, as the script checks it first. (#21)
+
+#### Changed
+- The README of the preset and the main README state that the `generic` integration gets no preset command override: `/speckit.taskstoissues` stays the core command there. (#20)
+
 ### 1.0.2 - 2026-10-11
 
 #### Fixed
