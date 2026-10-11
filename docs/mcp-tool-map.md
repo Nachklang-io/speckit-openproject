@@ -6,7 +6,7 @@ Single place that maps capabilities used by the commands to tool names. Add a co
 |---|---|---|---|
 | list-projects | `list_projects` | search, limit, offset | yes |
 | get-my-access | `get_my_project_access` | project | yes (admin role) |
-| list-capabilities | `list_capabilities` | project, limit, offset, select | yes (admin role: read and create listed); denied case for a real read-only role: no |
+| list-capabilities | `list_capabilities` | project, limit, offset, select | yes (admin role: read and create listed); denied case: yes (user without a membership: read listed, create not listed) |
 | list-types | `list_types` | project | yes |
 | get-write-context | `get_project_work_package_context` | project, type | yes |
 | list-statuses | `list_statuses` | (none) | yes |

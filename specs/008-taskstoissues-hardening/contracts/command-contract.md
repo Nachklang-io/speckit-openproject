@@ -32,7 +32,7 @@ Two rows are added to the preset's map and to `docs/mcp-tool-map.md`:
 | Capability | Tool | Parameters | Verified |
 |---|---|---|---|
 | get-my-access | `get_my_project_access` | project | yes (admin role) |
-| list-capabilities | `list_capabilities` | project, limit, offset, select | yes (admin role: read and create listed); denied case for a real read-only role: no |
+| list-capabilities | `list_capabilities` | project, limit, offset, select | yes (admin role: read and create listed); denied case: yes (user without a membership: read listed, create not listed) |
 
 ## Documentation
 

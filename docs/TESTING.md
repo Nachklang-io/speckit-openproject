@@ -625,7 +625,7 @@ Scenarios S41–S43 check `speckit.taskstoissues` after the hardening of feature
 |---|---|---|---|
 | S41 | Large plan (US1): `tests/fixtures/tasks/s-large-tasks.md` (120 tasks) as `tasks.md`, placeholder `plan.md`; `--dry-run` | one row per feature, phase and task with `hash` and `stored` cells, no range, no `…`, parts of at most 40 rows with `part i of n`, counts line after the last part, nothing written | pass 2026-10-11 (run log "S41–S43a") |
 | S42 | Missing file (US3): delete `plan.md`, run; restore it, delete `tasks.md`, run | the script's message verbatim and `Missing: plan.md. Run /speckit-plan first.` (resp. `tasks.md` and `/speckit-tasks`; `/speckit.plan` in command mode), nothing written | pass in skills mode 2026-10-11 (run log "S41–S43a"); command mode not run |
-| S43 | Read-only role (US2, "S7b") **(maintainer)**: give the sandbox user a read-only role in the project in the web UI; `--dry-run`; restore the role afterwards | stop before any write with the message "Missing write permission: user <id> can read but not create work packages in <project> ...", no "types are missing" | **not run** (needs a read-only role for the sandbox user, maintainer action) |
+| S43 | Read-only role (US2, "S7b") **(maintainer)**: give the sandbox user a read-only role in the project in the web UI; `--dry-run`; restore the role afterwards | stop before any write with the message "Missing write permission: user <id> can read but not create work packages in <project> ...", no "types are missing" | pass 2026-10-11 (run log "S43"); the "missing type" hint was not seen |
 | S43a | Allowed case: S1 or S2 with the write role through the changed prompt | same result as before the change (created, then all `skip`), no extra write, the permission check passes silently | dry run pass 2026-10-11; the real run and the re-run were not repeated (run log "S41–S43a") |
 
 ### Notes for the scenarios
@@ -649,8 +649,20 @@ Observations:
 - S43a: the denied case (S43) is not run, so the stop message of the permission check has not been seen live.
 - US4 (generic note): checked by installing the preset into a `generic` project (`--integration generic --integration-options="--commands-dir .claude/commands"`, spec-kit CLI 1.1.4.dev0): `specify preset list` shows the preset, the installed `speckit.taskstoissues.md` is still the core command (no OpenProject text, three mentions of GitHub).
 
+### Run log: S43 (2026-10-11)
+
+Setup as in the run log "S41–S43a"; the skill was reinstalled from the working tree after the review fixes (it contains "never print the result"). The maintainer changed the role of the sandbox user in the web UI; afterwards `get_my_project_access` returned `membership: null` for user 5 (no membership in `speckit-sandbox`, the read access comes from outside a project role), and the capability list had 54 entries (2 pages) with `work_packages/read/w3-5` and without `work_packages/create/w3-5`; `work_packages/create/w3-4` (another principal) was still listed.
+
+| Scenario | Feature dir | Steps | Result |
+|---|---|---|---|
+| S43 | `978-allowed` | `--dry-run` with the changed role | stop at step 5.2 before the type check and the plan: `Missing write permission: user 5 can read but not create work packages in speckit-sandbox (permission work_packages/create is not listed). Nothing was written. Ask a project admin for a role with that permission.`; no "types are missing" message; the project directory contains only `config.yml` (no ledger); no write capability called |
+
+Observations:
+- The tested case is a user **without a membership** who reads the project; a user with a membership and a read-only role was not run. The decision rule (read listed, create not listed) is the same, and the capability list of the user is what decides.
+- The restored write role must be set again by the maintainer before the next sandbox run.
+
 ### Untested after feature 008 (status 2026-10-11)
 
-- S43: a read-only role in the project (the denied case of the permission check, its stop message and the added hint in the "missing type" message). The capability list for a real read-only role has not been seen.
+- S43 variants: a user who still has a membership with a read-only role (only a user without a membership was run) and the added hint in the "missing type" message (appears only when the check finds no evidence).
 - Command mode (`/speckit.taskstoissues`, `/speckit.plan`, `/speckit.tasks` messages) and the `generic` integration beyond the file check above.
 - The real run and a re-run on an existing ledger through the changed prompt (SC-005); only dry runs were executed.
