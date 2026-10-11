@@ -884,3 +884,76 @@ def test_subject_cap_reference(length):
     assert len(capped) == min(length, 255)
     assert capped.startswith("Phase 1: ")
     assert capped.endswith("\u2026") == (length > 255)
+
+
+def test_plan_table_has_one_row_per_key_with_hash_columns(prompt):
+    assert "key, kind, subject" in prompt
+    assert "action, hash, stored, reason" in prompt
+    assert "one row per key" in prompt
+    for forbidden in ("ranges", "`…`", "and N more"):
+        assert forbidden in prompt, forbidden
+    assert "first 12 hexadecimal characters" in prompt
+    assert "at most 40 rows" in prompt
+    assert "part i of n" in prompt
+
+
+def test_permission_check_runs_before_list_types_and_stops_only_with_evidence(prompt):
+    step5 = prompt[
+        prompt.index("5. **Project and types.**") : prompt.index("6. **Parse `tasks.md`.**")
+    ]
+    check = step5.index("`get-my-access`")
+    assert check < step5.index("`list-types` (project)")
+    assert step5.index("`list-capabilities`") < step5.index("`list-types` (project)")
+    for text in (
+        "`select`",
+        "all pages",
+        "`work_packages/read/`",
+        "`work_packages/create/`",
+        "ends with `-<current_user_id>`",
+        "Missing write permission: user <current_user_id> can read but not create work packages",
+        "also with `--dry-run`",
+        "no evidence",
+        "never print a `url` or host",
+        "calls no write capability",
+        "A role without the permission to create work packages can also cause an empty type list.",
+    ):
+        assert text in step5, text
+
+
+def test_step1_reports_the_missing_file_and_the_command_for_the_mode(prompt):
+    step1 = prompt[prompt.index("1. **Prerequisites.**") : prompt.index("2. **Arguments.**")]
+    for text in (
+        "exits with a non-zero status",
+        "print its message verbatim",
+        "Missing: <file>. Run <command> first.",
+        "`plan.md`",
+        "`tasks.md`",
+        "(`/speckit-plan` in skills mode, `/speckit.plan` otherwise)",
+        "(`/speckit-tasks` in skills mode, `/speckit.tasks` otherwise)",
+        "the file the script reports",
+        "nothing is written",
+    ):
+        assert text in step1, text
+
+
+def test_readmes_name_the_generic_integration_limit(root):
+    main = (root / "README.md").read_text()
+    preset = (root / "preset/README.md").read_text()
+    for text in (main, preset):
+        assert "`generic` integration" in text
+        assert "registers no command override" in text
+        assert "stays the core" in text
+    assert "Check the installed command file" in preset
+
+
+def test_step_references_resolve_to_existing_sub_steps(prompt):
+    outline = prompt[prompt.index("## Outline") :]
+    numbered = set(re.findall(r"^(\d+)\. \*\*", outline, flags=re.MULTILINE))
+    for step, sub in re.findall(r"step (\d+)\.(\d+)", prompt):
+        assert step in numbered, f"step {step}.{sub}: no step {step}"
+    step5 = prompt[
+        prompt.index("5. **Project and types.**") : prompt.index("6. **Parse `tasks.md`.**")
+    ]
+    subs = set(re.findall(r"^   (\d+)\. ", step5, flags=re.MULTILINE))
+    for step, sub in re.findall(r"step (5)\.(\d+)", prompt):
+        assert sub in subs, f"step 5.{sub} does not exist"

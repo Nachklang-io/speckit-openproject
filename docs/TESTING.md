@@ -78,7 +78,7 @@ All steps were followed by hand against `speckit-sandbox` with the MCP tools (no
 - **S4**: 3 relations created (preview, then confirm): T004 follows T002, T005 follows T004, T006 follows T001 (relation ids 10–12). Read-back shows no relation involving T003 and none between T001 and T002; `queried_perspective` of T005 reports predecessor T004. Ledger has 9 items and 3 relations, schema-valid.
 - **Adopt (FR-007, ledger moved aside)**: the search found each of the 9 items exactly once, subjects start with the key; the parent chain of T004 contains the feature work package; the relation of T005 was recognised via `get-relations` (predecessor id). No duplicates would be created. The ledger was then restored from the moved-aside copy instead of being rebuilt by a run.
 - **S9**: after changing the title of T004 in `tasks.md`: without `--update` the stored hash differs from the current one, so "differs, not updated" and no update call. With `--update`: `update-work-package` preview (only subject/description) and confirm; `lock_version` 2. A ledger entry pointing to id 99999 was classified `stale` by the existence check (the search returns `total: 0`), not recreated, ledger untouched (the entry was restored by hand afterwards).
-- **S5** (logic only): the real type list is Task, Milestone, Summary task, Feature, Epic, User story, Bug; a configured type "Phase" is not in it, so the prompt would stop in step 5.2 before any write and list these types. Not run end to end.
+- **S5** (logic only): the real type list is Task, Milestone, Summary task, Feature, Epic, User story, Bug; a configured type "Phase" is not in it, so the prompt would stop in the type check (step 5.2 in the earlier prompt revision, 5.3 since feature 008) before any write and list these types. Not run end to end.
 - **S7** (partial): a preview for a project outside the server's allowlist (`test`, not visible to the server) fails with the generic `Error executing tool create_work_package`; nothing was written. The case "project allowed by the server but read-only in OpenProject" was not tested; it needs the project in `OPENPROJECT_READ_PROJECTS`/`OPENPROJECT_WRITE_PROJECTS` and a restart of the MCP server.
 - **Defects found and fixed during this run**: (1) a missing id makes `get_work_package` fail with a generic error that cannot be told apart from a connection error; the existence check now uses `search_work_packages` by id. (Earlier: file hints in backticks.)
 - **Open findings**: (1) the ledger is one file per project but is tied to one `feature`; a second feature in the same repo stops at step 8 (design question, see research R16). (2) `Story: parallel` reads oddly for `[P]`-only tasks.
@@ -616,3 +616,53 @@ Observation: the other parents continue after a block is covered only partly (bo
 - Duplicate phase headings (stop): prompt rule only, no reference test. A phase without tasks or without a heading on a live feature: covered by `tests/test_rollup.py` only.
 - SC-002 shape (exactly one open task): covered by reference tests only; S35 is the live approximation.
 - Command mode (`/speckit.openproject.sync-status`) and the `after_implement` hook offer.
+
+## Scenarios for feature 008 (taskstoissues hardening)
+
+Scenarios S41–S43 check `speckit.taskstoissues` after the hardening of feature 008 (plan rows, permission message, missing-file message). They run through the **installed skill** (skills mode) in a fresh headless session in the scratch project; S43 needs an admin action. S1 or S2 are re-run with the write role through the changed prompt as the allowed-case regression.
+
+| ID | Scenario | Expected | Status |
+|---|---|---|---|
+| S41 | Large plan (US1): `tests/fixtures/tasks/s-large-tasks.md` (120 tasks) as `tasks.md`, placeholder `plan.md`; `--dry-run` | one row per feature, phase and task with `hash` and `stored` cells, no range, no `…`, parts of at most 40 rows with `part i of n`, counts line after the last part, nothing written | pass 2026-10-11 (run log "S41–S43a") |
+| S42 | Missing file (US3): delete `plan.md`, run; restore it, delete `tasks.md`, run | the script's message verbatim and `Missing: plan.md. Run /speckit-plan first.` (resp. `tasks.md` and `/speckit-tasks`; `/speckit.plan` in command mode), nothing written | pass in skills mode 2026-10-11 (run log "S41–S43a"); command mode not run |
+| S43 | Read-only role (US2, "S7b") **(maintainer)**: give the sandbox user a read-only role in the project in the web UI; `--dry-run`; restore the role afterwards | stop before any write with the message "Missing write permission: user <id> can read but not create work packages in <project> ...", no "types are missing" | pass 2026-10-11 (run log "S43"); the "missing type" hint was not seen |
+| S43a | Allowed case: S1 or S2 with the write role through the changed prompt | same result as before the change (created, then all `skip`), no extra write, the permission check passes silently | dry run pass 2026-10-11; the real run and the re-run were not repeated (run log "S41–S43a") |
+
+### Notes for the scenarios
+
+- S43 depends on the capability list of the server for a real read-only role; that case is unverified (research R1). If the list shows no read entry for the user, the check gives no evidence and the old "missing type" message appears, now with the added hint about read-only roles; record that result as it is.
+- Command mode and the `generic` integration (US4 is documentation only) are not run for feature 008; label them untested.
+
+### Run log: S41–S43a (2026-10-11)
+
+Setup: MCP server `openproject-ce-mcp` 0.4.2 (not pinned; 0.4.1 is the verified version), spec-kit CLI 1.1.4.dev0, skills mode, sandbox project `speckit-sandbox`, role "Project admin". Prompt revision: the working tree of branch `008-taskstoissues-hardening` (T005–T012). A fresh scratch project (`.scratch/proj008`) with the preset installed with `--dev`; the S41 run used the skill as installed after T006, the S42 and S43a runs the skill reinstalled after T012. Each run was a fresh headless session (`claude -p` with the installed skill, `--permission-mode acceptEdits`, MCP tools, a restricted Bash allowlist). The `OPENPROJECT_*` variables were exported in the parent shell; `.env` was not read. Hashes of `config.yml` and `tasks.md` were checked before and after S41.
+
+| Scenario | Feature dir | Steps | Result |
+|---|---|---|---|
+| S41 | `975-large-list` (120 tasks, 6 phases) | `--dry-run` only, no ledger | 127 plan rows (1 feature, 6 phases, 120 tasks) in 4 parts (`part 1 of 4` … `part 4 of 4`) of 40, 40, 40 and 7 rows; every row has `hash` (12 characters) and `stored` (`—`); no range, no `…` or "and N more" in the table; counts line after the last part; `config.yml` and `tasks.md` unchanged, no mapping file created, no write capability called |
+| S42 | `976-no-plan`, `977-no-tasks` | `--dry-run` | `plan.md` missing: the script's message verbatim and `Missing: plan.md. Run /speckit-plan first.`; `tasks.md` missing: the script's message and `Missing: tasks.md. Run /speckit-tasks first.`; nothing written, no OpenProject call, no ledger |
+| S43a | `978-allowed` (10 tasks, 3 phases) | `--dry-run` with the write role | the permission check passed: the run reported `work_packages/read/w3-5` and `work_packages/create/w3-5` for user 5; plan of 14 rows with both hash columns; nothing written. The real run and a re-run on a ledger were not repeated |
+
+Observations:
+- S41: the session measured the subject length with `wc -m` for only 13 of 127 subjects and said so (the rule asks for every subject); this belongs to the length rule of preset 1.0.1, not to this feature. It computed 127 hashes with one `printf … | sha256sum` call each, because a script was refused by the session's permission mode. The hashes were not independently recomputed.
+- S42: command mode (`/speckit.plan`, `/speckit.tasks`) was not run.
+- S43a: the denied case (S43) is not run, so the stop message of the permission check has not been seen live.
+- US4 (generic note): checked by installing the preset into a `generic` project (`--integration generic --integration-options="--commands-dir .claude/commands"`, spec-kit CLI 1.1.4.dev0): `specify preset list` shows the preset, the installed `speckit.taskstoissues.md` is still the core command (no OpenProject text, three mentions of GitHub).
+
+### Run log: S43 (2026-10-11)
+
+Setup as in the run log "S41–S43a"; the skill was reinstalled from the working tree after the review fixes (it contains "never print the result"). The maintainer changed the role of the sandbox user in the web UI; afterwards `get_my_project_access` returned `membership: null` for user 5 (no membership in `speckit-sandbox`, the read access comes from outside a project role), and the capability list had 54 entries (2 pages) with `work_packages/read/w3-5` and without `work_packages/create/w3-5`; `work_packages/create/w3-4` (another principal) was still listed.
+
+| Scenario | Feature dir | Steps | Result |
+|---|---|---|---|
+| S43 | `978-allowed` | `--dry-run` with the changed role | stop at step 5.2 before the type check and the plan: `Missing write permission: user 5 can read but not create work packages in speckit-sandbox (permission work_packages/create is not listed). Nothing was written. Ask a project admin for a role with that permission.`; no "types are missing" message; the project directory contains only `config.yml` (no ledger); no write capability called |
+
+Observations:
+- The tested case is a user **without a membership** who reads the project; a user with a membership and a read-only role was not run. The decision rule (read listed, create not listed) is the same, and the capability list of the user is what decides.
+- The restored write role must be set again by the maintainer before the next sandbox run.
+
+### Untested after feature 008 (status 2026-10-11)
+
+- S43 variants: a user who still has a membership with a read-only role (only a user without a membership was run) and the added hint in the "missing type" message (appears only when the check finds no evidence).
+- Command mode (`/speckit.taskstoissues`, `/speckit.plan`, `/speckit.tasks` messages) and the `generic` integration beyond the file check above.
+- The real run and a re-run on an existing ledger through the changed prompt (SC-005); only dry runs were executed.
