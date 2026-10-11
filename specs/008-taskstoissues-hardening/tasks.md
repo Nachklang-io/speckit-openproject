@@ -53,7 +53,7 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 - [x] T005 [US1] Add a failing test to `tests/test_prompt_sync.py`: the plan step of the preset prompt names the columns `hash` and `stored`, forbids ranges, `…` and "and N more", and requires parts of at most 40 rows with `part i of n` (depends on T003)
 - [x] T006 [US1] Edit step 9 of `preset/commands/speckit.taskstoissues.md` per `contracts/command-contract.md` ("Step 9"): table columns key, kind, subject, parent key, action, hash, stored, reason; hash cells are the first 12 hex characters of the hash computed by the step 7 shell command (current) and of the ledger hash (`—` without an entry); one row per key; long plans in parts; the counts line follows the last part; T005 passes (depends on T005)
-- [ ] T007 [US1] **(headless sandbox run by Claude, `--dry-run` only; the maintainer may repeat it)** Run scenario S-large through the installed skill (`scripts/dev-install.sh`, `tasks.md` = the 120-task fixture, placeholder `plan.md`): count the rows, check the hash cells and the parts; record the result (depends on T006, T004)
+- [x] T007 [US1] **(headless sandbox run by Claude, `--dry-run` only; the maintainer may repeat it)** Run scenario S-large through the installed skill (`scripts/dev-install.sh`, `tasks.md` = the 120-task fixture, placeholder `plan.md`): count the rows, check the hash cells and the parts; record the result (depends on T006, T004)
 
 **Checkpoint**: US1 delivers readable plans; MVP.
 
@@ -81,7 +81,7 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 - [x] T011 [US3] Add a failing test to `tests/test_prompt_sync.py`: step 1 prints the script's message verbatim on a non-zero exit, names the missing file (`plan.md` or `tasks.md` as the script reports it) and the command for skills mode and command mode for both files (`/speckit-plan`, `/speckit.plan`, `/speckit-tasks`, `/speckit.tasks`) (depends on T009)
 - [x] T012 [US3] Edit step 1 of `preset/commands/speckit.taskstoissues.md` per `contracts/command-contract.md` ("Step 1"): replace the "If `tasks.md` is missing" sentence by the explicit non-zero-exit handling; the existing `tasks.md` wording keeps its content; T011 passes (depends on T011)
-- [ ] T013 [US3] **(headless sandbox run, no OpenProject call needed)** Run S-plan: delete `plan.md` from a scratch feature directory, run the installed skill; then restore `plan.md` and delete `tasks.md`. Expect the messages of the contract and no write; record (depends on T012, T004)
+- [x] T013 [US3] **(headless sandbox run, no OpenProject call needed)** Run S-plan: delete `plan.md` from a scratch feature directory, run the installed skill; then restore `plan.md` and delete `tasks.md`. Expect the messages of the contract and no write; record (depends on T012, T004)
 
 **Checkpoint**: US3 gives a specific stop message for both files.
 
@@ -103,7 +103,7 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 ## Phase 7: Polish & Cross-Cutting
 
 - [x] T016 [P] Add `### Unreleased` items for the preset to `CHANGELOG.md` under "Planned as 1.0.3": `#### Fixed` for the plan rows (#23), the permission message (#22) and the missing-file message (#21); `#### Changed` or a note for the two new read capabilities and the README note (#20); keep the denied case labelled untested if S7b did not run
-- [ ] T017 Record the executed runs (T007, T010, T013) in the run log of `docs/TESTING.md`: what was actually executed, what was not; update the scenario statuses and the "Untested" list (depends on T007, T010, T013)
+- [x] T017 Record the executed runs (T007, T010, T013) in the run log of `docs/TESTING.md`: what was actually executed, what was not; update the scenario statuses and the "Untested" list (depends on T007, T010, T013)
 - [ ] T018 Verification before done: `uv run pytest && uv run ruff check . && uv run ruff format --check .`; `scripts/dev-install.sh` installs both packages and `specify preset list` / `specify extension list` show them; `git diff --stat main -- schemas preset/openproject-config.template.yml extension` shows no change (FR-010); run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff and fix or record their findings (depends on T016, T017)
 - [ ] T019 Open the PR `feat(preset): harden taskstoissues (plan rows, permission and missing file messages)` with the executed and unexecuted scenarios listed; add `docs/ROADMAP.md` row 008 (depends on T018)
 
