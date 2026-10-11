@@ -79,7 +79,7 @@ A team that manages phase and feature statuses by hand disables the roll-up in t
 
 **Why this priority**: Teams with their own parent workflow must not be surprised; existing configurations must keep working.
 
-**Independent Test**: With the switch set to off, run the sync on a feature with all tasks done: no parent is read for the roll-up or written, and the report does not list parents.
+**Independent Test**: With the switch set to off, run the sync on a feature with all tasks done: no parent is read for the roll-up or written, and the report has no Parents section and no parents counts line; phase and feature work packages appear only as informational lines, as in 003.
 
 **Acceptance Scenarios**:
 
@@ -98,6 +98,10 @@ A team that manages phase and feature statuses by hand disables the roll-up in t
 - `--dry-run`: the roll-up is computed from the planned task states, as if the task writes had happened.
 - A parent work package is missing in OpenProject: reported as stale, never recreated.
 - The ledger has a phase entry but `tasks.md` has no matching `## Phase N` heading, or the other way round: reported, no write.
+- A task sits above the first phase heading or was moved under another heading after publishing, while its work package is a child of a phase in OpenProject: it counts for that phase (FR-002) and the report names it. If that phase has no heading, the task counts for no phase.
+- A heading with leading zeros (`## Phase 01`) is the phase `phase-1` for both the preset and the sync; a legacy ledger key `phase-01` equals `phase-1` and is never renamed or adopted again.
+- Two phase headings with the same key (`## Phase 1` and `## Phase 01`), or two ledger phase entries with the same key: the preset and the sync stop before any write and name them.
+- The sync accepts any `## Phase N` heading; the preset publishes only `## Phase N:` with a colon, so a heading without a colon is an `unpublished phase`.
 - The configured statuses `open`, `in_progress` or `done` are missing: the roll-up cannot run and the command stops with the existing message that points to field discovery.
 - A task is reopened after its phase was closed: the phase stays done (FR-013); a manual reopen of the phase in OpenProject is needed.
 
@@ -106,7 +110,7 @@ A team that manages phase and feature statuses by hand disables the roll-up in t
 ### Functional Requirements
 
 - **FR-001**: The sync MUST derive the status of each phase work package from the statuses of its tasks after the task pushes and pulls of the same run: done if all tasks are finished, in progress if at least one task is finished or in progress, otherwise open. A task is finished when its work package is in the done status or in any other closed status (for example Rejected); the report names every task that counted as finished through a closed status other than done.
-- **FR-002**: A task belongs to the phase named by the `## Phase N` heading it sits under in `tasks.md`, which is the ledger entry `phase-N`.
+- **FR-002**: A task line belongs to the phase whose ledger `id` equals the `parent_id` of the task work package as read by the sync. If no ledger phase matches, or the work package has no parent or was not read, it belongs to the phase of the nearest `## Phase N` heading above it, which is the ledger entry `phase-N` (N without leading zeros). A task line with neither, an orphan ledger entry, a task line whose parent phase has no heading, and a task line whose heading phase has no ledger entry belong to no phase and are named in the report (`T### not counted: …`). A task counted for another phase than the heading it sits under is named in the report.
 - **FR-003**: The sync MUST derive the status of the feature work package from its phases: done if all phases are finished, in progress if any phase is in progress or finished, otherwise open. A phase is finished when its status (rolled up in this run, or left alone) is the done status or another closed status; a left-alone phase in an open status outside the three configured statuses (for example On hold) counts as in progress; a phase without tasks is ignored. If every phase is ignored, the feature is left alone and reported. Phases are written before the feature; a phase whose write was blocked or failed counts with the status it actually has in OpenProject, never with the rolled-up status.
 - **FR-004**: The sync MUST write only the status of a parent, using the same two-step flow (preview, then confirm) and the same failure classes as the task pushes. The parent changes are part of the one plan of the run and are covered by its single confirmation question; there is no separate question for parents.
 - **FR-005**: The sync MUST NOT change a parent that is in a closed status other than the configured done status, and MUST report it.

@@ -12,7 +12,7 @@ Unchanged set: `list-statuses`, `get-write-context`, `get-work-package`, `search
 
 ## Steps (16, every run from scratch)
 
-1–6 as in 003 (step 5 additionally requires `statuses.open` and `statuses.in_progress` while the roll-up is on; step 5 reads the write context for the phase and feature types too).
+1–6 as in 003 (step 6 additionally reads `parent_id` of every task work package for the phase membership, FR-002 (report lines `T### counted for phase-M (parent in OpenProject), …` and `T### not counted: …`, no action and no count change); step 5 additionally requires `statuses.open` and `statuses.in_progress` while the roll-up is on; step 5 reads the write context for the phase and feature types too).
 
 7. **Roll-up plan** (new): planned task states (pushes assumed confirmed), `R` and action of each phase, then of the feature.
 8. **Preview the writes**: task pushes, then each parent with action `roll-up` (phases in key order, feature last), `status` = `R`, no `confirm`. An invalid preview or a tool error makes the parent `blocked`.

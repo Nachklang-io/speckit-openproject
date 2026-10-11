@@ -20,7 +20,8 @@ All open points of the spec are resolved here (the spec has no `NEEDS CLARIFICAT
 
 ## R3. Which state a task contributes
 
-- **Decision**: per task line under `## Phase N`:
+- **Membership** (review follow-up, 2026-10-10): a task line belongs to the ledger phase whose `id` equals the `parent_id` of its work package (read in step 6, no extra call); without a match, without a parent or without a read, to the phase of the nearest `## Phase N` heading above it (N without leading zeros); otherwise to no phase; a task whose parent phase has no heading, or whose heading phase has no ledger entry, is counted for no phase and named in the report. Reason: the preset can parent a task above the first heading under a phase the user names, and a task line can be moved after publishing; the heading alone then misses a real child.
+- **Decision**: per task line of a phase:
   - `finished`: its work package status after this run is `statuses.done` or any other closed status (`closed, not done` tasks; the report names them, FR-001).
   - `in progress`: its status after this run equals `statuses.in_progress`.
   - `open`: everything else, including `unpublished`, `stale`, `blocked` and `failed` tasks and tasks whose pull or conflict was `skipped` (FR-012). A task with an unmapped open status (for example On hold) also counts as `open` for the phase.

@@ -13,7 +13,7 @@ No new files and no ledger schema change. The feature reads the config, `tasks.m
 
 | Field | Source | Rule |
 |---|---|---|
-| key | ledger item key: `phase-N` or `feature` | a phase belongs to the `## Phase N` heading of `tasks.md` (FR-002) |
+| key | ledger item key: `phase-N` or `feature` | a phase belongs to the `## Phase N` heading of `tasks.md`, N without leading zeros; its tasks are the task lines whose work package `parent_id` is its `id`, else the lines under its heading (FR-002) |
 | `id` | ledger | work package id |
 | `status` | ledger (`B`) | last status the sync saw or wrote; the only field this feature changes (assignee keys of parents are not written) |
 | `O` | `get-work-package` in step 6 | status read now, no extra call |
