@@ -528,8 +528,8 @@ def test_check_bundle_speckit_range_mismatch(tmp_path):
 
 def test_bundle_pins_read_provides():
     assert release.bundle_pins(yaml.safe_load(BUNDLE.read_text())) == {
-        "preset": "1.0.1",
-        "extension": "0.1.0",
+        "preset": "1.0.2",
+        "extension": "0.2.0",
     }
 
 
@@ -603,7 +603,7 @@ def test_bundle_catalog_download_base(tmp_path):
 
 def test_bundle_catalog_missing_archive(tmp_path):
     archives = build_components(tmp_path)
-    (archives / "openproject-extension-0.1.0.zip").unlink()
+    (archives / f"openproject-extension-{bundle_pin_map()['extension']}.zip").unlink()
     with pytest.raises(release.ReleaseError, match=r"missing release archive: openproject-ext"):
         run_bundle_catalog(tmp_path, archives=archives)
 

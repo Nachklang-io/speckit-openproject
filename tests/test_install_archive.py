@@ -28,9 +28,9 @@ if os.environ.get("SPECKIT_REQUIRE_CLI") != "1":
         shutil.which("specify") is None, reason="specify CLI not installed"
     )
 
-PRESET_VERSION = "1.0.1"
-EXTENSION_VERSION = "0.1.0"
-BUNDLE_VERSION = "0.1.1"
+PRESET_VERSION = "1.0.2"
+EXTENSION_VERSION = "0.2.0"
+BUNDLE_VERSION = "0.2.0"
 
 
 def run(cmd, cwd, answer=None):
