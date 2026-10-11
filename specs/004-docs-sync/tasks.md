@@ -99,7 +99,7 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`, `.specify/memo
 **Independent Test**: S21 on a server without upload root and on broken inputs.
 
 - [X] T024 [US4] In `extension/commands/sync-docs.md` write step 0 and the stop conditions of `contracts/command-contract.md`: capability `create-attachment` not callable → stop naming the capability and `OPENPROJECT_ATTACHMENT_ROOT` (also with `--dry-run`, before any read-for-write step); missing config or ledger, no `items.feature.id`, missing `spec.md`, stale work package, MCP server not connected, inconsistent markers; oversize or rejected upload is a `failed` document with the server's reason, not a stop; when the server rejects the path, the message also names the upload root (`OPENPROJECT_ATTACHMENT_ROOT` must contain the feature directory) as the likely cause (depends on T022)
-- [ ] T025 [US4] **(maintainer)** Run S21: start the server without `OPENPROJECT_ATTACHMENT_ROOT` (tool absent) for the capability stop in `--dry-run` and real mode; no `spec.md`; no ledger; broken markers in the description; record in `docs/TESTING.md` (depends on T024)
+- [X] T025 [US4] **(maintainer)** Run S21: start the server without `OPENPROJECT_ATTACHMENT_ROOT` (tool absent) for the capability stop in `--dry-run` and real mode; no `spec.md`; no ledger; broken markers in the description; record in `docs/TESTING.md` (depends on T024) — (b), (c) run 2026-10-06; (a) dry and real, and (d) dry and real (begin marker without end marker, work package 414) run 2026-10-09 on 93d24db, all pass with zero writes; other marker variants and command mode not run (see TESTING.md untested list)
 
 ---
 
@@ -107,11 +107,11 @@ Monorepo: `extension/`, `preset/`, `schemas/`, `tests/`, `docs/`, `.specify/memo
 
 - [X] T026 [P] Update `extension/README.md`: usage and arguments, upload-root prerequisite and how to set it in the MCP client config, what it reads and writes (attachments, one description block, ledger `documents`), the decision table in plain words, the deletion exception, limitations and untested paths
 - [X] T027 [P] Update `docs/ARCHITECTURE.md`: docs sync flow, ledger `documents`, upload root as MCP server prerequisite; update the status line of `docs/adr/0003-docs-sync-without-wiki-pages.md` ("re-verified 2026-10-06 in feature 004" if T002 confirms no wiki write tool) and `docs/ROADMAP.md`
-- [X] T028 Update `docs/TESTING.md`: scenarios S18–S21 in the checklist, "Untested after feature 004" (command mode (FR-014: the command-mode name is not run), `research.md`/`data-model.md` documents, files above the server's size limit, crash between upload and ledger write, concurrent description edit) (depends on T017, T020, T023, T025) — written for the runs so far; update again when S21a/S21d run
+- [X] T028 Update `docs/TESTING.md`: scenarios S18–S21 in the checklist, "Untested after feature 004" (command mode (FR-014: the command-mode name is not run), `research.md`/`data-model.md` documents, files above the server's size limit, crash between upload and ledger write, concurrent description edit) (depends on T017, T020, T023, T025) — updated 2026-10-09 after S21a/S21d ran
 - [X] T029 Run `scripts/dev-install.sh`; confirm `specify preset list` and `specify extension list` show `openproject` in both and that `.claude/skills/speckit-openproject-sync-docs` exists in the scratch project (depends on T013, T024)
-- [ ] T030 Run `uv run pytest` and `uv run ruff check . && uv run ruff format --check .`; all green (depends on T029)
+- [X] T030 (done 2026-10-09 on main 93d24db: 404 passed, ruff clean) Run `uv run pytest` and `uv run ruff check . && uv run ruff format --check .`; all green (depends on T029)
 - [X] T031 (both reviewers ran once; findings applied, see TESTING.md; run again after any further prompt change) Run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff; fix findings or record the reason for not fixing; rerun once after the last prompt change (depends on T030)
-- [X] T032 (PR description prepared 2026-10-06; T025 stays open as partial, see the untested list) Mark finished tasks in this file, prepare the PR description (summary, executed scenarios, untested paths, the constitution amendment called out); opening the PR is the maintainer's call (depends on T028, T031)
+- [X] T032 (PR description prepared 2026-10-06; T025 completed 2026-10-09, see the untested list) Mark finished tasks in this file, prepare the PR description (summary, executed scenarios, untested paths, the constitution amendment called out); opening the PR is the maintainer's call (depends on T028, T031)
 
 ---
 
