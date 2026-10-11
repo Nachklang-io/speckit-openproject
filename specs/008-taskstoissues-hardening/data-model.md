@@ -25,6 +25,6 @@ Long plans are printed in parts of at most 40 rows (header repeated, `part i of 
 |---|---|---|
 | missing file | prerequisite script exits non-zero | the script's message verbatim; the missing file; the command that creates it for the current mode |
 | missing write permission | the project's permission list shows `work_packages/read` for the user but not `work_packages/create` | project identifier, user id, missing permission `work_packages/create`; no write was made; the list is informational |
-| missing type | a configured type is not in the type list (role may create) | unchanged: name it, list the available types |
+| missing type | a configured type is not in the type list | unchanged: name it, list the available types; plus one sentence that a role without the permission to create work packages can cause an empty type list |
 
 State transitions: none. Every stop happens before the first write, so nothing needs cleanup.

@@ -2,7 +2,7 @@
 
 ## R1. How to detect a missing write permission (issue #22)
 
-**Finding (live, read-only, 2026-10-11, sandbox, role "Project admin")**:
+**Finding (live, read-only, 2026-10-11, sandbox, role "Project admin"; observations, the decision is below and was revised after analysis F1)**:
 - `get_my_project_access` returns `project_id`, `current_user_id` and a `membership` object with `can_update` and `can_update_immediately`. These flags describe the **membership record** (may the user change it), not work package permissions. The brief's idea to check `can_update` is **wrong** and is dropped.
 - `list_capabilities` (with `project`) lists the user's action grants. A capability id has the form `<resource>/<action>/w<project_id>-<principal_id>`; for work packages `work_packages/create/w3-5` exists for project 3 and user 5. Without a suffix the id is unknown (`[not_found]`).
 - `list_capabilities` with `capability_id = work_packages/create/w<project_id>-<current_user_id>` and `project` returns `total: 1` when the grant exists and the tool error `[not_found] OpenProject resource not found.` when it does not (checked with an id for a user that has no grant). The result also carries a `url` with the server host: it must never be printed or stored.

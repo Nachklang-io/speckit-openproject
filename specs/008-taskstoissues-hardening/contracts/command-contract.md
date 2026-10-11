@@ -19,6 +19,7 @@ New sub-step between project selection and `list-types`:
    - read not found, or the list is empty or has another shape → no evidence; continue with `list-types` as today.
    - tool error → existing rule (stop, report verbatim).
 3. Always pass `select`; never print any `url` or host from a capability result.
+4. The existing "missing type" stop of `list-types` keeps its text and gets one added sentence: `If you have read access only, a role without the permission to create work packages can also cause an empty type list.`
 
 ## Step 9 (plan table)
 

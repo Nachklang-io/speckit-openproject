@@ -90,7 +90,7 @@ A user installs the preset in a project that uses spec-kit's `generic` integrati
 - **FR-002**: Every plan row MUST show the hash fields that the command's rules compare for that row (the current hash, and the stored hash where a ledger entry exists); a plan MUST NOT omit them because of its size. A fixed-length prefix of each hash (12 hexadecimal characters) is enough; the full hashes stay in the ledger.
 - **FR-003**: The plan MAY end with a counts line that summarizes the rows; the summary never replaces them.
 - **FR-004**: When the user's role can read but cannot create work packages in the selected project (shown by the project's list of the user's permissions), the command MUST stop before any write, in a dry run as well as in a real run, with a message that names the missing write permission and the project.
-- **FR-005**: The message of FR-004 MUST NOT say that types are missing; the existing "missing type" message applies only when the role may create work packages and a configured type is not in the type list.
+- **FR-005**: The message of FR-004 MUST NOT say that types are missing. The existing "missing type" message stays for a configured type that is not in the type list, and gets one added sentence: if the type list is empty or the user has read access only, the cause may be a role without the permission to create work packages.
 - **FR-006**: The check of FR-004 MUST NOT create, change or delete anything in OpenProject, and MUST NOT rely on a write call.
 - **FR-007**: When `plan.md` is missing from the feature directory and `tasks.md` exists, the command MUST stop before any write with a message that names `plan.md` and the plan command for the current mode (`/speckit-plan` in skills mode, `/speckit.plan` otherwise).
 - **FR-008**: The existing stop message for a missing `tasks.md` MUST remain unchanged (it names `tasks.md` and the tasks command for the current mode). When both files are missing, the file that the prerequisite check reports first (`plan.md`) is named, as today; the other one is reported on the next run.
@@ -109,7 +109,7 @@ A user installs the preset in a project that uses spec-kit's `generic` integrati
 ### Measurable Outcomes
 
 - **SC-001**: A dry run on a feature with 120 tasks prints 120 task rows plus one row per phase and the feature, with no range rows; a reader can find any task by its key.
-- **SC-002**: A user with a read-only role learns the real reason (missing write permission) from the first stop message, in one run, and no run of that case names missing types.
+- **SC-002**: A user with a read-only role whose permissions the project lists learns the real reason (missing write permission) from the first stop message, in one run, and that run does not name missing types. When the permissions are not listed, the "missing type" message carries a hint that a role without the permission to create work packages can cause an empty type list.
 - **SC-003**: A user with a missing `plan.md` learns the file and the command to run from the first stop message, without reading the prerequisite script's output.
 - **SC-004**: A reader of either README can answer "does the preset work with the generic integration?" without trying it.
 - **SC-005**: No scenario that passed before (S1–S9 and re-runs on an existing ledger) changes its result; a re-run on an existing feature writes nothing new.
