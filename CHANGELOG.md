@@ -6,7 +6,7 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 
 ### Unreleased
 
-Planned as 1.0.2.
+### 1.0.2 - 2026-10-11
 
 #### Fixed
 - `speckit.taskstoissues`: the phase key has no leading zeros (`## Phase 01:` → `phase-1`), so the roll-up of `sync-status` finds the phase; the subject and the adopt search keep the number as written. Two headings with the same key stop the run before any write. A ledger written earlier with `phase-01` keeps working: the old entry counts as `phase-1`, is not renamed, duplicated or adopted again.
@@ -32,7 +32,7 @@ Planned as 1.0.2.
 
 ### Unreleased
 
-Planned as 0.2.0.
+### 0.2.0 - 2026-10-11
 
 #### Added
 - `speckit.openproject.sync-status` rolls the status of phase and feature work packages up from their children: all finished → done, at least one finished or in progress → in progress, otherwise open. A Rejected task counts as finished. Phases are rolled up from their task lines, the feature from its phases. Parent writes use preview and confirm and are part of the single confirmation of the run; the plan and the report have a `Parents` section and a `parents:` counts line. On by default; set `rollup_parents: false` in `.specify/openproject/config.yml` to keep the 0.1.0 behaviour.
@@ -58,7 +58,7 @@ Planned as 0.2.0.
 
 ### Unreleased
 
-Planned as 0.2.0.
+### 0.2.0 - 2026-10-11
 
 #### Changed
 - Pins preset 1.0.2 and extension 0.2.0 (parent status roll-up in `sync-status`, on by default, switch `rollup_parents: false`).

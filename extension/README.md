@@ -7,7 +7,7 @@ Version 0.1.0. Implemented: `speckit.openproject.discover-fields`, `speckit.open
 From a release (replace the version as needed). spec-kit asks you to confirm the download source; answer `y`:
 
 ```bash
-specify extension add openproject --from https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.1.0/openproject-extension-0.1.0.zip
+specify extension add openproject --from https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.2.0/openproject-extension-0.2.0.zip
 ```
 
 For local development, from a clone of https://github.com/Nachklang-io/speckit-openproject:

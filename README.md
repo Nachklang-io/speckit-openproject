@@ -15,8 +15,8 @@ Requires spec-kit ≥ 1.1.0 and an OpenProject MCP server configured in your age
 From the GitHub releases (see [releases](https://github.com/Nachklang-io/speckit-openproject/releases) for the current versions):
 
 ```bash
-specify preset add --from https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.1/openproject-preset-1.0.1.zip
-specify extension add openproject --from https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.1.0/openproject-extension-0.1.0.zip
+specify preset add --from https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.2/openproject-preset-1.0.2.zip
+specify extension add openproject --from https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.2.0/openproject-extension-0.2.0.zip
 ```
 
 `specify extension add` asks you to confirm the download source; answer `y`. To install both in one step, use the bundle: see [`bundle/README.md`](bundle/README.md). Changes per package: [`CHANGELOG.md`](CHANGELOG.md).
