@@ -96,4 +96,5 @@ In every row from 2 on, if the parent exists and `B` ≠ `O`, the ledger gets `s
 ## Unresolved (to verify live, labelled untested until then)
 
 - Whether the sandbox workflow for the phase type ("Summary task") and the feature type allows New → Closed and In progress → New directly; if not, those parents are `blocked` by design (spec assumption), and the scenario records it.
+  - Result 2026-10-11 (S38, feature 974): with New → Closed removed for the phase type, the preview of a phase is `rejected` with "no valid transition exists from old to new status for the current user's roles", and the phase is `blocked` with that text. The feature type was not restricted.
 - Whether the server's percent-complete derivation on a closed parent changes anything else visible (expected: only percent complete).
