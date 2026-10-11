@@ -1,0 +1,7 @@
+# rollup_parents must be a boolean
+project: "speckit-sandbox"
+types:
+  feature: "Feature"
+  phase: "Summary task"
+  task: "Task"
+rollup_parents: "no"

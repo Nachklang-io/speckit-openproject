@@ -41,6 +41,7 @@
     },
     "create_relations": {"type": "boolean"},
     "mark_parallel": {"type": "boolean"},
+    "rollup_parents": {"type": "boolean", "description": "false switches off the parent status roll-up of sync-status; absent or true = on"},
     "required_custom_fields": {"type": "object", "additionalProperties": {"type": ["string", "number", "boolean"]}}
   },
   "additionalProperties": false
