@@ -47,9 +47,9 @@ In command mode use `/speckit.taskstoissues`. Configuration order per value: arg
 
 ## Behavior
 
-1. Validates the config, verifies the MCP capabilities, the project and the three types.
+1. Checks that `plan.md` and `tasks.md` exist (a missing file is named together with the command that creates it), validates the config, verifies the MCP capabilities and the project, checks that the user's role can create work packages in the project (a role that can read but not create stops with "Missing write permission"; the check does not see the server's write allowlist), and verifies the three types.
 2. Parses phases, tasks, `[P]` markers, `[US#]` labels and dependencies from `tasks.md`.
-3. Plans every item: skip (already in the ledger), adopt (found in OpenProject by its subject prefix), create, stale (ledger entry whose work package is gone, reported only), blocked.
+3. Plans every item: skip (already in the ledger), adopt (found in OpenProject by its subject prefix), create, stale (ledger entry whose work package is gone, reported only), blocked. The plan has one row per feature, phase and task with the current and the stored hash (12 characters each); long plans are printed in parts of 40 rows.
 4. Asks for confirmation once per phase, then creates the hierarchy Feature → Phase → Task, one work package at a time (preview, then confirm), and writes the ledger `.specify/openproject/mapping-<feature>.json` after every write. Subjects start with the task id and a short headline (`T012 Create schema`; the rules are in step 7 of the command: leading `(...)` groups and a file path after a preposition are removed, the text is cut at the first `: `, `; `, ` (` or `. `, backticks are dropped, at most 70 characters plus `…`; the description keeps the full text); the feature subject starts with the feature directory name. Lengths are measured with `wc -m` in a UTF-8 locale (`C.UTF-8` or `en_US.UTF-8`); without one the command stops. Work packages already in the ledger with an old full-text subject are reported as "differs, not updated"; `--update` rewrites subject and description (description edits made in OpenProject are overwritten). A work package adopted without a ledger entry stores the hash of the new subject, so it keeps its old subject: rename it in OpenProject.
 5. Creates `follows` relations for real dependencies only (not for `[P]` tasks).
 6. Prints a report with counts, work package ids and reasons for blocked, stale and failed items.
@@ -59,7 +59,8 @@ Labels (`[US#]`, `[P]`) are written as plain text in the first line of the descr
 ## Untested paths
 
 Labelled honestly until a scenario in `docs/TESTING.md` has been run:
-- Lists of 100+ tasks beyond a dry run.
+- Lists of 100+ tasks beyond a dry run (a 120-task dry run was checked in feature 008).
+- The "Missing write permission" stop for a user who still has a project membership with a read-only role (only a user without a membership was run), and the check on other servers or OpenProject versions.
 - Command mode (`/speckit.taskstoissues`) and other MCP servers.
 - Other MCP servers and other server names: the front matter filter `tools: ['openproject-ce-mcp/*']` worked in the runs with the server configured as `openproject`; behaviour with other servers is untested.
 - The installed skill was run in skills mode only (S1–S4, S6, S8, S9, see `docs/TESTING.md`); S5 (logic only) and S7 (project outside the server allowlist only, not the OpenProject read-only role) were manual walkthroughs.
@@ -75,7 +76,7 @@ Labelled honestly until a scenario in `docs/TESTING.md` has been run:
 - Each write is a separate preview and confirm call; bulk creation is not used.
 - Types, statuses, workflows and mandatory custom fields differ per project. The command reports problems instead of guessing.
 - LLM execution is not fully deterministic; the mapping file is what guarantees idempotency.
-- Installs and overrides the command with spec-kit 1.1.1 (skills mode); re-verify on each spec-kit upgrade.
+- Installs and overrides the command with spec-kit 1.1.1 and, for the latest checks, 1.1.4.dev0 (skills mode); the `generic` integration gets no override. Re-verify on each spec-kit upgrade.
 
 ## License
 
