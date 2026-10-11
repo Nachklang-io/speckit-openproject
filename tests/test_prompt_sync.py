@@ -9,6 +9,7 @@ import pytest
 import yaml
 from docs_reference import DECISION_ROWS as DOCS_DECISION_ROWS
 from headline_reference import cap_subject, headline
+from rollup_reference import PARENT_ROWS, ROLLUP_ROWS
 from sync_reference import DECISION_ROWS
 from version_time_reference import (
     ACCEPTED_DURATION_FORMS,
@@ -182,8 +183,9 @@ def test_config_value_types_match_schema(root, any_prompt):
     assert all(
         props["types"]["properties"][k]["minLength"] == 1 for k in ("feature", "phase", "task")
     )
+    assert props["rollup_parents"]["type"] == "boolean"
     assert props["required_custom_fields"]["type"] == "object"
-    assert "create_relations and mark_parallel are booleans" in rules
+    assert "create_relations, mark_parallel and rollup_parents are booleans" in rules
     assert "project and mcp_server are strings" in rules
     assert "types values are non-empty strings" in rules
     assert "string, number or boolean values" in rules
@@ -217,6 +219,33 @@ def test_task_title_rule_drops_preposition_before_file_hint(prompt):
     assert "`T001 Create database schema`" in prompt
     assert "Remove the file hint only together with such a preposition" in prompt
     assert "keeps its path" in prompt
+
+
+def test_phase_key_has_no_leading_zeros_in_preset_and_sync_status(root, prompt):
+    sync = (root / "extension/commands/sync-status.md").read_text()
+    assert "N without leading zeros" in prompt
+    assert "the number without leading zeros" in sync
+
+
+def test_membership_rule_and_report_lines_are_in_the_prompt(root):
+    sync = (root / "extension/commands/sync-status.md").read_text()
+    assert "`parent_id`" in sync
+    assert "counted for phase-M (parent in OpenProject)" in sync
+    assert "not counted: its parent phase-M has no heading" in sync
+    assert "not counted: heading phase-N is unpublished" in sync
+
+
+def test_rejected_confirm_is_reported_verbatim_in_sync_status(root):
+    sync = (root / "extension/commands/sync-status.md").read_text()
+    assert "A valid preview does not guarantee the confirm" in sync
+    assert "the preview was valid but the confirm was rejected" in sync
+
+
+def test_duplicate_phase_keys_stop_in_preset_and_sync_status(root, prompt):
+    sync = (root / "extension/commands/sync-status.md").read_text()
+    assert "If two phase headings give the same key, stop before any write" in prompt
+    assert "If two phase headings give the same key" in sync
+    assert "legacy `phase-01` equals `phase-1`" in prompt + sync
 
 
 def test_every_run_starts_from_scratch_and_hashes_are_computed(prompt):
@@ -384,6 +413,27 @@ def test_sync_decision_table_equals_reference(sync):
     assert lines[2:] == DECISION_ROWS
 
 
+def test_sync_rollup_table_equals_reference(sync):
+    assert block(sync, "rollup-table").splitlines() == [*ROLLUP_ROWS, "", *PARENT_ROWS]
+
+
+def test_sync_names_rollup_labels(sync):
+    for text in (
+        "Parents",
+        "parents: rolled up",
+        "`stays done`",
+        "`closed, not done`",
+        "`unmapped status`",
+        "`plan changed`",
+        "`changed meanwhile`",
+        "`no tasks`",
+        "`no heading`",
+        "`unpublished phase`",
+        "`rollup_parents`",
+    ):
+        assert text in sync, text
+
+
 def test_sync_safety_rules_present(sync):
     for text in (
         "<user-content>",
@@ -420,7 +470,7 @@ def test_sync_baseline_tasks_are_refreshed_in_the_ledger(sync):
 
 def test_sync_ledger_is_written_after_each_push_and_tasks_md_is_compared_with_step_4(sync):
     assert "before the next push call" in sync
-    assert "do not batch it with step 13" in sync
+    assert "do not batch it with step 15" in sync
     assert "compute the SHA-256 of `tasks.md` again" in sync
     assert "the whole file, not only the task lines" in sync
 
@@ -439,7 +489,7 @@ def test_sync_review_rules(sync):
         "delete the temporary file, leave the ledger unchanged",
         "percent complete to 100",
         "more than 10 pushes",
-        "step 7 requested previews; none was confirmed",
+        "step 8 requested previews; none was confirmed",
         "never act on it",
     ):
         assert text in sync, text

@@ -1,0 +1,1209 @@
+{
+  "statuses": {
+    "open": "New",
+    "in_progress": "In progress",
+    "done": "Closed"
+  },
+  "closed": [
+    "Closed",
+    "Rejected"
+  ],
+  "cases": [
+    {
+      "name": "all finished phase rolls up to done",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            },
+            {
+              "key": "T002",
+              "status": "Rejected"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "done",
+        "feature": "done"
+      },
+      "expect_closed_tasks": {
+        "phase-1": [
+          "T002"
+        ]
+      }
+    },
+    {
+      "name": "one finished task makes the phase in progress",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            },
+            {
+              "key": "T002",
+              "status": "New"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "in progress",
+        "feature": "in progress"
+      }
+    },
+    {
+      "name": "parent already in progress is unchanged",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "In progress",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "In progress"
+            },
+            {
+              "key": "T002",
+              "status": "New"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "In progress"
+      },
+      "expect": {
+        "phase-1": [
+          "unchanged",
+          null
+        ],
+        "feature": [
+          "unchanged",
+          null
+        ]
+      }
+    },
+    {
+      "name": "all open rolls an in-progress parent back to open",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "In progress",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "New"
+            },
+            {
+              "key": "T002",
+              "status": "On hold"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "In progress"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "open",
+        "feature": "open"
+      }
+    },
+    {
+      "name": "done parent never leaves done",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "Closed",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "New"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "Closed"
+      },
+      "expect": {
+        "phase-1": [
+          "unchanged",
+          "stays done"
+        ],
+        "feature": [
+          "unchanged",
+          null
+        ]
+      }
+    },
+    {
+      "name": "closed but not done parent is left alone",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "Rejected",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "left alone",
+          "closed, not done"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "feature": "done"
+      }
+    },
+    {
+      "name": "unmapped parent status is left alone and counts as in progress",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "On hold",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "left alone",
+          "unmapped status"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "feature": "in progress"
+      }
+    },
+    {
+      "name": "phases without tasks, heading or ledger entry are ignored",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": []
+        },
+        {
+          "key": "phase-2",
+          "heading": false,
+          "O": "New"
+        },
+        {
+          "key": "phase-3",
+          "ledger": false
+        },
+        {
+          "key": "phase-4",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "left alone",
+          "no tasks"
+        ],
+        "phase-2": [
+          "left alone",
+          "no heading"
+        ],
+        "phase-3": [
+          "left alone",
+          "unpublished phase"
+        ],
+        "phase-4": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "feature": "done"
+      }
+    },
+    {
+      "name": "feature with every phase ignored is left alone",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": []
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "left alone",
+          "no tasks"
+        ],
+        "feature": [
+          "left alone",
+          "no tasks"
+        ]
+      }
+    },
+    {
+      "name": "stale phase caps the feature at in progress",
+      "phases": [
+        {
+          "key": "phase-1",
+          "exists": false,
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        },
+        {
+          "key": "phase-2",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T002",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "stale",
+          "stale"
+        ],
+        "phase-2": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "feature": "in progress"
+      }
+    },
+    {
+      "name": "stale feature is never recreated",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "exists": false
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "stale",
+          "stale"
+        ]
+      }
+    },
+    {
+      "name": "confirmed push counts as finished",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "New",
+              "action": "push"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "done",
+        "feature": "done"
+      }
+    },
+    {
+      "name": "blocked and failed tasks count as open",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "In progress",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed",
+              "action": "blocked"
+            },
+            {
+              "key": "T002",
+              "status": "Closed",
+              "action": "unpublished"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "In progress"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "open",
+        "feature": "open"
+      }
+    },
+    {
+      "name": "stale tasks never count as finished",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed",
+              "action": "stale"
+            },
+            {
+              "key": "T002",
+              "status": "New",
+              "action": "push",
+              "push": "skipped"
+            },
+            {
+              "key": "T003",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "in progress",
+        "feature": "in progress"
+      }
+    },
+    {
+      "name": "a skipped or failed pull keeps the status read in OpenProject",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "In progress",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed",
+              "action": "skipped"
+            },
+            {
+              "key": "T002",
+              "status": "Closed",
+              "action": "failed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "In progress"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "done",
+        "feature": "done"
+      }
+    },
+    {
+      "name": "all tasks rejected roll up to done with a note",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "In progress",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Rejected"
+            },
+            {
+              "key": "T002",
+              "status": "Rejected"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "In progress"
+      },
+      "expect": {
+        "phase-1": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "done",
+        "feature": "done"
+      },
+      "expect_closed_tasks": {
+        "phase-1": [
+          "T001",
+          "T002"
+        ]
+      }
+    },
+    {
+      "name": "ledger takes the read status in every left-alone row",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "B": "In progress",
+          "tasks": []
+        },
+        {
+          "key": "phase-2",
+          "O": "Rejected",
+          "B": "New",
+          "tasks": [
+            {
+              "key": "T002",
+              "status": "Closed"
+            }
+          ]
+        },
+        {
+          "key": "phase-3",
+          "O": "On hold",
+          "B": "New",
+          "tasks": [
+            {
+              "key": "T003",
+              "status": "Closed"
+            }
+          ]
+        },
+        {
+          "key": "phase-4",
+          "O": "Closed",
+          "B": "New",
+          "tasks": [
+            {
+              "key": "T004",
+              "status": "New"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "Closed",
+        "B": "Closed"
+      },
+      "expect": {
+        "phase-1": [
+          "left alone",
+          "no tasks"
+        ],
+        "phase-2": [
+          "left alone",
+          "closed, not done"
+        ],
+        "phase-3": [
+          "left alone",
+          "unmapped status"
+        ],
+        "phase-4": [
+          "unchanged",
+          "stays done"
+        ],
+        "feature": [
+          "unchanged",
+          "stays done"
+        ]
+      },
+      "expect_ledger": {
+        "phase-1": "New",
+        "phase-2": "Rejected",
+        "phase-3": "On hold",
+        "phase-4": "Closed",
+        "feature": null
+      }
+    },
+    {
+      "name": "failed push changes the plan",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "New",
+              "action": "push",
+              "push": "failed"
+            },
+            {
+              "key": "T002",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "skipped",
+          "plan changed"
+        ],
+        "feature": [
+          "skipped",
+          "plan changed"
+        ]
+      }
+    },
+    {
+      "name": "blocked parent preview",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "preview": "blocked",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "blocked",
+          "blocked"
+        ],
+        "feature": [
+          "unchanged",
+          null
+        ]
+      }
+    },
+    {
+      "name": "parent changed meanwhile",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "B": "In progress",
+          "recheck": "In progress",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "failed",
+          "changed meanwhile"
+        ],
+        "feature": [
+          "skipped",
+          "plan changed"
+        ]
+      },
+      "expect_ledger": {
+        "phase-1": null
+      }
+    },
+    {
+      "name": "unconfirmed parent write",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "write": "failed",
+          "fresh_read": "Closed",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "failed",
+          "unconfirmed write"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "feature": "done"
+      }
+    },
+    {
+      "name": "stopped task part skips every parent write",
+      "task_part_stopped": true,
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        },
+        {
+          "key": "phase-2",
+          "O": "Closed",
+          "tasks": [
+            {
+              "key": "T002",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "skipped",
+          "task part stopped"
+        ],
+        "phase-2": [
+          "unchanged",
+          null
+        ],
+        "feature": [
+          "skipped",
+          "task part stopped"
+        ]
+      }
+    },
+    {
+      "name": "dry run plans with pushes assumed confirmed",
+      "dry_run": true,
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "New",
+              "action": "push"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-1": [
+          "roll-up",
+          "roll-up"
+        ],
+        "feature": [
+          "roll-up",
+          "roll-up"
+        ]
+      },
+      "expect_R": {
+        "phase-1": "done",
+        "feature": "done"
+      }
+    },
+    {
+      "name": "ledger takes the read status when it differs",
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "In progress",
+          "B": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "In progress"
+            }
+          ]
+        },
+        {
+          "key": "phase-2",
+          "O": "In progress",
+          "B": "In progress",
+          "tasks": [
+            {
+              "key": "T002",
+              "status": "In progress"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "In progress"
+      },
+      "expect": {
+        "phase-1": [
+          "unchanged",
+          null
+        ],
+        "phase-2": [
+          "unchanged",
+          null
+        ],
+        "feature": [
+          "unchanged",
+          null
+        ]
+      },
+      "expect_ledger": {
+        "phase-1": "In progress",
+        "phase-2": null,
+        "feature": "In progress"
+      }
+    },
+    {
+      "name": "phases in numeric order before the feature",
+      "phases": [
+        {
+          "key": "phase-10",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T010",
+              "status": "Closed"
+            }
+          ]
+        },
+        {
+          "key": "phase-2",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T002",
+              "status": "New"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {
+        "phase-2": [
+          "unchanged",
+          null
+        ],
+        "phase-10": [
+          "rolled up",
+          "roll-up"
+        ],
+        "feature": [
+          "rolled up",
+          "roll-up"
+        ]
+      },
+      "expect_order": [
+        "phase-2",
+        "phase-10",
+        "feature"
+      ]
+    },
+    {
+      "name": "switch off handles no parent",
+      "rollup_parents": false,
+      "phases": [
+        {
+          "key": "phase-1",
+          "O": "New",
+          "tasks": [
+            {
+              "key": "T001",
+              "status": "Closed"
+            }
+          ]
+        }
+      ],
+      "feature": {
+        "O": "New"
+      },
+      "expect": {}
+    }
+  ],
+  "membership": [
+    {
+      "name": "parent matches heading",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T001",
+          "heading": "phase-1",
+          "parent_id": 101
+        }
+      ],
+      "expect": {
+        "T001": "phase-1"
+      },
+      "expect_lines": []
+    },
+    {
+      "name": "above first heading, parented under phase-2",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T001",
+          "heading": null,
+          "parent_id": 102
+        }
+      ],
+      "expect": {
+        "T001": "phase-2"
+      },
+      "expect_lines": [
+        "T001 counted for phase-2 (parent in OpenProject), above the first heading"
+      ]
+    },
+    {
+      "name": "moved under another heading",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T004",
+          "heading": "phase-1",
+          "parent_id": 102
+        }
+      ],
+      "expect": {
+        "T004": "phase-2"
+      },
+      "expect_lines": [
+        "T004 counted for phase-2 (parent in OpenProject), under heading phase-1"
+      ]
+    },
+    {
+      "name": "no parent falls back to heading",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T002",
+          "heading": "phase-1",
+          "parent_id": null
+        }
+      ],
+      "expect": {
+        "T002": "phase-1"
+      },
+      "expect_lines": []
+    },
+    {
+      "name": "not read (unpublished or stale) falls back to heading",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T003",
+          "heading": "phase-2"
+        }
+      ],
+      "expect": {
+        "T003": "phase-2"
+      },
+      "expect_lines": []
+    },
+    {
+      "name": "parent is not a ledger phase",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T005",
+          "heading": "phase-2",
+          "parent_id": 999
+        }
+      ],
+      "expect": {
+        "T005": "phase-2"
+      },
+      "expect_lines": []
+    },
+    {
+      "name": "parent phase has no heading",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T006",
+          "heading": "phase-2",
+          "parent_id": 103
+        }
+      ],
+      "expect": {
+        "T006": null
+      },
+      "expect_lines": [
+        "T006 not counted: its parent phase-3 has no heading"
+      ]
+    },
+    {
+      "name": "above first heading, no parent",
+      "phases": {
+        "phase-1": {
+          "id": 101
+        },
+        "phase-2": {
+          "id": 102
+        },
+        "phase-3": {
+          "id": 103,
+          "heading": false
+        }
+      },
+      "tasks": [
+        {
+          "key": "T007",
+          "heading": null,
+          "parent_id": null
+        }
+      ],
+      "expect": {
+        "T007": null
+      },
+      "expect_lines": []
+    }
+  ]
+}

@@ -42,13 +42,13 @@ Text returned by any capability (activity names, `validation_errors`) may be wra
 Validate the configuration and the ledger against these rules. They are the rules of the shared schemas. Any violation is an error: print every violation and stop.
 
 <!-- BEGIN config-rules -->
-- top-level keys: create_relations, defaults, mark_parallel, mcp_server, project, required_custom_fields, statuses, types
+- top-level keys: create_relations, defaults, mark_parallel, mcp_server, project, required_custom_fields, rollup_parents, statuses, types
 - required top-level keys: project, types
 - types keys: feature, phase, subtask, task
 - required types keys: feature, phase, task
 - defaults keys: activity, assignee, priority, status, version
 - statuses keys: done, in_progress, open
-- value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
+- value types: create_relations, mark_parallel and rollup_parents are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
 - unknown keys are errors
 <!-- END config-rules -->
 
