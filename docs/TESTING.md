@@ -616,3 +616,19 @@ Observation: the other parents continue after a block is covered only partly (bo
 - Duplicate phase headings (stop): prompt rule only, no reference test. A phase without tasks or without a heading on a live feature: covered by `tests/test_rollup.py` only.
 - SC-002 shape (exactly one open task): covered by reference tests only; S35 is the live approximation.
 - Command mode (`/speckit.openproject.sync-status`) and the `after_implement` hook offer.
+
+## Scenarios for feature 008 (taskstoissues hardening)
+
+Scenarios S41–S43 check `speckit.taskstoissues` after the hardening of feature 008 (plan rows, permission message, missing-file message). They run through the **installed skill** (skills mode) in a fresh headless session in the scratch project; S43 needs an admin action. S1 or S2 are re-run with the write role through the changed prompt as the allowed-case regression.
+
+| ID | Scenario | Expected | Status |
+|---|---|---|---|
+| S41 | Large plan (US1): `tests/fixtures/tasks/s-large-tasks.md` (120 tasks) as `tasks.md`, placeholder `plan.md`; `--dry-run` | one row per feature, phase and task with `hash` and `stored` cells, no range, no `…`, parts of at most 40 rows with `part i of n`, counts line after the last part, nothing written | not run |
+| S42 | Missing file (US3): delete `plan.md`, run; restore it, delete `tasks.md`, run | the script's message verbatim and `Missing: plan.md. Run /speckit-plan first.` (resp. `tasks.md` and `/speckit-tasks`; `/speckit.plan` in command mode), nothing written | not run |
+| S43 | Read-only role (US2, "S7b") **(maintainer)**: give the sandbox user a read-only role in the project in the web UI; `--dry-run`; restore the role afterwards | stop before any write with the message "Missing write permission: user <id> can read but not create work packages in <project> ...", no "types are missing" | not run |
+| S43a | Allowed case: S1 or S2 with the write role through the changed prompt | same result as before the change (created, then all `skip`), no extra write, the permission check passes silently | not run |
+
+### Notes for the scenarios
+
+- S43 depends on the capability list of the server for a real read-only role; that case is unverified (research R1). If the list shows no read entry for the user, the check gives no evidence and the old "missing type" message appears, now with the added hint about read-only roles; record that result as it is.
+- Command mode and the `generic` integration (US4 is documentation only) are not run for feature 008; label them untested.

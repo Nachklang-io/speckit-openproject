@@ -29,7 +29,7 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 ## Phase 1: Setup
 
-- [ ] T001 Baseline: `uv run pytest && uv run ruff check . && uv run ruff format --check .` pass on branch `008-taskstoissues-hardening`; confirm `tests/fixtures/tasks/s-large-tasks.md` has 120 tasks (`grep -c '^- \[' tests/fixtures/tasks/s-large-tasks.md`)
+- [x] T001 Baseline: `uv run pytest && uv run ruff check . && uv run ruff format --check .` pass on branch `008-taskstoissues-hardening`; confirm `tests/fixtures/tasks/s-large-tasks.md` has 120 tasks (`grep -c '^- \[' tests/fixtures/tasks/s-large-tasks.md`)
 
 ---
 
@@ -37,9 +37,9 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 **Purpose**: the two new capabilities exist in the single map before any prompt step uses them, and the scenario rows exist before the live runs fill them in
 
-- [ ] T002 Add two rows to `docs/mcp-tool-map.md` directly after `list-projects`: `get-my-access` (`get_my_project_access`, parameters `project`, verified `yes (admin role)`) and `list-capabilities` (`list_capabilities`, parameters `project, limit, offset, select`, verified `yes (admin role: read and create listed); denied case for a real read-only role: no`), matching the table in `contracts/command-contract.md`
-- [ ] T003 Copy the same two rows, in the same order, into the `capability-map` block of `preset/commands/speckit.taskstoissues.md`; `uv run pytest tests/test_prompt_sync.py` passes (rows identical to the tool map, order kept, no tool name outside the block) (depends on T002)
-- [ ] T004 Add the scenarios S-large, S-plan and S7b to the scenario table in `docs/TESTING.md` (steps, expected result, status "not run" until T007, T010, T013) and extend the "Untested" list (depends on T002)
+- [x] T002 Add two rows to `docs/mcp-tool-map.md` directly after `list-projects`: `get-my-access` (`get_my_project_access`, parameters `project`, verified `yes (admin role)`) and `list-capabilities` (`list_capabilities`, parameters `project, limit, offset, select`, verified `yes (admin role: read and create listed); denied case for a real read-only role: no`), matching the table in `contracts/command-contract.md`
+- [x] T003 Copy the same two rows, in the same order, into the `capability-map` block of `preset/commands/speckit.taskstoissues.md`; `uv run pytest tests/test_prompt_sync.py` passes (rows identical to the tool map, order kept, no tool name outside the block) (depends on T002)
+- [x] T004 Add the scenarios S-large, S-plan and S7b to the scenario table in `docs/TESTING.md` (steps, expected result, status "not run" until T007, T010, T013) and extend the "Untested" list (depends on T002)
 
 **Checkpoint**: tool map and prompt agree; scenario rows exist; no step uses the new capabilities yet.
 
