@@ -79,8 +79,8 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 **Independent Test**: a feature directory without `plan.md` stops with the script's message and `Missing: plan.md. Run /speckit-plan first.`, nothing written.
 
-- [ ] T011 [US3] Add a failing test to `tests/test_prompt_sync.py`: step 1 prints the script's message verbatim on a non-zero exit, names the missing file (`plan.md` or `tasks.md` as the script reports it) and the command for skills mode and command mode for both files (`/speckit-plan`, `/speckit.plan`, `/speckit-tasks`, `/speckit.tasks`) (depends on T009)
-- [ ] T012 [US3] Edit step 1 of `preset/commands/speckit.taskstoissues.md` per `contracts/command-contract.md` ("Step 1"): replace the "If `tasks.md` is missing" sentence by the explicit non-zero-exit handling; the existing `tasks.md` wording keeps its content; T011 passes (depends on T011)
+- [x] T011 [US3] Add a failing test to `tests/test_prompt_sync.py`: step 1 prints the script's message verbatim on a non-zero exit, names the missing file (`plan.md` or `tasks.md` as the script reports it) and the command for skills mode and command mode for both files (`/speckit-plan`, `/speckit.plan`, `/speckit-tasks`, `/speckit.tasks`) (depends on T009)
+- [x] T012 [US3] Edit step 1 of `preset/commands/speckit.taskstoissues.md` per `contracts/command-contract.md` ("Step 1"): replace the "If `tasks.md` is missing" sentence by the explicit non-zero-exit handling; the existing `tasks.md` wording keeps its content; T011 passes (depends on T011)
 - [ ] T013 [US3] **(headless sandbox run, no OpenProject call needed)** Run S-plan: delete `plan.md` from a scratch feature directory, run the installed skill; then restore `plan.md` and delete `tasks.md`. Expect the messages of the contract and no write; record (depends on T012, T004)
 
 **Checkpoint**: US3 gives a specific stop message for both files.

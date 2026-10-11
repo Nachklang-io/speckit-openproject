@@ -918,3 +918,19 @@ def test_permission_check_runs_before_list_types_and_stops_only_with_evidence(pr
         "If you have read access only, a role without the permission to create work packages can also cause an empty type list.",
     ):
         assert text in step5, text
+
+
+def test_step1_reports_the_missing_file_and_the_command_for_the_mode(prompt):
+    step1 = prompt[prompt.index("1. **Prerequisites.**") : prompt.index("2. **Arguments.**")]
+    for text in (
+        "exits with a non-zero status",
+        "print its message verbatim",
+        "Missing: <file>. Run <command> first.",
+        "`plan.md`",
+        "`tasks.md`",
+        "(`/speckit-plan` in skills mode, `/speckit.plan` otherwise)",
+        "(`/speckit-tasks` in skills mode, `/speckit.tasks` otherwise)",
+        "the file the script reports",
+        "nothing is written",
+    ):
+        assert text in step1, text
