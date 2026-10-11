@@ -25,7 +25,7 @@ All open points of the spec are resolved here (the spec has no `NEEDS CLARIFICAT
   - `finished`: its work package status after this run is `statuses.done` or any other closed status (`closed, not done` tasks; the report names them, FR-001).
   - `in progress`: its status after this run equals `statuses.in_progress`.
   - `open`: everything else, including `unpublished`, `stale`, `blocked` and `failed` tasks and tasks whose pull or conflict was `skipped` (FR-012). A task with an unmapped open status (for example On hold) also counts as `open` for the phase.
-  - "status after this run" is: for a confirmed push `statuses.done`; for a blocked or failed push the status read in step 6; for every other task the status read in step 6 (pulls and conflicts never change OpenProject).
+  - "status after this run" is: for a confirmed push `statuses.done`; for a blocked or failed push `open` (it must not count as done, FR-012; this is the rule of the prompt, so a task that was In progress counts as `open` after a failed push); for every other task the status read in step 6 (pulls and conflicts never change OpenProject).
   - `orphan` ledger entries have no task line and do not belong to any phase.
 - **Dry run**: pushes are assumed confirmed (spec edge case "dry run uses the planned states"); blocked previews stay blocked.
 - **Rationale**: OpenProject owns the status (feature 003), so the roll-up reads OpenProject's state, not the checkbox. A pull already makes the box follow OpenProject.
