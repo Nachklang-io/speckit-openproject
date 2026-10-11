@@ -934,3 +934,13 @@ def test_step1_reports_the_missing_file_and_the_command_for_the_mode(prompt):
         "nothing is written",
     ):
         assert text in step1, text
+
+
+def test_readmes_name_the_generic_integration_limit(root):
+    for name in ("README.md", "preset/README.md"):
+        text = (root / name).read_text()
+        assert "`generic` integration" in text, name
+        assert "no" in text.split("`generic` integration", 1)[1][:200], name
+    preset = (root / "preset/README.md").read_text()
+    assert "stays the core GitHub-issues command" in preset
+    assert "Check the installed command file" in preset

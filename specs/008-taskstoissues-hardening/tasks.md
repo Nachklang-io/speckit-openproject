@@ -93,8 +93,8 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 **Independent Test**: read both READMEs.
 
-- [ ] T014 [P] [US4] Add the `generic` note to `README.md` (installation section) and `preset/README.md` (installation section): spec-kit registers no preset command overrides for the `generic` integration, so `/speckit.taskstoissues` stays the core command there; say what to do instead and how to check (`specify preset list`, the command output); name the spec-kit version where it was observed (see `docs/TESTING.md`, run log 2026-10-09)
-- [ ] T015 [US4] Add a test to `tests/test_prompt_sync.py` (no README test module exists) that both READMEs contain the sentence about the `generic` integration (depends on T014)
+- [x] T014 [P] [US4] Add the `generic` note to `README.md` (installation section) and `preset/README.md` (installation section): spec-kit registers no preset command overrides for the `generic` integration, so `/speckit.taskstoissues` stays the core command there; say what to do instead and how to check (`specify preset list`, the command output); name the spec-kit version where it was observed (see `docs/TESTING.md`, run log 2026-10-09)
+- [x] T015 [US4] Add a test to `tests/test_prompt_sync.py` (no README test module exists) that both READMEs contain the sentence about the `generic` integration (depends on T014)
 
 **Checkpoint**: all four stories implemented.
 

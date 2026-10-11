@@ -28,6 +28,8 @@ For local development, from a clone of https://github.com/Nachklang-io/speckit-o
 specify preset add --dev ./preset
 ```
 
+**The `generic` integration gets no preset override.** spec-kit registers preset command overrides only for integrations that support them; with `--integration generic` the preset installs and `specify preset list` shows it, but `/speckit.taskstoissues` stays the core GitHub-issues command (checked on 2026-10-11 with spec-kit CLI 1.1.4.dev0: the installed command file has no OpenProject text). Check the installed command file after `specify preset add`. If it is still the core command, use an integration with preset support (for example `claude`), or copy `.specify/presets/openproject/commands/speckit.taskstoissues.md` over the command file of your commands directory by hand and repeat that after each spec-kit upgrade. The extension commands do not need an override and work with any integration. Re-check on each spec-kit upgrade.
+
 The `openproject` extension adds field discovery, status sync, docs sync, versions and time tracking. It lives in the same repository (`extension/`), and the bundle installs both together (`bundle/README.md`). Changes are listed in the repository's `CHANGELOG.md` under "Preset".
 
 Then copy `openproject-config.template.yml` to `.specify/openproject/config.yml` and set at least `project`. The three work package types (`feature`, `phase`, `task`) must be enabled in the target project; a default OpenProject instance has no type "Phase", so the template uses "Summary task".

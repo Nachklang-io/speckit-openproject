@@ -19,6 +19,8 @@ specify preset add --from https://github.com/Nachklang-io/speckit-openproject/re
 specify extension add openproject --from https://github.com/Nachklang-io/speckit-openproject/releases/download/extension-v0.2.0/openproject-extension-0.2.0.zip
 ```
 
+Note: with spec-kit's `generic` integration the preset installs but registers no command override, so `/speckit.taskstoissues` stays the core GitHub-issues command there; see [`preset/README.md`](preset/README.md) for how to check and what to do instead.
+
 `specify extension add` asks you to confirm the download source; answer `y`. To install both in one step, use the bundle: see [`bundle/README.md`](bundle/README.md). Changes per package: [`CHANGELOG.md`](CHANGELOG.md).
 
 For development, from a clone: `scripts/dev-install.sh` (installs both packages with `--dev` into `.scratch/`).
