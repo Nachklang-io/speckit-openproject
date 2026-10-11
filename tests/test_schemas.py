@@ -202,3 +202,29 @@ def test_activity_fixture_validates(root):
     cfg = yaml.safe_load((root / "tests/fixtures/config/valid-with-activity.yml").read_text())
     jsonschema.validate(cfg, s)
     assert cfg["defaults"]["activity"] == "Development"
+
+
+def test_rollup_parents_is_an_optional_boolean(root):
+    s = schema(root, "config.schema.json")
+    assert "rollup_parents" not in s["required"]
+    assert s["properties"]["rollup_parents"]["type"] == "boolean"
+    off = yaml.safe_load((root / "tests/fixtures/config/valid-rollup-off.yml").read_text())
+    jsonschema.validate(off, s)
+    assert off["rollup_parents"] is False
+    bad = yaml.safe_load((root / "tests/fixtures/config/invalid-rollup-type.yml").read_text())
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(bad, s)
+
+
+def test_previously_valid_config_fixtures_still_validate(root):
+    s = schema(root, "config.schema.json")
+    for name in (
+        "valid-full",
+        "valid-hand-edited",
+        "valid-minimal",
+        "valid-with-activity",
+        "valid-with-statuses",
+    ):
+        jsonschema.validate(
+            yaml.safe_load((root / f"tests/fixtures/config/{name}.yml").read_text()), s
+        )

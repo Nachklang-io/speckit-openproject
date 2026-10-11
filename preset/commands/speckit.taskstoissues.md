@@ -51,13 +51,13 @@ Paging: `offset` of the search and list capabilities is a **page number** starti
 Validate the configuration and the ledger against these rules. Any violation is an error: print every violation and stop; never repair or overwrite the file.
 
 <!-- BEGIN config-rules -->
-- top-level keys: create_relations, defaults, mark_parallel, mcp_server, project, required_custom_fields, statuses, types
+- top-level keys: create_relations, defaults, mark_parallel, mcp_server, project, required_custom_fields, rollup_parents, statuses, types
 - required top-level keys: project, types
 - types keys: feature, phase, subtask, task
 - required types keys: feature, phase, task
 - defaults keys: activity, assignee, priority, status, version
 - statuses keys: done, in_progress, open
-- value types: create_relations and mark_parallel are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
+- value types: create_relations, mark_parallel and rollup_parents are booleans; project and mcp_server are strings; types values are non-empty strings; defaults values are strings; statuses values are non-empty strings; required_custom_fields is an object with string, number or boolean values
 - unknown keys are errors
 <!-- END config-rules -->
 
@@ -101,7 +101,7 @@ Every run starts from scratch. Execute steps 1–15 in order, every time, even i
    3. `get-write-context` (project, type) once for each of `types.feature`, `types.phase`, `types.task`. Note required fields and custom fields. A field counts as a blocker only if it is `required`, `writable` and has `has_default` false, and is not subject, type, project or parent (status and priority are required but have defaults and never block), and is not covered (a custom field by an entry in `required_custom_fields`; priority or assignee by a non-empty `defaults.priority` / `defaults.assignee`); each blocker makes every item of that type `blocked` with the reason "mandatory field <name>"; their children become `blocked` too. Items of other types are not affected and the run continues.
 
 6. **Parse `tasks.md`.** Apply these rules in order:
-   1. A phase starts at a line `## Phase N: Title`. Phase key `phase-N`.
+   1. A phase starts at a line `## Phase N: Title`. Phase key `phase-N`, N without leading zeros (`## Phase 01:` → `phase-1`; `Phase 0` and `Phase 00` both give `phase-0`); the subject and the adopt search keep N as written in the heading. When a ledger already has the phase, a ledger key `phase-<digits>` equals the heading key with its leading zeros removed (a legacy `phase-01` equals `phase-1`): such an entry counts as present, is not adopted again, not duplicated and not renamed. If two phase headings give the same key, stop before any write and name both headings.
    2. A task is a line `- [ ] T### [P]? [US#]? text` (checkbox may be `[X]`). `T###` is the task key. `[P]` sets parallel. `[US#]` sets story. The first file path in the text is the file hint: a token (backticks allowed; a trailing `.`, `,`, `:` or `;` is not part of it) that contains a `/`, or that ends in a dot followed by 1–5 letters or digits, the first of them a letter, with at least two characters before that dot (`db/schema.sql`, `README.md`; not `v1.0`, `1.2.3` or `e.g.`). Later paths in the text are ordinary text.
    3. Dependencies: text `(depends on T###, T###)` on a task line, and lines `T### depends on T###[, T###]` in a section titled Dependencies. Phase order and `[P]` alone never create a dependency.
    4. If there is no phase or no task: stop, write nothing.

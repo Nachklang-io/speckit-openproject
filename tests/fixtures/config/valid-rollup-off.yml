@@ -1,0 +1,7 @@
+# parent status roll-up switched off
+project: "speckit-sandbox"
+types:
+  feature: "Feature"
+  phase: "Summary task"
+  task: "Task"
+rollup_parents: false

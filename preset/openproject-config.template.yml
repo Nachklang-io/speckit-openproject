@@ -36,3 +36,6 @@ mark_parallel: true
 
 # Custom fields that are mandatory in the target project: { "customField12": "value" }
 required_custom_fields: {}
+
+# Roll the status of phase and feature work packages up from their children (speckit.openproject.sync-status). Default: true
+# rollup_parents: false

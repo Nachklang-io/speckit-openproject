@@ -94,12 +94,34 @@ A run prints a plan table first. `--dry-run` shows it and writes nothing; otherw
 
 Optional hook: the manifest registers an optional `after_implement` hook (`optional: true`), so the host offers the sync after `/speckit-implement` and it never runs unasked. The offer was seen once in skills mode after a no-op `implement` run (see `../docs/TESTING.md`).
 
+### Parent roll-up
+
+After the task part, the command rolls the status of the phase and feature work packages up from their children (the task lines of a phase; the phases of the feature). A task counts as finished if its status is `statuses.done` or another closed status (for example Rejected), as in progress if it is `statuses.in_progress`, and as open otherwise (also On hold, and a task that is unpublished, stale or blocked or whose push did not confirm).
+
+| Children | Rolled-up status |
+|---|---|
+| none (phase without task lines; feature whose phases are all ignored) | none: the parent is left alone (`no tasks`) |
+| all finished | `statuses.done` |
+| at least one finished or in progress | `statuses.in_progress` |
+| otherwise | `statuses.open` |
+
+Guards, checked in this order: a parent whose work package no longer exists is `stale` and never recreated; a parent in `statuses.done` never leaves it (`stays done`); a parent in another closed status (`closed, not done`) or in a status that is none of `statuses.open`, `statuses.in_progress` and `statuses.done` (`unmapped status`) is left alone; a parent already in the rolled-up status is unchanged. Only the remaining parents are written, and only their `status`. This includes moving a parent from in progress back to open when none of its children is started (for example a phase set to In progress by hand); that is not a reopen, since neither status is closed. Phases are written in numeric order, the feature last, after the task pushes and the checkbox pulls; a failed task push recomputes the plan (`plan changed`), a parent whose status changed after the plan is not written (`changed meanwhile`). A valid preview does not guarantee the write: if the server rejects the confirm (for example a workflow rule it applies only when writing), the parent or task is `failed`, the server's answer is shown verbatim and the next run reads it again.
+
+A task counts for the phase its work package is a child of in OpenProject (`parent_id`, read together with the status); without a matching phase it counts for the phase of the nearest `## Phase N` heading above it (N without leading zeros). A task counted for another phase than its heading, for example one above the first heading, is named in the `Parents` section.
+
+Every parent write is previewed in the same preview pass as the task pushes and is part of the one confirmation of the whole plan; `--dry-run` shows the `Parents` section and the second counts line (`parents: rolled up N, unchanged N, left alone N, blocked N, failed N, stale N, skipped N`) and writes nothing. When a parent gets a closed status, the server sets its percent complete to 100 (shown in the plan). A parent's percent complete is derived from its children and may already show 100 while it is open or in progress; if a closed parent is reopened by hand later, the server keeps 100. The ledger records the status of each parent after the run; its assignee is never written.
+
+The roll-up is on by default. Set `rollup_parents: false` in `.specify/openproject/config.yml` to turn it off: then no parent is written and phase and feature work packages are shown in the report only, as before. While it is on, the command needs `statuses.open` and `statuses.in_progress` besides `statuses.done` (written by `discover-fields`, which keeps an existing `rollup_parents` value).
+
+Version pairing: `rollup_parents` is accepted only by extension 0.2.0 and preset 1.0.2 or later. Older prompts reject the key as unknown, so update both packages together before setting it.
+
 ### Limitations and untested paths
 
-- Interactive only. Only task work packages are synced; phase and feature work packages are shown in the report only.
+- Interactive only. Without the roll-up (`rollup_parents: false`), phase and feature work packages are shown in the report only.
 - "Writes only the status" is enforced by the prompt, not by the client (same caveat as `discover-fields`).
 - A closed status sets the percentage done to 100 on the server (observed in the preview); the command does not touch that field itself.
 - Run so far (2026-10-06, skills mode, headless, sandbox, 7 work packages created by hand, hand-written ledger): on earlier prompt revisions (the prompt changed afterwards): pull, push, baseline, conflict, reverted, a transition the server rejects (`blocked`, restricted workflow), the stop conditions and the `tasks.md`-changed-during-the-run case (S14, S15, S16 blocked path, S17; details and defects in `../docs/TESTING.md`). **Untested:** the label `closed, not done` with a Rejected work package, accepting the hook offer inside the `implement` flow, command mode, a stale work package, a failed single confirm, and a re-run of `speckit.taskstoissues` over a synced ledger. A 14-work-package feature (ledger written by `taskstoissues`) was synced with one confirmation in 88 s of command time.
+- Parent roll-up (feature 007): run 2026-10-10 (skills mode, headless, sandbox): S34 (all done, re-run `no changes`), S35 (mixed progress, `stays done`), S36 (`closed, not done` and `unmapped status` left alone) and S37 (switched off, no parent write); run 2026-10-11: S39 (membership by `parent_id`, task above the first heading), S40 (`## Phase 01` heading, ledger key `phase-1`) and S35b (a `reverted` pull written into `tasks.md` together with the roll-up); details in `../docs/TESTING.md`. **Untested:** S38 (a parent transition the workflow forbids), a pull of an open checkbox to a status closed in OpenProject together with the roll-up, a task line moved under another phase heading, a failed parent confirm, the stop after three tool errors, duplicate phase headings, command mode and the hook offer.
 
 ## `sync-docs`
 

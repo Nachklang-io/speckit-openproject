@@ -1,0 +1,11 @@
+# Brief 007: Parent status roll-up for phase and feature work packages (extension)
+
+Extend `speckit.openproject.sync-status` so that phase and feature work packages follow the state of their children. Today the command only writes task work packages and explicitly never writes `phase` or `feature` entries; OpenProject CE does not derive a parent's status from its children (only dates and progress), so after a full sync every phase and feature stays `New` although all its tasks are `Closed`.
+
+Roll-up rule (derived from the ledger and `tasks.md`, after the task pushes and pulls of the same run): a phase is `statuses.done` when all of its tasks are done, `statuses.in_progress` when at least one task is done or in progress, otherwise `statuses.open`; the feature work package is done when all phases are done, in progress when any phase is in progress or done, otherwise open. A task's phase is the `## Phase N` heading it sits under in `tasks.md` (ledger key `phase-N`).
+
+Constraints: same two-step writes (preview, then confirm) and failure classes as the task pushes; never reopen a parent that is in a closed status that is not `statuses.done` (for example `Rejected`); a parent whose status was changed by hand in OpenProject to something outside the three mapped statuses is reported and left alone; never write anything of a parent except `status`; the ledger stores the parent status like a task status. `--dry-run` shows the parent plan. Optional config switch to disable the roll-up (new key, no rename of shipped keys). Note that closing a parent makes the server set its percent complete to 100.
+
+Acceptance: on a feature with all tasks done, one run closes every phase and the feature; with one open task, its phase and the feature become in progress and all other phases are closed; a re-run changes nothing; a hand-set `Rejected` or `On hold` parent is reported, not overwritten. Observed need: dogfood sync of this repo on 2026-10-09 required a manual bulk update of 53 parent work packages.
+
+Open questions for `/speckit-clarify`: should the roll-up also move a parent back from done to in progress when a task is reopened; should it be on by default; does it run in the `after_implement` hook unchanged or as a separate flag.
