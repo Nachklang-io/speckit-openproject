@@ -10,7 +10,7 @@ Each item has a brief in `docs/briefs/` that is the input for `/speckit-specify`
 | 004 | Spec/plan documentation sync | extension | spec.md/plan.md as attachments + summary in the feature work package (implemented, see `specs/004-docs-sync`) | 001 |
 | 005 | Versions/milestones and time tracking | extension | feature → version (implemented, see `specs/005-versions-and-time`), `log-time` | 001, 002 |
 | 006 | Release engineering | both | tags `preset-v*`/`extension-v*`/`bundle-v*`, release workflow, changelog, catalog checklists and submission text, bundle (implemented, see `specs/006-release-engineering`) | 001–005 |
-| 007 | Parent status roll-up | extension | `sync-status` sets phase and feature work packages to open / in progress / done from their tasks (brief only) | 003 |
+| 007 | Parent status roll-up | extension | `sync-status` sets phase and feature work packages to open / in progress / done from their tasks, default on, switch `rollup_parents: false` (implemented, see `specs/007-parent-status-rollup`) | 003 |
 
 Milestones: M1 = 001 released as preset v1.0.0. M2 = 002+003 as extension v0.1. M3 = 004+005. M4 = catalog submissions.
 

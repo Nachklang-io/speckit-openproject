@@ -6,6 +6,14 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 
 ### Unreleased
 
+Planned as 1.0.2.
+
+#### Fixed
+- `speckit.taskstoissues`: the phase key has no leading zeros (`## Phase 01:` → `phase-1`), so the roll-up of `sync-status` finds the phase; the subject and the adopt search keep the number as written. Two headings with the same key stop the run before any write. A ledger written earlier with `phase-01` gets no automatic rename: the old entry stays unused and `phase-1` is created or adopted.
+
+#### Changed
+- `speckit.taskstoissues` accepts the new optional configuration key `rollup_parents` (boolean). The preset never reads or writes it; it only stops rejecting a configuration that contains it. Use preset 1.0.2 together with extension 0.2.0.
+
 ### 1.0.1 - 2026-10-09
 
 #### Fixed
@@ -24,6 +32,18 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 
 ### Unreleased
 
+Planned as 0.2.0.
+
+#### Added
+- `speckit.openproject.sync-status` rolls the status of phase and feature work packages up from their children: all finished → done, at least one finished or in progress → in progress, otherwise open. A Rejected task counts as finished. Phases are rolled up from their task lines, the feature from its phases. Parent writes use preview and confirm and are part of the single confirmation of the run; the plan and the report have a `Parents` section and a `parents:` counts line. On by default; set `rollup_parents: false` in `.specify/openproject/config.yml` to keep the 0.1.0 behaviour.
+- Phase membership of a task follows its work package: the roll-up reads `parent_id` in the existing status read and counts the task for the phase it is a child of in OpenProject; without a matching phase it falls back to the nearest `## Phase N` heading. A task counted for another phase than its heading is named in the `Parents` section. Needs preset 1.0.2 for `## Phase 01` headings.
+- New optional configuration key `rollup_parents` (boolean, default on). `discover-fields` keeps an existing value unchanged.
+
+#### Changed
+- While the roll-up is on, `sync-status` needs `statuses.open` and `statuses.in_progress` in the configuration (run `discover-fields`, or switch the roll-up off).
+- A parent is never moved out of done, and a parent in another closed status (for example Rejected) or in a status outside `statuses.open`, `statuses.in_progress` and `statuses.done` (for example On hold) is never written. The server sets percent complete to 100 when a parent gets a closed status.
+- All prompts accept `rollup_parents` in the configuration. Older prompts (extension 0.1.0, preset 1.0.1) reject a configuration that contains it.
+
 ### 0.1.0 - 2026-10-08
 
 #### Added
@@ -37,6 +57,11 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 ## Bundle
 
 ### Unreleased
+
+Planned as 0.2.0.
+
+#### Changed
+- Pins preset 1.0.2 and extension 0.2.0 (parent status roll-up in `sync-status`, on by default, switch `rollup_parents: false`).
 
 ### 0.1.1 - 2026-10-09
 

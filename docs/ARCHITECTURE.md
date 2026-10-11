@@ -31,7 +31,7 @@ spec-kit project                         OpenProject (CE)
 ## Data flow principles
 1. Discover before write (types, statuses, custom fields).
 2. Plan table → user confirmation → writes (each preview/confirm) → ledger.
-3. Sync is explicit (command or hook), conflict policy: spec-kit is source of truth for structure/subject, OpenProject is source of truth for status, assignee, time. `sync-status` applies it per task: a decision table over checkbox, current status and last synced status (ledger `status`); a conflict goes to OpenProject and is named in the report; the assignee lives in the ledger only; a work package never leaves the done status and is never moved through intermediate statuses.
+3. Sync is explicit (command or hook), conflict policy: spec-kit is source of truth for structure/subject, OpenProject is source of truth for status, assignee, time. `sync-status` applies it per task: a decision table over checkbox, current status and last synced status (ledger `status`); a conflict goes to OpenProject and is named in the report; the assignee lives in the ledger only; a work package never leaves the done status and is never moved through intermediate statuses. Phase and feature work packages are rolled up from their children (all finished → done, any started → in progress, otherwise open), only their status is written, a parent never leaves done and a parent in another closed or an unmapped status is left alone; `rollup_parents: false` turns this off (feature 007).
 4. No deletes. Orphans are reported.
 
 ## Compatibility
