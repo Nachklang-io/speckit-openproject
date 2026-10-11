@@ -6,7 +6,7 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 
 ### Unreleased
 
-Planned as 1.0.3.
+### 1.0.3 - 2026-10-11
 
 #### Fixed
 - `speckit.taskstoissues`: the plan has exactly one row per feature, phase and task, with the columns `hash` and `stored` (first 12 hexadecimal characters of the current and of the ledger hash, `—` without a ledger entry); ranges such as `T001–T020`, `…` and "and N more" are not allowed, and long plans are printed in parts of at most 40 rows (`part i of n`). (#23)
@@ -67,6 +67,11 @@ Planned as 1.0.3.
 ## Bundle
 
 ### Unreleased
+
+### 0.2.1 - 2026-10-11
+
+#### Changed
+- Pins preset 1.0.3 (one plan row per key with hash columns, "Missing write permission" message for read-only roles, message for a missing `plan.md`). The extension pin stays at 0.2.0.
 
 ### 0.2.0 - 2026-10-11
 
