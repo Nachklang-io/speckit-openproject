@@ -4,9 +4,9 @@ Run projects end to end with [spec-kit](https://github.com/github/spec-kit) and 
 
 | Package | Path | Version | Tag |
 |---|---|---|---|
-| Preset `openproject` (overrides `speckit.taskstoissues`) | [`preset/`](preset) | 1.0.0 | `preset-v*` |
-| Extension `openproject` (discover-fields, sync-status, sync-docs, sync-version, log-time) | [`extension/`](extension) | 0.1.0 | `extension-v*` |
-| Bundle `openproject` (preset + extension, pinned) | [`bundle/`](bundle) | 0.1.0 | `bundle-v*` |
+| Preset `openproject` (overrides `speckit.taskstoissues`) | [`preset/`](preset) | 1.0.3 | `preset-v*` |
+| Extension `openproject` (discover-fields, sync-status, sync-docs, sync-version, log-time) | [`extension/`](extension) | 0.2.0 | `extension-v*` |
+| Bundle `openproject` (preset + extension, pinned) | [`bundle/`](bundle) | 0.2.1 | `bundle-v*` |
 
 Requires spec-kit ≥ 1.1.0 and an OpenProject MCP server configured in your agent's MCP client.
 
@@ -100,7 +100,7 @@ Every command is idempotent: a re-run only does what is still missing, and it re
 | When | Command | What it syncs |
 |---|---|---|
 | `tasks.md` changed (new tasks, new phase) | `/speckit-taskstoissues` | creates the missing work packages; `--update` also updates titles and descriptions of linked ones |
-| tasks done locally, or status changed in OpenProject | `/speckit-openproject-sync-status` | checkbox ↔ status, only `statuses.done` is pushed; OpenProject wins conflicts and the command never reopens a work package |
+| tasks done locally, or status changed in OpenProject | `/speckit-openproject-sync-status` | checkbox ↔ status, only `statuses.done` is pushed; OpenProject wins conflicts and the command never reopens a work package; since 0.2.0 it also sets the phase and feature work packages from their tasks (on by default, `rollup_parents: false` in `config.yml` switches it off) |
 | `spec.md`, `plan.md`, `research.md` or `data-model.md` changed | `/speckit-openproject-sync-docs` | replaces changed attachments, keeps the summary block in the feature description |
 | feature planned for a release | `/speckit-openproject-sync-version [--version <name>]` | creates or reuses the version and assigns unassigned work packages |
 | time spent | `/speckit-openproject-log-time T012: 1h30` | one time entry per line, no duplicates on re-run |
@@ -128,6 +128,7 @@ Every command reports what it did and why it stopped. Error texts from the serve
 | A capability id is missing (for example `create-work-package`) | The server runs without write access. Set `OPENPROJECT_ENABLE_WORK_PACKAGE_WRITE` (or `OPENPROJECT_ENABLE_VERSION_WRITE` for `sync-version`) and restart the server. |
 | `create-attachment` is missing (`sync-docs`) | Set `OPENPROJECT_ATTACHMENT_ROOT` to an absolute directory that contains the feature directory, restart the server. |
 | Project not found, or several projects listed | Use the exact project identifier. The project must be in `OPENPROJECT_READ_PROJECTS` (and `OPENPROJECT_WRITE_PROJECTS` for writes). |
+| `Missing write permission: user <id> can read but not create work packages …` (`taskstoissues`) | The user the agent acts as has read access but no permission to create work packages in the project. Ask a project admin for a role with that permission. The check does not see the server's write allowlist (`OPENPROJECT_WRITE_PROJECTS`); a project outside it fails at the first preview. |
 | A type or status is missing | Enable the type in the project settings (Work packages → Types), or pick other names with `discover-fields`. Types, statuses and workflows cannot be created through the API. |
 | Configuration or ledger violation | The command prints every violation and stops; it never repairs the file. Fix the named key, or run `discover-fields` for the configuration. A ledger whose `project` or `feature` does not match belongs to another project or feature: do not edit ids by hand. |
 | `Error executing tool …` on the first preview | Typical causes: unknown type, parent or project, a project outside the allowlist, a token without permission. Check these in OpenProject and in the server variables; nothing was written. |

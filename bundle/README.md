@@ -22,7 +22,7 @@ specify bundle install ./openproject-0.2.1.zip
 
 | Component | Version |
 |-----------|---------|
-| preset `openproject` | 1.0.0 |
-| extension `openproject` | 0.1.0 |
+| preset `openproject` | 1.0.3 |
+| extension `openproject` | 0.2.0 |
 
 Source and changelog: https://github.com/Nachklang-io/speckit-openproject
