@@ -895,3 +895,26 @@ def test_plan_table_has_one_row_per_key_with_hash_columns(prompt):
     assert "first 12 hexadecimal characters" in prompt
     assert "at most 40 rows" in prompt
     assert "part i of n" in prompt
+
+
+def test_permission_check_runs_before_list_types_and_stops_only_with_evidence(prompt):
+    step5 = prompt[
+        prompt.index("5. **Project and types.**") : prompt.index("6. **Parse `tasks.md`.**")
+    ]
+    check = step5.index("`get-my-access`")
+    assert check < step5.index("`list-types` (project)")
+    assert step5.index("`list-capabilities`") < step5.index("`list-types` (project)")
+    for text in (
+        "`select`",
+        "all pages",
+        "`work_packages/read/`",
+        "`work_packages/create/`",
+        "ends with `-<current_user_id>`",
+        "Missing write permission: user <current_user_id> can read but not create work packages",
+        "also with `--dry-run`",
+        "no evidence",
+        "never print a `url` or host",
+        "calls no write capability",
+        "If you have read access only, a role without the permission to create work packages can also cause an empty type list.",
+    ):
+        assert text in step5, text
