@@ -6,11 +6,15 @@ Upstream rules as read on 2026-10-08 (research R9): extensions are submitted **o
 
 ## Status
 
-| Package | Issue | Filed |
-|---------|-------|-------|
-| Preset `openproject` 1.0.0 | https://github.com/github/spec-kit/issues/4886 | 2026-10-08 |
-| Extension `openproject` 0.1.0 | https://github.com/github/spec-kit/issues/4887 | 2026-10-08 |
-| Bundle `openproject` 0.1.0 | not filed; waits until both are listed | |
+| Package | Issue | Filed | Result |
+|---------|-------|-------|--------|
+| Preset `openproject` 1.0.0 | https://github.com/github/spec-kit/issues/4886 | 2026-10-08 | listed (PR #4897, merged 2026-10-09) |
+| Extension `openproject` 0.1.0 | https://github.com/github/spec-kit/issues/4887 | 2026-10-08 | listed (PR #4893, merged 2026-10-09) |
+| Preset `openproject` update to 1.0.3 | https://github.com/github/spec-kit/issues/4921 | 2026-10-11 | open, waits for the maintainers |
+| Extension `openproject` update to 0.2.0 | https://github.com/github/spec-kit/issues/4920 | 2026-10-11 | open, waits for the maintainers |
+| Bundle `openproject` 0.2.1 | not filed | | waits until the catalogs list preset 1.0.3 and extension 0.2.0 |
+
+Updates follow the upstream guide: a new submission issue that says it is an update to an existing entry. Posting a new version as a comment on the closed first issue (done for 1.0.1 in #4886) did not update the catalog, which still lists 1.0.0 and 0.1.0 on 2026-10-11. The bundle form asks for the bundle ID, name, version, role, description, author, repository, download URL (`openproject-0.2.1.zip` of the bundle release), documentation, license, required Spec Kit version, optional integration, components, required catalogs and tags, features and testing details.
 
 The forms read on 2026-10-08 at filing time also ask for key features, a testing checklist, testing details and example usage; the filed issues answer them. The preset form has no catalog-entry field, so the preset issue links `preset-entry.json` instead.
 

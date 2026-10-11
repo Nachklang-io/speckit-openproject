@@ -537,6 +537,25 @@ Both tags point to `83f8db8` (`main` after PR #17). They were pushed by the main
 
 Not run: S27 parity on the 1.0.1 URLs, and the `taskstoissues` scenarios from the release install against the test instance. The changed prompt ran against the sandbox only from the `--dev` install (run log above). The extension did not change, so its install was checked only through the bundle.
 
+## Run log: releases of features 007 and 008 (2026-10-11)
+
+`preset-v1.0.2`, `extension-v0.2.0` and `bundle-v0.2.0` point to `14a1c16` (`main` after PR #27); `preset-v1.0.3` and `bundle-v0.2.1` point to `9b39181` (`main` after PR #29). All tags were pushed one at a time from this session at the maintainer's request, in the order preset, extension, bundle, each run checked before the next. The install checks ran in fresh `specify init` projects with spec-kit CLI 1.1.4.dev0 (the first 1.0.2/0.2.0 checks with the same CLI); `specify` fetched the release URLs itself.
+
+| Tag | Run | Last line of the run log | Release |
+|---|---|---|---|
+| `preset-v1.0.2` | [38161758600](https://github.com/Nachklang-io/speckit-openproject/actions/runs/38161758600) | `created preset-v1.0.2` | not pre-release; `openproject-preset-1.0.2.zip`, sha256 `470c6d42…` |
+| `extension-v0.2.0` | [38161808882](https://github.com/Nachklang-io/speckit-openproject/actions/runs/38161808882) | `created extension-v0.2.0` | not pre-release; `openproject-extension-0.2.0.zip`, sha256 `252d0d82…` |
+| `bundle-v0.2.0` | [38161855893](https://github.com/Nachklang-io/speckit-openproject/actions/runs/38161855893) | `created bundle-v0.2.0` | not pre-release; superseded by 0.2.1 (pins preset 1.0.2) |
+| `preset-v1.0.3` | [38165544866](https://github.com/Nachklang-io/speckit-openproject/actions/runs/38165544866) | `created preset-v1.0.3` | not pre-release; `openproject-preset-1.0.3.zip`, sha256 `1fcec33c…` |
+| `bundle-v0.2.1` | [38165599399](https://github.com/Nachklang-io/speckit-openproject/actions/runs/38165599399) | `created bundle-v0.2.1` | not pre-release, marked Latest; `openproject-0.2.1.zip`, `openproject-presets-catalog.json`, `openproject-extensions-catalog.json` |
+
+- Checksums: the asset digests shown by `gh release view` equal the values computed by `scripts/release.py build` before the release and written into `docs/catalog/preset-entry.json` and `docs/catalog/extension-entry.json` (all three archives: reproducible build).
+- S30 repeat: `specify preset add --from <release URL>` installs v1.0.2 and v1.0.3 and `specify extension add openproject --from <release URL>` (answered `y`) installs v0.2.0; `speckit-taskstoissues` carries `preset:openproject`; the installed 1.0.3 skill contains "Missing write permission" and "part i of n", the installed `sync-status` contains `rollup_parents`.
+- S32 repeat (bundle 0.2.1): `gh release download`, then `preset catalog add` / `extension catalog add` with the `bundle-v0.2.1` URLs and `specify bundle install ./openproject-0.2.1.zip`: `Installed 'openproject' (2 added, 0 already present)`; `specify preset list` shows v1.0.3 and `specify extension list` v0.2.0; five `speckit-openproject-*` skills; the catalogs pin preset 1.0.3 (`1fcec33c…`) and extension 0.2.0 (`252d0d82…`).
+- S27 repeat (preset 1.0.3 and extension 0.2.0 from the bundle install vs the `--dev` install from the same commit): `/speckit-openproject-discover-fields --dry-run` in both projects with the same `config.yml` (hash checked before and after). Both end with `no changes` and `Dry run: nothing was written.`, give the same types, statuses and proposals 1–7 and the same stale-entry warning for `customField1`; the wording and the language of the report differ (LLM output), the facts are the same. The first run of the release project stopped with "no OpenProject MCP server" because the project lay outside the repository and had no `.mcp.json`; that was a setup error of the test, and the run was repeated after copying the project's `.mcp.json` (variable references only).
+
+Not covered: command mode; `taskstoissues` and `sync-status` scenarios from the release install against the test instance (they ran from the `--dev` install, see the run logs of features 007 and 008); an anonymous download of the assets (`gh release download` was authenticated); the install in a project with the `generic` integration beyond the file check of feature 008.
+
 ## Scenarios for feature 007 (parent status roll-up)
 
 Scenarios S34–S40 check `speckit.openproject.sync-status` with the roll-up of phase and feature work packages. They run through the **installed skill** (skills mode) in a fresh headless session in the scratch project (`scripts/dev-install.sh`), with the setup from `specs/007-parent-status-rollup/quickstart.md`: a sandbox feature published by `taskstoissues`, its phase and feature work packages in "New", a config with `statuses.done`, `statuses.in_progress` and `statuses.open`. Always `--dry-run` first. Record date, OpenProject version, MCP server version, spec-kit version and result.
