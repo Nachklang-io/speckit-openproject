@@ -53,7 +53,7 @@ A user runs the command on a feature that has a `tasks.md` but no `plan.md` (for
 **Acceptance Scenarios**:
 
 1. **Given** a feature directory without `plan.md`, **When** the command runs, **Then** it stops before any write, names `plan.md` and tells the user to run the plan command (`/speckit-plan` in skills mode, `/speckit.plan` otherwise).
-2. **Given** a feature directory without `tasks.md`, **When** the command runs, **Then** the existing message for `tasks.md` is unchanged.
+2. **Given** a feature directory with `plan.md` but without `tasks.md`, **When** the command runs, **Then** the existing message for `tasks.md` is unchanged.
 3. **Given** both files exist, **When** the command runs, **Then** nothing changes compared to today.
 
 ---
@@ -77,7 +77,7 @@ A user installs the preset in a project that uses spec-kit's `generic` integrati
 
 - A plan with several hundred items: the plan stays one row per item; if it is too long for one message it is printed in consecutive parts, never condensed.
 - A feature whose `tasks.md` has no tasks: unchanged (nothing to list).
-- Both `tasks.md` and `plan.md` are missing: the message names `tasks.md` first, as today; `plan.md` is reported on the next run.
+- Both `tasks.md` and `plan.md` are missing: the message names `plan.md`, because the prerequisite check tests it first (as today); `tasks.md` is reported on the next run.
 - A role that can create work packages but not in this project's type: unchanged; the existing type and mandatory-field messages apply.
 - The write permission cannot be determined (server answers with an error or an unknown shape): the run stops and reports the answer verbatim; it never guesses the cause (existing rule for tool errors).
 - An unknown integration other than `generic` that registers no override: not covered by this feature; the documentation names `generic` only.
@@ -93,7 +93,7 @@ A user installs the preset in a project that uses spec-kit's `generic` integrati
 - **FR-005**: The message of FR-004 MUST NOT say that types are missing; the existing "missing type" message applies only when the role may create work packages and a configured type is not in the type list.
 - **FR-006**: The check of FR-004 MUST NOT create, change or delete anything in OpenProject, and MUST NOT rely on a write call.
 - **FR-007**: When `plan.md` is missing from the feature directory and `tasks.md` exists, the command MUST stop before any write with a message that names `plan.md` and the plan command for the current mode (`/speckit-plan` in skills mode, `/speckit.plan` otherwise).
-- **FR-008**: The existing stop message for a missing `tasks.md` MUST remain unchanged and keep precedence when both files are missing.
+- **FR-008**: The existing stop message for a missing `tasks.md` MUST remain unchanged (it names `tasks.md` and the tasks command for the current mode). When both files are missing, the file that the prerequisite check reports first (`plan.md`) is named, as today; the other one is reported on the next run.
 - **FR-009**: `README.md` and `preset/README.md` MUST state that spec-kit registers no preset command overrides for the `generic` integration, so `/speckit.taskstoissues` stays the core command there, and MUST say what to do instead.
 - **FR-010**: The change MUST NOT add or rename a configuration key, MUST NOT change the ledger format or a schema, and MUST NOT change what is written to OpenProject on any path that works today (constitution III and V).
 - **FR-011**: The command MUST keep working in skills mode and in command mode, and the install of the preset must keep working with spec-kit 1.1.0 and later.
