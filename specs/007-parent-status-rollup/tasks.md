@@ -130,8 +130,8 @@ Monorepo: `extension/`, `preset/`, `bundle/`, `schemas/`, `tests/`, `docs/`. `pr
 - [x] T036 `speckit.taskstoissues.md`: phase key without leading zeros, duplicate keys stop. **Done 2026-10-10**
 - [x] T037 `tests/rollup_reference.py`, `rollup-cases.json` (`membership`), `test_rollup.py`, `test_prompt_sync.py`. **Done 2026-10-10**: 497 passed
 - [x] T038 CHANGELOG, extension README, TESTING (S39, S40). **Done 2026-10-10**
-- [ ] T039 Live runs S35b (pull write), S39, S40 headless in the sandbox, dry run first; S38 after the maintainer's workflow change. **2026-10-11**: S35b, S39, S40 pass (dry run, real run; see TESTING run log 2026-10-11); S38 dry run on 973 showed the workflow restriction not effective for the bot's role, real run held back, open.
-- [ ] T040 Rerun both reviewers on the final diff.
+- [ ] T039 Live runs S35b (pull write), S39, S40 headless in the sandbox, dry run first; S38 after the maintainer's workflow change. **2026-10-11**: S35b, S39, S40 pass (dry run, real run; see TESTING run log 2026-10-11); S38 on 973: the workflow restriction did not take effect after two changes, the real run closed the phases; S38 stays open (see TESTING run log 2026-10-11).
+- [x] T040 Rerun both reviewers on the final diff. **Done 2026-10-11**: no blocker; README/TESTING consistency fixed, M1 (rejected confirm reported verbatim) and L1 (in progress → open documented as intended) applied; M2 (server not pinned) and L2–L6 recorded in the PR description.
 
 ---
 
