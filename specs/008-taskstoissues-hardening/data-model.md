@@ -24,7 +24,7 @@ Long plans are printed in parts of at most 40 rows (header repeated, `part i of 
 | Reason | Trigger | Content |
 |---|---|---|
 | missing file | prerequisite script exits non-zero | the script's message verbatim; the missing file; the command that creates it for the current mode |
-| missing write permission | capability `work_packages/create/w<project_id>-<user_id>` is `[not_found]` | project identifier, user id, capability id; no write was made; the grant list is informational |
+| missing write permission | the project's permission list shows `work_packages/read` for the user but not `work_packages/create` | project identifier, user id, missing permission `work_packages/create`; no write was made; the list is informational |
 | missing type | a configured type is not in the type list (role may create) | unchanged: name it, list the available types |
 
 State transitions: none. Every stop happens before the first write, so nothing needs cleanup.

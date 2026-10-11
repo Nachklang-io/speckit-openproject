@@ -12,12 +12,13 @@ Observable behavior of the preset command after this feature. Everything not lis
 
 New sub-step between project selection and `list-types`:
 
-1. `get-my-access` (project) → read `project_id` and `current_user_id`; no other field is used.
-2. `get-capability` (project, capability id `work_packages/create/w<project_id>-<current_user_id>`):
-   - `total` = 1 → continue.
-   - tool error with `[not_found]` → stop: `Missing write permission: <user id> cannot create work packages in <project identifier> (capability work_packages/create/w<project_id>-<user id> not granted). Nothing was written. Ask a project admin for a role with that permission.` Applies to `--dry-run` as well.
-   - any other error or shape → tool error (existing rule), report verbatim.
-3. Never print the `url` field of the capability result (it holds the server address).
+1. `get-my-access` (project) → read `current_user_id`; no other field is used.
+2. `list-capabilities` (project, `select` = `id`, `action_id`, `limit` = 50, all pages). Look at the entries whose `id` starts with `work_packages/read/` or `work_packages/create/` and ends with `-<current_user_id>`:
+   - read and create found → continue.
+   - read found, create not found → stop: `Missing write permission: user <current_user_id> can read but not create work packages in <project identifier> (permission work_packages/create is not listed). Nothing was written. Ask a project admin for a role with that permission.` Applies to `--dry-run` as well.
+   - read not found, or the list is empty or has another shape → no evidence; continue with `list-types` as today.
+   - tool error → existing rule (stop, report verbatim).
+3. Always pass `select`; never print any `url` or host from a capability result.
 
 ## Step 9 (plan table)
 
@@ -30,7 +31,7 @@ Two rows are added to the preset's map and to `docs/mcp-tool-map.md`:
 | Capability | Tool | Parameters | Verified |
 |---|---|---|---|
 | get-my-access | `get_my_project_access` | project | yes (admin role) |
-| get-capability | `list_capabilities` | project, capability_id | yes (allowed and unknown principal); denied case for a real read-only role: no |
+| list-capabilities | `list_capabilities` | project, limit, offset, select | yes (admin role: read and create listed); denied case for a real read-only role: no |
 
 ## Documentation
 

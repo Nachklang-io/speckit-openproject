@@ -79,7 +79,7 @@ A user installs the preset in a project that uses spec-kit's `generic` integrati
 - A feature whose `tasks.md` has no tasks: unchanged (nothing to list).
 - Both `tasks.md` and `plan.md` are missing: the message names `plan.md`, because the prerequisite check tests it first (as today); `tasks.md` is reported on the next run.
 - A role that can create work packages but not in this project's type: unchanged; the existing type and mandatory-field messages apply.
-- The write permission cannot be determined (server answers with an error or an unknown shape): the run stops and reports the answer verbatim; it never guesses the cause (existing rule for tool errors).
+- The write permission cannot be determined (the grant list is empty, has an unknown shape, or shows no sign of the user's read access): the check does not stop the run and the command behaves as today; the first preview stays the authority. A tool error during the check stops the run and is reported verbatim (existing rule). The check stops only with positive evidence: the user's read access to work packages is listed, the create permission is not.
 - An unknown integration other than `generic` that registers no override: not covered by this feature; the documentation names `generic` only.
 
 ## Requirements *(mandatory)*
@@ -87,9 +87,9 @@ A user installs the preset in a project that uses spec-kit's `generic` integrati
 ### Functional Requirements
 
 - **FR-001**: The plan and the dry-run output MUST list every feature, phase and task as its own row with its action; a row that stands for a range or a group of items is not allowed.
-- **FR-002**: Every plan row MUST show the hash fields that the command's rules compare for that row (the current hash, and the stored hash where a ledger entry exists); a plan MUST NOT omit them because of its size.
+- **FR-002**: Every plan row MUST show the hash fields that the command's rules compare for that row (the current hash, and the stored hash where a ledger entry exists); a plan MUST NOT omit them because of its size. A fixed-length prefix of each hash (12 hexadecimal characters) is enough; the full hashes stay in the ledger.
 - **FR-003**: The plan MAY end with a counts line that summarizes the rows; the summary never replaces them.
-- **FR-004**: When the user's role cannot create work packages in the selected project, the command MUST stop before any write, in a dry run as well as in a real run, with a message that names the missing write permission and the project.
+- **FR-004**: When the user's role can read but cannot create work packages in the selected project (shown by the project's list of the user's permissions), the command MUST stop before any write, in a dry run as well as in a real run, with a message that names the missing write permission and the project.
 - **FR-005**: The message of FR-004 MUST NOT say that types are missing; the existing "missing type" message applies only when the role may create work packages and a configured type is not in the type list.
 - **FR-006**: The check of FR-004 MUST NOT create, change or delete anything in OpenProject, and MUST NOT rely on a write call.
 - **FR-007**: When `plan.md` is missing from the feature directory and `tasks.md` exists, the command MUST stop before any write with a message that names `plan.md` and the plan command for the current mode (`/speckit-plan` in skills mode, `/speckit.plan` otherwise).
@@ -112,7 +112,7 @@ A user installs the preset in a project that uses spec-kit's `generic` integrati
 - **SC-002**: A user with a read-only role learns the real reason (missing write permission) from the first stop message, in one run, and no run of that case names missing types.
 - **SC-003**: A user with a missing `plan.md` learns the file and the command to run from the first stop message, without reading the prerequisite script's output.
 - **SC-004**: A reader of either README can answer "does the preset work with the generic integration?" without trying it.
-- **SC-005**: No scenario that passed before (S1–S9, S34-style re-runs of the preset) changes its result; a re-run on an existing feature writes nothing new.
+- **SC-005**: No scenario that passed before (S1–S9 and re-runs on an existing ledger) changes its result; a re-run on an existing feature writes nothing new.
 
 ## Assumptions
 

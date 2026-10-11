@@ -6,9 +6,9 @@
 
 ## Summary
 
-Four fixes in the preset command `speckit.taskstoissues` (`preset/commands/speckit.taskstoissues.md`), released as preset 1.0.3: (1) the plan table has one row per key with `hash` and `stored` columns, never ranges, printed in parts of at most 40 rows (#23); (2) a capability lookup for `work_packages/create` of the current user in the project stops a role without write permission with a "missing write permission" message before `list-types` (#22); (3) step 1 handles a non-zero exit of the prerequisite script by printing its message and naming the missing file and the command for the current mode (#21); (4) both READMEs state that the `generic` integration gets no preset override (#20). No config key, ledger or schema change.
+Four fixes in the preset command `speckit.taskstoissues` (`preset/commands/speckit.taskstoissues.md`), released as preset 1.0.3: (1) the plan table has one row per key with `hash` and `stored` columns, never ranges, printed in parts of at most 40 rows (#23); (2) a read-only lookup of the user's work package permissions in the project (`list_capabilities`) stops a role that can read but not create with a "missing write permission" message before `list-types`, and lets every unclear case through (#22); (3) step 1 handles a non-zero exit of the prerequisite script by printing its message and naming the missing file and the command for the current mode (#21); (4) both READMEs state that the `generic` integration gets no preset override (#20). No config key, ledger or schema change.
 
-Research changed the brief in one point: `can_update` from `get_my_project_access` describes the membership record, not work package rights, so the check uses `list_capabilities` with an exact capability id instead (research R1). It also corrected the spec's precedence rule for two missing files (R4).
+Research changed the brief in one point: `can_update` from `get_my_project_access` describes the membership record, not work package rights, so the check lists the project's capabilities and stops only with positive evidence (read listed, create missing), instead of building a capability id by hand (research R1, analysis F1). It also corrected the spec's precedence rule for two missing files (R4).
 
 ## Technical Context
 
@@ -24,7 +24,7 @@ Research changed the brief in one point: `can_update` from `get_my_project_acces
 
 **Project Type**: spec-kit preset (prompt package) in a monorepo
 
-**Performance Goals**: two extra read calls per run (`get-my-access`, `get-capability`); no extra writes
+**Performance Goals**: one `get-my-access` call plus one to three `list-capabilities` pages (50 per page) per run; no extra writes
 
 **Constraints**: MCP-only (ADR-0002); no secrets, hosts or URLs in files or output (the capability result's `url` is never printed); nothing is written on any new stop path; behavior of every working path unchanged (FR-010)
 
@@ -35,13 +35,13 @@ Research changed the brief in one point: `can_update` from `get_my_project_acces
 | Principle | Status | Evidence |
 |---|---|---|
 | I Spec-driven | Pass | specify → plan; tasks and analyze follow before any prompt edit |
-| II MCP-only | Pass | two read capabilities added to the single map (`docs/mcp-tool-map.md`) and the prompt's embedded map; no REST |
+| II MCP-only | Pass | two read capabilities (`get-my-access`, `list-capabilities`) added to the single map (`docs/mcp-tool-map.md`) and the prompt's embedded map; no REST |
 | III Idempotent/safe (NON-NEGOTIABLE) | Pass | new stop paths write nothing, also in `--dry-run`; the plan becomes more complete, which strengthens the confirmation; no write path changes |
 | IV Test-first incl. prompts | Pass, with caveat | prompt-sync tests first; S7b needs a read-only user and may stay untested, then labelled so (R2) |
 | V Compatibility | Pass | skills and command mode named in the step 1 message; no config key; patch version 1.0.3; spec-kit ≥ 1.1.0 unchanged |
 | VI Simplicity/transparency | Pass | two read calls, one table rule, one message; limitations documented (generic, informational capabilities) |
 
-Post-design re-check: Pass. The one risk is a false "missing permission" (R2); it is limited to the exact `[not_found]` answer and covered by an allowed-case regression run.
+Post-design re-check: Pass. The one risk is a false "missing permission" (R2); it is limited to positive evidence (read listed, create missing) and covered by an allowed-case regression run.
 
 ## Project Structure
 
@@ -67,7 +67,7 @@ preset/
 ├── README.md                           # generic note
 └── commands/speckit.taskstoissues.md   # step 1, step 5 (permission), step 9 (plan table), capability map
 docs/
-├── mcp-tool-map.md                     # two rows: get-my-access, get-capability
+├── mcp-tool-map.md                     # two rows: get-my-access, list-capabilities
 └── TESTING.md                          # scenarios S-large, S-plan, S7b; run log
 tests/
 ├── test_prompt_sync.py                 # new checks
