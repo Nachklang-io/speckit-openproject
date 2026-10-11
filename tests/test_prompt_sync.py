@@ -884,3 +884,14 @@ def test_subject_cap_reference(length):
     assert len(capped) == min(length, 255)
     assert capped.startswith("Phase 1: ")
     assert capped.endswith("\u2026") == (length > 255)
+
+
+def test_plan_table_has_one_row_per_key_with_hash_columns(prompt):
+    assert "key, kind, subject" in prompt
+    assert "action, hash, stored, reason" in prompt
+    assert "one row per key" in prompt
+    for forbidden in ("ranges", "`…`", "and N more"):
+        assert forbidden in prompt, forbidden
+    assert "first 12 hexadecimal characters" in prompt
+    assert "at most 40 rows" in prompt
+    assert "part i of n" in prompt

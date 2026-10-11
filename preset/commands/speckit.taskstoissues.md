@@ -134,7 +134,10 @@ Every run starts from scratch. Execute steps 1–15 in order, every time, even i
    - `create`: nothing matches. If the feature work package is neither in the ledger nor found, plan all phases and tasks of this feature directly as `create` without searching for them.
    - `blocked`: the parent is `blocked`, `stale` or `failed` (reason "parent <state>"), or a mandatory field applies (step 5.3).
    Also plan relations (step 13): list each as successor key → predecessor key with action `create` or `skip`.
-   Show the plan as a table: key, kind, subject (exactly the subject that will be written; labels such as `[P]` or `US1` appear only in the description), parent key, action, reason; then the relation lines.
+   Show the plan as a table with the columns key, kind, subject (exactly the subject that will be written; labels such as `[P]` or `US1` appear only in the description), parent key, action, hash, stored, reason; then the relation lines. Rules for the table:
+   - **Exactly one row per key.** Every feature, phase and task of the ledger and of `tasks.md` has its own row. Never write ranges (`T001–T020`), never `…`, never "and N more", never a row that stands for several items, however long the plan is. The counts line may summarize; the rows may not.
+   - **`hash`** is the first 12 hexadecimal characters of the current content hash of the item (step 7 command, computed for every item); **`stored`** is the first 12 hexadecimal characters of the hash in the ledger entry, or `—` when the item has no ledger entry. Never leave a hash cell empty.
+   - **Long plans** are printed in consecutive parts of at most 40 rows. Each part repeats the header row and starts with the line `part i of n`. The counts line and the relation lines follow the last part.
 
 10. **Dry run.** If `--dry-run`: print the plan and the line "Dry run: nothing was written." and stop. No write capability may be called and no file may be created or changed.
 

@@ -51,8 +51,8 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 **Independent Test**: `--dry-run` on the 120-task fixture prints 120 task rows plus phases and the feature, each with both hash cells.
 
-- [ ] T005 [US1] Add a failing test to `tests/test_prompt_sync.py`: the plan step of the preset prompt names the columns `hash` and `stored`, forbids ranges, `…` and "and N more", and requires parts of at most 40 rows with `part i of n` (depends on T003)
-- [ ] T006 [US1] Edit step 9 of `preset/commands/speckit.taskstoissues.md` per `contracts/command-contract.md` ("Step 9"): table columns key, kind, subject, parent key, action, hash, stored, reason; hash cells are the first 12 hex characters of the hash computed by the step 7 shell command (current) and of the ledger hash (`—` without an entry); one row per key; long plans in parts; the counts line follows the last part; T005 passes (depends on T005)
+- [x] T005 [US1] Add a failing test to `tests/test_prompt_sync.py`: the plan step of the preset prompt names the columns `hash` and `stored`, forbids ranges, `…` and "and N more", and requires parts of at most 40 rows with `part i of n` (depends on T003)
+- [x] T006 [US1] Edit step 9 of `preset/commands/speckit.taskstoissues.md` per `contracts/command-contract.md` ("Step 9"): table columns key, kind, subject, parent key, action, hash, stored, reason; hash cells are the first 12 hex characters of the hash computed by the step 7 shell command (current) and of the ledger hash (`—` without an entry); one row per key; long plans in parts; the counts line follows the last part; T005 passes (depends on T005)
 - [ ] T007 [US1] **(headless sandbox run by Claude, `--dry-run` only; the maintainer may repeat it)** Run scenario S-large through the installed skill (`scripts/dev-install.sh`, `tasks.md` = the 120-task fixture, placeholder `plan.md`): count the rows, check the hash cells and the parts; record the result (depends on T006, T004)
 
 **Checkpoint**: US1 delivers readable plans; MVP.
