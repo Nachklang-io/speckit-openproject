@@ -9,7 +9,7 @@ All notable changes per package. Format based on Keep a Changelog; versions foll
 Planned as 1.0.2.
 
 #### Fixed
-- `speckit.taskstoissues`: the phase key has no leading zeros (`## Phase 01:` → `phase-1`), so the roll-up of `sync-status` finds the phase; the subject and the adopt search keep the number as written. Two headings with the same key stop the run before any write. A ledger written earlier with `phase-01` gets no automatic rename: the old entry stays unused and `phase-1` is created or adopted.
+- `speckit.taskstoissues`: the phase key has no leading zeros (`## Phase 01:` → `phase-1`), so the roll-up of `sync-status` finds the phase; the subject and the adopt search keep the number as written. Two headings with the same key stop the run before any write. A ledger written earlier with `phase-01` keeps working: the old entry counts as `phase-1`, is not renamed, duplicated or adopted again.
 
 #### Changed
 - `speckit.taskstoissues` accepts the new optional configuration key `rollup_parents` (boolean). The preset never reads or writes it; it only stops rejecting a configuration that contains it. Use preset 1.0.2 together with extension 0.2.0.

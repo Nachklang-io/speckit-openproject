@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-09
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "docs/briefs/007-parent-status-rollup.md" — the status sync command also sets the phase and feature work packages from the state of their children, so that after a full sync a phase whose tasks are all done is done, and the feature is done when all its phases are. It builds on the status sync (feature 003) and on the mapping ledger (feature 001).
 
