@@ -2,14 +2,14 @@
   "openproject": {
     "name": "OpenProject Work Packages",
     "id": "openproject",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Overrides speckit.taskstoissues to create OpenProject work packages (phases, tasks, sub-tasks, relations) via an OpenProject MCP server instead of GitHub Issues",
     "author": "Daniel Ring",
     "repository": "https://github.com/Nachklang-io/speckit-openproject",
-    "download_url": "https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.2/openproject-preset-1.0.2.zip",
-    "sha256": "470c6d42ab4d277c9d49d5d0c3a8a5ec246c3d18828653b14d8fdc276c2b3654",
+    "download_url": "https://github.com/Nachklang-io/speckit-openproject/releases/download/preset-v1.0.3/openproject-preset-1.0.3.zip",
+    "sha256": "1fcec33c357592ce82266556e1f0a71dfc2c4b9512026af65a1ba6efcb8de92a",
     "homepage": "https://github.com/Nachklang-io/speckit-openproject",
-    "documentation": "https://github.com/Nachklang-io/speckit-openproject/blob/preset-v1.0.2/preset/README.md",
+    "documentation": "https://github.com/Nachklang-io/speckit-openproject/blob/preset-v1.0.3/preset/README.md",
     "license": "MIT",
     "requires": {
       "speckit_version": ">=1.1.0"

@@ -528,7 +528,7 @@ def test_check_bundle_speckit_range_mismatch(tmp_path):
 
 def test_bundle_pins_read_provides():
     assert release.bundle_pins(yaml.safe_load(BUNDLE.read_text())) == {
-        "preset": "1.0.2",
+        "preset": "1.0.3",
         "extension": "0.2.0",
     }
 
