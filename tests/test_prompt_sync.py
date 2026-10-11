@@ -915,7 +915,7 @@ def test_permission_check_runs_before_list_types_and_stops_only_with_evidence(pr
         "no evidence",
         "never print a `url` or host",
         "calls no write capability",
-        "If you have read access only, a role without the permission to create work packages can also cause an empty type list.",
+        "A role without the permission to create work packages can also cause an empty type list.",
     ):
         assert text in step5, text
 
@@ -937,10 +937,23 @@ def test_step1_reports_the_missing_file_and_the_command_for_the_mode(prompt):
 
 
 def test_readmes_name_the_generic_integration_limit(root):
-    for name in ("README.md", "preset/README.md"):
-        text = (root / name).read_text()
-        assert "`generic` integration" in text, name
-        assert "no" in text.split("`generic` integration", 1)[1][:200], name
+    main = (root / "README.md").read_text()
     preset = (root / "preset/README.md").read_text()
-    assert "stays the core GitHub-issues command" in preset
+    for text in (main, preset):
+        assert "`generic` integration" in text
+        assert "registers no command override" in text
+        assert "stays the core" in text
     assert "Check the installed command file" in preset
+
+
+def test_step_references_resolve_to_existing_sub_steps(prompt):
+    outline = prompt[prompt.index("## Outline") :]
+    numbered = set(re.findall(r"^(\d+)\. \*\*", outline, flags=re.MULTILINE))
+    for step, sub in re.findall(r"step (\d+)\.(\d+)", prompt):
+        assert step in numbered, f"step {step}.{sub}: no step {step}"
+    step5 = prompt[
+        prompt.index("5. **Project and types.**") : prompt.index("6. **Parse `tasks.md`.**")
+    ]
+    subs = set(re.findall(r"^   (\d+)\. ", step5, flags=re.MULTILINE))
+    for step, sub in re.findall(r"step (5)\.(\d+)", prompt):
+        assert sub in subs, f"step 5.{sub} does not exist"

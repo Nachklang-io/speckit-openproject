@@ -104,8 +104,8 @@ Monorepo: `preset/`, `docs/`, `tests/`, root `README.md`. `extension/` and `sche
 
 - [x] T016 [P] Add `### Unreleased` items for the preset to `CHANGELOG.md` under "Planned as 1.0.3": `#### Fixed` for the plan rows (#23), the permission message (#22) and the missing-file message (#21); `#### Changed` or a note for the two new read capabilities and the README note (#20); keep the denied case labelled untested if S7b did not run
 - [x] T017 Record the executed runs (T007, T010, T013) in the run log of `docs/TESTING.md`: what was actually executed, what was not; update the scenario statuses and the "Untested" list (depends on T007, T010, T013)
-- [ ] T018 Verification before done: `uv run pytest && uv run ruff check . && uv run ruff format --check .`; `scripts/dev-install.sh` installs both packages and `specify preset list` / `specify extension list` show them; `git diff --stat main -- schemas preset/openproject-config.template.yml extension` shows no change (FR-010); run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff and fix or record their findings (depends on T016, T017)
-- [ ] T019 Open the PR `feat(preset): harden taskstoissues (plan rows, permission and missing file messages)` with the executed and unexecuted scenarios listed; add `docs/ROADMAP.md` row 008 (depends on T018)
+- [x] T018 Verification before done: `uv run pytest && uv run ruff check . && uv run ruff format --check .`; `scripts/dev-install.sh` installs both packages and `specify preset list` / `specify extension list` show them; `git diff --stat main -- schemas preset/openproject-config.template.yml extension` shows no change (FR-010); run the `spec-conformance-reviewer` and `openproject-api-reviewer` subagents on the diff and fix or record their findings (depends on T016, T017)
+- [x] T019 Open the PR `feat(preset): harden taskstoissues (plan rows, permission and missing file messages)` with the executed and unexecuted scenarios listed; add `docs/ROADMAP.md` row 008 (depends on T018)
 
 ---
 
