@@ -88,12 +88,12 @@ jobs:
           uv run python scripts/release.py notes "$KIND" "$VERSION" > notes/notes.md
           printf '\n<!-- release-commit: %s -->\n' "$GITHUB_SHA" >> notes/notes.md
           uv run python scripts/release.py verify-text notes/notes.md
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: assets
           path: dist/
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: notes
           path: notes/notes.md
